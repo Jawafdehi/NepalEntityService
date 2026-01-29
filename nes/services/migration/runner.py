@@ -13,6 +13,7 @@ This module provides the MigrationRunner class which handles:
 import importlib.util
 import inspect
 import logging
+import os
 import subprocess
 import sys
 import time
@@ -275,19 +276,27 @@ class MigrationRunner:
             status=MigrationStatus.RUNNING,
         )
 
-        # Check for uncommitted changes before running migration
-        existing_diff = self._get_git_diff()
-        if existing_diff:
-            error_msg = (
-                f"Cannot run migration {migration.full_name}: "
-                "Database has uncommitted changes. "
-                "Please commit or stash changes before running migrations."
+        # Check for uncommitted changes before running migration (unless disabled)
+        git_diff_check_disabled = os.getenv("NES_MIGRATIONS_GIT_DIFF_CHECK_DISABLED", "false").lower() == "true"
+        
+        if not git_diff_check_disabled:
+            existing_diff = self._get_git_diff()
+            if existing_diff:
+                error_msg = (
+                    f"Cannot run migration {migration.full_name}: "
+                    "Database has uncommitted changes. "
+                    "Please commit or stash changes before running migrations."
+                )
+                logger.error(error_msg)
+                result.status = MigrationStatus.FAILED
+                result.error = RuntimeError(error_msg)
+                result.logs.append(error_msg)
+                return result
+        else:
+            logger.warning(
+                f"Git diff check disabled for migration {migration.full_name} "
+                "(NES_MIGRATIONS_GIT_DIFF_CHECK_DISABLED=true)"
             )
-            logger.error(error_msg)
-            result.status = MigrationStatus.FAILED
-            result.error = RuntimeError(error_msg)
-            result.logs.append(error_msg)
-            return result
 
         # Check if migration already applied (determinism check via migration logs)
         is_applied = await self._is_migration_logged(migration)

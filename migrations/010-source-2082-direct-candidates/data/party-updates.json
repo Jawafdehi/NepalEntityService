@@ -1,0 +1,84 @@
+{
+  "new_parties": [
+    {
+      "slug": "nepal-communist-party-united",
+      "nepali_name": "नेपाल कम्युनिष्ट पार्टी (संयुक्त)",
+      "english_name": "Nepal Communist Party (United)",
+      "registration_number": "105",
+      "registration_date": "2082/07/17",
+      "address_nepali": "मैतिदेवी सेतोपुल, काठमाडौं",
+      "address_english": "Maitidevi Setopul, Kathmandu",
+      "contact": "महासचिव: केदार चन्द्र शर्मा",
+      "chief": "महासचिव: केदार चन्द्र शर्मा",
+      "chief_english": "General Secretary: Kedar Chandra Sharma",
+      "symbol_name_nepali": "हँसिया",
+      "symbol_name_english": "Sickle"
+    },
+    {
+      "slug": "national-unity-party",
+      "nepali_name": "राष्ट्रिय एकता दल",
+      "english_name": "National Unity Party",
+      "registration_number": "110",
+      "registration_date": "2073/08/30",
+      "address_nepali": "काठमाडौं महानगरपालिका-३१, नयाँवानेश्वर",
+      "address_english": "Kathmandu Metropolitan City-31, Nayabaneshwor",
+      "contact": "अध्यक्षः विनय यादव",
+      "chief": "अध्यक्षः विनय यादव",
+      "chief_english": "President: Vinay Yadav",
+      "symbol_name_nepali": "गोलाकार घेराभित्र तुलसी, मठ",
+      "symbol_name_english": "Tulsi plant within circular border, temple"
+    },
+    {
+      "slug": "nepali-janashramdan-sanskriti-party",
+      "nepali_name": "नेपाली जनश्रमदान संस्कृति पार्टी",
+      "english_name": "Nepali Janashramdan Sanskriti Party",
+      "registration_number": "131",
+      "registration_date": "2074/03/30",
+      "address_nepali": "धरान-६, सुनसरी",
+      "address_english": "Dharan-6, Sunsari",
+      "contact": "राजकुमार राई महासचिव",
+      "chief": "अध्यक्षः कृष्ण कुमार राई",
+      "chief_english": "President: Krishna Kumar Rai",
+      "symbol_name_nepali": "मान्छेले काधमा बोकिरहेको ढुङ्गा",
+      "symbol_name_english": "Stone carried on shoulder by a person"
+    }
+  ],
+  "existing_parties_fixes": [
+    {
+      "slug": "nepal-sadbhawana-party",
+      "corrected_nepali_name": "नेपाल सद्भावना पार्टी",
+      "corrected_english_name": "Nepal Sadbhawana Party",
+      "type": "alternative_name"
+    },
+    {
+      "slug": "united-nepal-democratic-party",
+      "corrected_nepali_name": "युनाईटेड नेपाल डिमोक्रयाटीक पार्टी",
+      "corrected_english_name": "United Nepal Democratic Party",
+      "type": "alternative_name"
+    },
+    {
+      "slug": "federal-democratic-national-forum",
+      "corrected_nepali_name": "संघीय लोकतान्त्रिक राष्ट्रिय मञ्च",
+      "corrected_english_name": "Federal Democratic National Forum",
+      "type": "alternative_name"
+    },
+    {
+      "slug": "nepal-communist-party-maoist",
+      "corrected_nepali_name": "नेपाल कम्युनिस्ट पार्टी (माओवादी)",
+      "corrected_english_name": "Nepal Communist Party (Maoist)",
+      "type": "alternative_name"
+    },
+    {
+      "slug": "bimal-nepal",
+      "corrected_nepali_name": "त्रिमूल नेपाल",
+      "corrected_english_name": "Trimul Nepal",
+      "type": "misspelled_name"
+    },
+    {
+      "slug": "nepal-socialist-party-naya-shakti",
+      "corrected_nepali_name": "प्रगतिशील लोकतान्त्रिक पार्टी",
+      "corrected_english_name": "Progressive Democratic Party",
+      "type": "alternative_name"
+    }
+  ]
+}
