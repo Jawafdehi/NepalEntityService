@@ -277,8 +277,11 @@ class MigrationRunner:
         )
 
         # Check for uncommitted changes before running migration (unless disabled)
-        git_diff_check_disabled = os.getenv("NES_MIGRATIONS_GIT_DIFF_CHECK_DISABLED", "false").lower() == "true"
-        
+        git_diff_check_disabled = (
+            os.getenv("NES_MIGRATIONS_GIT_DIFF_CHECK_DISABLED", "false").lower()
+            == "true"
+        )
+
         if not git_diff_check_disabled:
             existing_diff = self._get_git_diff()
             if existing_diff:
