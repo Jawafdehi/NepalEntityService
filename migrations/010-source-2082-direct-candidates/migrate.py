@@ -364,9 +364,6 @@ async def import_candidates(context: MigrationContext) -> None:
     # Load all existing person entities into memory
     context.log("Loading all person entities into memory...")
     all_persons = await context.db.list_entities(
-        entity_type="organization", sub_type=None, limit=100_000
-    )
-    all_persons = await context.db.list_entities(
         entity_type="person", sub_type=None, limit=100_000
     )
     context.log(f"Loaded {len(all_persons)} person entities")
@@ -381,16 +378,28 @@ async def import_candidates(context: MigrationContext) -> None:
                     break
     context.log(f"Built lookup for {len(person_by_nec_id)} persons with NEC IDs")
     
-    # Load all political parties for linking
+    # Load party name to slug mapping
+    context.log("Loading party-to-slug mapping...")
+    party_to_slug = {}
+    with open(context.migration_dir / "data/party-to-slug.csv", "r", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            party_name = row["party"]
+            slug = row["slug"]
+            standardized = name_extractor.standardize_name(party_name)
+            party_to_slug[standardized] = slug
+    context.log(f"Loaded {len(party_to_slug)} party-to-slug mappings")
+    
+    # Load all political parties for linking (by slug)
     parties = await context.db.list_entities(
         entity_type="organization", sub_type="political_party", limit=1000
     )
     party_lookup = {}
     for party in parties:
-        for name in party.names:
-            if name.ne and name.ne.full:
-                standardized = name_extractor.standardize_name(name.ne.full)
-                party_lookup[standardized] = party.id
+        # Extract slug from party ID (format: entity:organization/political_party/{slug})
+        if party.id.startswith("entity:organization/political_party/"):
+            slug = party.id.replace("entity:organization/political_party/", "")
+            party_lookup[slug] = party.id
     context.log(f"Loaded {len(party_lookup)} political parties for linking")
     
     # Process candidates
@@ -423,7 +432,7 @@ async def import_candidates(context: MigrationContext) -> None:
     context.log("Updating existing candidates with 2082 electoral history...")
     for person, raw, translated, candidate_id_2082 in updated_candidates:
         # Add new candidacy to electoral details
-        party_id = _get_party_id(raw, party_lookup, district_slug_map)
+        party_id = _get_party_id(raw, party_to_slug, party_lookup, district_slug_map)
         constituency_id = _get_constituency_id(raw, district_slug_map)
         symbol = _build_symbol(raw, translated)
         
@@ -435,7 +444,7 @@ async def import_candidates(context: MigrationContext) -> None:
             position=ElectionPosition.FEDERAL_PARLIAMENT,
             candidate_id=candidate_id_2082,
             party_id=party_id,
-            votes_received=0,  # Election hasn't happened yet
+            votes_received=None,  # Election hasn't happened yet
             elected=False,
             symbol=symbol,
         )
@@ -468,7 +477,7 @@ async def import_candidates(context: MigrationContext) -> None:
     person_data_list = []
     for raw, translated, candidate_id_2082 in new_candidates:
         person_data = _build_person_data(
-            candidate_id_2082, raw, translated, party_lookup, district_slug_map
+            candidate_id_2082, raw, translated, party_to_slug, party_lookup, district_slug_map
         )
         person_data_list.append(person_data)
     
@@ -483,9 +492,12 @@ async def import_candidates(context: MigrationContext) -> None:
     duplicate_slugs = [s for s in set(slugs) if slugs.count(s) > 1]
     if duplicate_slugs:
         context.log(f"Found {len(duplicate_slugs)} duplicate slugs, adding candidate ID suffix")
+        context.log(f"Duplicate slugs: {', '.join(sorted(duplicate_slugs))}")
         for person_data in person_data_list:
             if person_data["slug"] in duplicate_slugs:
+                old_slug = person_data["slug"]
                 person_data["slug"] = f"{person_data['slug']}-{person_data['candidate_id']}"
+                context.log(f"  Renamed: {old_slug} → {person_data['slug']}")
     
     # Create entities
     for person_data in person_data_list:
@@ -504,8 +516,8 @@ async def import_candidates(context: MigrationContext) -> None:
     context.log("import_candidates completed successfully")
 
 
-def _get_party_id(raw: dict, party_lookup: dict, district_slug_map: dict) -> str | None:
-    """Get party ID from party name."""
+def _get_party_id(raw: dict, party_to_slug: dict, party_lookup: dict, district_slug_map: dict) -> str | None:
+    """Get party ID from party name using CSV mapping."""
     party_name = raw.get("PoliticalPartyName", "")
     if not party_name or party_name == "स्वतन्त्र":
         return None
@@ -514,10 +526,25 @@ def _get_party_id(raw: dict, party_lookup: dict, district_slug_map: dict) -> str
     party_name = party_name.replace("(एकल चुनाव चिन्ह)", "").strip()
     standardized = name_extractor.standardize_name(party_name)
     
-    if standardized not in party_lookup:
-        raise Exception(f"No political party found for: {party_name}")
+    # Look up slug from CSV mapping
+    if standardized not in party_to_slug:
+        raise Exception(
+            f"No slug mapping found for party: {party_name}\n"
+            f"Standardized to: {standardized}\n"
+            f"Add this party to data/party-to-slug.csv"
+        )
     
-    return party_lookup[standardized]
+    slug = party_to_slug[standardized]
+    
+    # Look up party ID by slug
+    if slug not in party_lookup:
+        raise Exception(
+            f"No party entity found with slug: {slug}\n"
+            f"Party name: {party_name}\n"
+            f"Expected entity ID: entity:organization/political_party/{slug}"
+        )
+    
+    return party_lookup[slug]
 
 
 def _get_constituency_id(raw: dict, district_slug_map: dict) -> str:
@@ -537,7 +564,7 @@ def _build_symbol(raw: dict, translated: dict) -> ElectionSymbol | None:
     if not (raw.get("SYMBOLCODE") and raw.get("SymbolName")):
         return None
     
-    symbol_en = translated.get("symbol_name", "").strip() or None
+    symbol_en = (translated.get("symbol_name") or "").strip() or None
     
     return ElectionSymbol(
         symbol_name=LangText(
@@ -553,34 +580,26 @@ def _build_symbol(raw: dict, translated: dict) -> ElectionSymbol | None:
 
 
 def _build_person_data(
-    candidate_id: int, raw: dict, translated: dict, party_lookup: dict, district_slug_map: dict
+    candidate_id: int, raw: dict, translated: dict, party_to_slug: dict, party_lookup: dict, district_slug_map: dict
 ) -> dict:
     """Build person entity data for new candidate."""
     
     # Personal details (NO family information per migration 007)
-    birth_year = raw.get("AGE_YR")
-    birth_date = None
-    if birth_year and isinstance(birth_year, int):
-        # Approximate birth date from age
-        current_year = 2082  # BS year
-        birth_year_bs = current_year - birth_year
-        # Convert to AD (approximate)
-        birth_year_ad = birth_year_bs - 57
-        birth_date = f"{birth_year_ad}-01-01"
+    age = raw.get("AGE_YR")
     
     gender_map = {"पुरुष": Gender.MALE, "महिला": Gender.FEMALE}
     gender = gender_map.get(raw.get("Gender", ""), Gender.OTHER)
     
     # Address
-    addr_en = translated.get("address", "").strip() or None
-    addr_ne = raw.get("ADDRESS", "").strip() or None
+    addr_en = (translated.get("address") or "").strip() or None
+    addr_ne = (raw.get("ADDRESS") or "").strip() or None
     
     # Education
     education = None
-    inst_en = translated.get("education_institution", "").strip() or None
-    inst_ne = raw.get("NAMEOFINST", "").strip() or None
-    degree_en = translated.get("education_level", "").strip() or None
-    field_en = translated.get("education_field", "").strip() or None
+    inst_en = (translated.get("education_institution") or "").strip() or None
+    inst_ne = (raw.get("NAMEOFINST") or "").strip() or None
+    degree_en = (translated.get("education_level") or "").strip() or None
+    field_en = (translated.get("education_field") or "").strip() or None
     
     if inst_en or inst_ne or degree_en or field_en:
         education = [
@@ -608,9 +627,9 @@ def _build_person_data(
     
     # Positions
     positions = None
-    title_en = translated.get("position_title", "").strip() or None
-    org_en = translated.get("organization", "").strip() or None
-    desc_en = translated.get("description", "").strip() or None
+    title_en = (translated.get("position_title") or "").strip() or None
+    org_en = (translated.get("organization") or "").strip() or None
+    desc_en = (translated.get("description") or "").strip() or None
     
     if title_en or org_en:
         positions = [
@@ -630,7 +649,7 @@ def _build_person_data(
         ]
     
     personal_details = PersonDetails(
-        birth_date=birth_date,
+        birth_date=None,
         gender=gender,
         address=Address(
             description2=LangText(
@@ -643,7 +662,7 @@ def _build_person_data(
     )
     
     # Electoral details
-    party_id = _get_party_id(raw, party_lookup, district_slug_map)
+    party_id = _get_party_id(raw, party_to_slug, party_lookup, district_slug_map)
     constituency_id = _get_constituency_id(raw, district_slug_map)
     symbol = _build_symbol(raw, translated)
     
@@ -655,7 +674,7 @@ def _build_person_data(
         position=ElectionPosition.FEDERAL_PARLIAMENT,
         candidate_id=candidate_id,
         party_id=party_id,
-        votes_received=0,  # Election hasn't happened yet
+        votes_received=None,  # Election hasn't happened yet
         elected=False,
         symbol=symbol,
     )
@@ -663,13 +682,22 @@ def _build_person_data(
     electoral_details = ElectoralDetails(candidacies=[candidacy])
     
     # Attributes
-    qual_en = translated.get("qualification", "").strip() or None
-    qual_ne = raw.get("QUALIFICATION", "").strip() or None
-    other_en = translated.get("other_details", "").strip() or None
-    other_ne = raw.get("OTHERDETAILS", "").strip() or None
+    qual_en = (translated.get("qualification") or "").strip() or None
+    qual_ne = (raw.get("QUALIFICATION") or "").strip() or None
+    other_en = (translated.get("other_details") or "").strip() or None
+    other_ne = (raw.get("OTHERDETAILS") or "").strip() or None
+    
+    # Age attribute
+    age_text = None
+    if age and isinstance(age, int):
+        age_text = LangText(
+            en=LangTextValue(value=f"Aged {age} as of January 2026", provenance="imported"),
+            ne=LangTextValue(value=f"२०८२ माघमा {age} वर्ष", provenance="imported"),
+        ).model_dump()
     
     attributes = {
         "election_council_misc": {
+            "age": age_text,
             "qualification": (
                 LangText(
                     en=LangTextValue(value=qual_en, provenance="translation_service") if qual_en else None,

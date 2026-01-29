@@ -50,7 +50,8 @@ This migration follows a two-step pattern:
 - Creates new Person entities for first-time 2082 candidates
 - Each person includes:
   - Primary name in both Nepali and English
-  - Personal details: gender, birth date (approximate from age), address
+  - Personal details: gender, address
+  - Age as attribute: "Aged {age} as of January 2026" (not as birth_date)
   - Electoral details: 2082 candidacy information, party affiliation, election symbol
   - Education and position information (when available)
   - External identifier linking to Nepal Election Commission candidate ID
@@ -59,11 +60,93 @@ This migration follows a two-step pattern:
   - Tags: "federal-election-2082-candidate"
 - Does NOT include family information (father, mother, spouse names)
 - Links candidates to existing political parties
-- Election results show 0 votes (election hasn't happened yet)
+- Election results show null votes (election hasn't happened yet)
+
+## Conflict Resolution Process
+
+This migration implements a sophisticated conflict resolution strategy to handle candidates who ran in both 2079 and 2082 elections:
+
+### 1. Candidate Matching Strategy
+
+The migration uses a three-step matching process:
+
+1. **Load ID Mapping**: Reads `candidate_id_matches_2079_2082.csv` which maps 2082 candidate IDs to their 2079 counterparts
+2. **Build NEC ID Lookup**: Creates an in-memory index of all existing person entities by their Nepal Election Commission (NEC) candidate ID
+3. **Match Candidates**: For each 2082 candidate:
+   - Checks if they have a 2079 ID in the mapping file
+   - Looks up the person entity using the 2079 NEC ID
+   - If found → **UPDATE** existing entity
+   - If not found → **CREATE** new entity
+
+### 2. Update Strategy (Existing Candidates)
+
+For candidates who ran in both elections:
+
+- **Preserves existing data**: Name, personal details, 2079 electoral history remain unchanged
+- **Appends new candidacy**: Adds 2082 election information to `electoral_details.candidacies[]` array
+- **Updates tags**: Adds "federal-election-2082-candidate" tag if not present
+- **No collision risk**: Uses existing entity ID, no slug conflicts possible
+
+Example:
+```python
+# Candidate ran in 2079 (ID: 12345) and 2082 (ID: 67890)
+# Entity already exists with ID: entity:person/ram-bahadur-thapa
+# Migration adds new candidacy to existing entity:
+person.electoral_details.candidacies.append(
+    Candidacy(election_year=2082, candidate_id=67890, ...)
+)
+```
+
+### 3. Creation Strategy (New Candidates)
+
+For first-time candidates in 2082:
+
+- **Slug generation**: Creates slug from English name using `text_to_slug()`
+- **Collision detection**: Checks if slug already exists in database
+- **Collision resolution**: If slug exists, appends candidate ID: `{slug}-{candidate_id}`
+- **Batch creation**: Uses Publication Service to create all new entities
+
+Example collision resolution:
+```python
+# Original slug: "ram-bahadur-thapa"
+# If exists → "ram-bahadur-thapa-67890"
+```
+
+### 4. Why This Approach?
+
+**Advantages:**
+- **Data continuity**: Candidates maintain single entity across elections
+- **Historical tracking**: Full electoral history in one place
+- **No duplicates**: Matching prevents creating duplicate entities for same person
+- **Graceful degradation**: If matching fails, creates new entity (safe fallback)
+
+**Trade-offs:**
+- **Requires ID mapping**: Depends on `candidate_id_matches_2079_2082.csv` accuracy
+- **Memory intensive**: Loads all person entities into memory for matching
+- **Manual mapping**: ID matching file must be created/maintained manually
+
+### 5. Conflict Resolution Edge Cases
+
+**Case 1: Candidate ID mismatch**
+- If 2082 candidate has 2079 ID in mapping but no matching entity exists
+- Resolution: Creates new entity (treats as first-time candidate)
+
+**Case 2: Name slug collision**
+- If new candidate's name slug matches existing entity
+- Resolution: Appends candidate ID to slug
+
+**Case 3: Missing translation**
+- If candidate has no translation in `translations.json`
+- Resolution: Skips candidate with warning log
+
+**Case 4: Party not found**
+- If candidate's party not in database or mapping
+- Resolution: Raises exception (migration fails, must fix data)
 
 ## Notes
 
-- Birth dates are approximated from age (AGE_YR field)
+- Age is stored as an attribute ("Aged {age} as of January 2026"), not as birth_date
+- Birth dates are NOT set (no approximation from age)
 - Gender is parsed from Nepali text ("पुरुष" = MALE, "महिला" = FEMALE)
 - Party linking uses cleaned party names (removes "(एकल चुनाव चिन्ह)" suffix)
 - Address data is stored as bilingual description
@@ -72,6 +155,7 @@ This migration follows a two-step pattern:
 - Family information is NOT collected per migration 007 policy
 - Processing time: ~2-3 hours for full translation (depending on API rate limits)
 - Migration execution: ~10-15 seconds for entity creation/updates
+- Votes received is set to None (election hasn't happened yet)
 
 ## Testing
 
