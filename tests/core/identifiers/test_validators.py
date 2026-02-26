@@ -3,6 +3,11 @@
 import pytest
 
 
+# ===========================================================================
+# Backward compat: existing entity IDs still validate
+# ===========================================================================
+
+
 def test_validate_entity_id_valid():
     """Test validating valid entity IDs."""
     from nes.core.identifiers.validators import is_valid_entity_id, validate_entity_id
@@ -30,6 +35,74 @@ def test_validate_entity_id_invalid_format():
 
     # Slug too short
     assert not is_valid_entity_id("entity:person/ab")
+
+
+def test_validate_existing_2_segment_ids_pass():
+    """Existing 2-segment entity IDs continue to pass validation — backward compat regression."""
+    from nes.core.identifiers.validators import validate_entity_id
+
+    # Real entity IDs from the database
+    assert validate_entity_id("entity:person/rabi-lamichhane") == "entity:person/rabi-lamichhane"
+    assert (
+        validate_entity_id("entity:organization/political_party/national-independent-party")
+        == "entity:organization/political_party/national-independent-party"
+    )
+    assert (
+        validate_entity_id("entity:location/district/kathmandu")
+        == "entity:location/district/kathmandu"
+    )
+    assert (
+        validate_entity_id("entity:location/constituency/acham-1")
+        == "entity:location/constituency/acham-1"
+    )
+    assert (
+        validate_entity_id("entity:organization/government_body/accham-district-development-committee")
+        == "entity:organization/government_body/accham-district-development-committee"
+    )
+
+
+# ===========================================================================
+# New: 3-segment prefix validation
+# ===========================================================================
+
+
+def test_validate_3_segment_prefix_in_registry_passes():
+    """A 3-segment entity ID passes validation when its prefix is in ALLOWED_ENTITY_PREFIXES."""
+    from nes.core.identifiers.validators import validate_entity_id
+    from nes.core.models.entity_type_map import ALLOWED_ENTITY_PREFIXES
+
+    # Temporarily register a 3-level prefix for this test
+    test_prefix = "organization/nepal_govt/moha"
+    ALLOWED_ENTITY_PREFIXES.add(test_prefix)
+    try:
+        result = validate_entity_id("entity:organization/nepal_govt/moha/department-of-immigration")
+        assert result == "entity:organization/nepal_govt/moha/department-of-immigration"
+    finally:
+        ALLOWED_ENTITY_PREFIXES.discard(test_prefix)
+
+
+def test_validate_unknown_prefix_raises():
+    """validate_entity_id raises ValueError for a prefix not in ALLOWED_ENTITY_PREFIXES."""
+    from nes.core.identifiers.validators import validate_entity_id
+
+    with pytest.raises(ValueError, match="not.*allowed|unknown|unsupported|invalid"):
+        validate_entity_id("entity:organization/unknown_category/some-org")
+
+
+def test_validate_unknown_top_level_type_raises():
+    """validate_entity_id raises ValueError for an unknown top-level type."""
+    from nes.core.identifiers.validators import validate_entity_id
+
+    with pytest.raises(ValueError):
+        validate_entity_id("entity:unicorn/rabi-lamichhane")
+
+
+def test_validate_prefix_exceeding_max_depth_raises():
+    """validate_entity_id raises ValueError when prefix depth exceeds MAX_PREFIX_DEPTH."""
+    from nes.core.identifiers.validators import validate_entity_id
+
+    with pytest.raises(ValueError):
+        validate_entity_id("entity:a/b/c/d/some-slug")
 
 
 def test_validate_relationship_id_valid():
