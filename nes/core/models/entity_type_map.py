@@ -2,9 +2,51 @@
 
 This module defines the valid combinations of entity types and subtypes,
 reflecting Nepal's political and administrative structure.
+
+ALLOWED_ENTITY_PREFIXES is the canonical registry of valid entity_prefix values.
+It is a flat set of slash-joined strings (e.g. "organization/political_party").
+New prefixes — including 3-level ones like "organization/nepal_govt/moha" — are
+added here to make them available for use in entity IDs.
+
+ENTITY_TYPE_MAP is retained for backward compatibility.
 """
 
 from nes.core.models.entity import EntitySubType, EntityType
+
+# ---------------------------------------------------------------------------
+# Canonical prefix registry (replaces ENTITY_TYPE_MAP for validation)
+# ---------------------------------------------------------------------------
+
+# All valid entity_prefix values. Seeded from existing type/subtype combos.
+# To add a new classification, append its slash-joined prefix string here.
+ALLOWED_ENTITY_PREFIXES: set[str] = {
+    # Person — no subtypes
+    "person",
+    # Organization
+    "organization",
+    "organization/political_party",
+    "organization/government_body",
+    "organization/ngo",
+    "organization/international_org",
+    "organization/hospital",
+    # Location — Nepal's administrative hierarchy
+    "location",
+    "location/province",
+    "location/district",
+    "location/metropolitan_city",
+    "location/sub_metropolitan_city",
+    "location/municipality",
+    "location/rural_municipality",
+    "location/ward",
+    "location/constituency",
+    # Project
+    "project",
+    "project/development_project",
+}
+
+# ---------------------------------------------------------------------------
+# Legacy type map (deprecated — use ALLOWED_ENTITY_PREFIXES for new code)
+# ---------------------------------------------------------------------------
 
 # Entity type map for v2 with Nepali context
 # This maps entity types to their allowed subtypes
