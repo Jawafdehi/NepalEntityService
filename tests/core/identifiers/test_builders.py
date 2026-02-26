@@ -3,8 +3,13 @@
 import pytest
 
 
+# ===========================================================================
+# Backward compat: existing build_entity_id / break_entity_id behaviour
+# ===========================================================================
+
+
 def test_build_entity_id_with_subtype():
-    """Test building entity ID with subtype."""
+    """Test building entity ID with subtype (deprecated wrapper — must keep working)."""
     from nes.core.identifiers.builders import build_entity_id
 
     entity_id = build_entity_id("person", "politician", "ram-chandra-poudel")
@@ -12,7 +17,7 @@ def test_build_entity_id_with_subtype():
 
 
 def test_build_entity_id_without_subtype():
-    """Test building entity ID without subtype."""
+    """Test building entity ID without subtype (deprecated wrapper — must keep working)."""
     from nes.core.identifiers.builders import build_entity_id
 
     entity_id = build_entity_id("person", None, "ram-chandra-poudel")
@@ -20,7 +25,7 @@ def test_build_entity_id_without_subtype():
 
 
 def test_break_entity_id_with_subtype():
-    """Test breaking entity ID with subtype."""
+    """Test breaking entity ID with subtype — backward compat regression."""
     from nes.core.identifiers.builders import break_entity_id
 
     components = break_entity_id("entity:person/politician/ram-chandra-poudel")
@@ -30,13 +35,161 @@ def test_break_entity_id_with_subtype():
 
 
 def test_break_entity_id_without_subtype():
-    """Test breaking entity ID without subtype."""
+    """Test breaking entity ID without subtype — backward compat regression."""
     from nes.core.identifiers.builders import break_entity_id
 
     components = break_entity_id("entity:person/ram-chandra-poudel")
     assert components.type == "person"
     assert components.subtype is None
     assert components.slug == "ram-chandra-poudel"
+
+
+# ===========================================================================
+# New: EntityIdComponents.prefix field
+# ===========================================================================
+
+
+def test_entity_id_components_prefix_1_segment():
+    """EntityIdComponents.prefix returns the full prefix — 1 segment."""
+    from nes.core.identifiers.builders import break_entity_id
+
+    components = break_entity_id("entity:person/rabi-lamichhane")
+    assert components.prefix == "person"
+    assert components.slug == "rabi-lamichhane"
+
+
+def test_entity_id_components_prefix_2_segment():
+    """EntityIdComponents.prefix returns the full prefix — 2 segments."""
+    from nes.core.identifiers.builders import break_entity_id
+
+    components = break_entity_id(
+        "entity:organization/political_party/national-independent-party"
+    )
+    assert components.prefix == "organization/political_party"
+    assert components.slug == "national-independent-party"
+
+
+def test_entity_id_components_type_property_1_segment():
+    """EntityIdComponents.type (compat property) returns first prefix segment."""
+    from nes.core.identifiers.builders import break_entity_id
+
+    components = break_entity_id("entity:person/rabi-lamichhane")
+    assert components.type == "person"
+
+
+def test_entity_id_components_type_property_2_segment():
+    """EntityIdComponents.type (compat property) returns first prefix segment for 2-segment prefix."""
+    from nes.core.identifiers.builders import break_entity_id
+
+    components = break_entity_id(
+        "entity:organization/political_party/national-independent-party"
+    )
+    assert components.type == "organization"
+
+
+def test_entity_id_components_subtype_property_none():
+    """EntityIdComponents.subtype (compat property) returns None for 1-segment prefix."""
+    from nes.core.identifiers.builders import break_entity_id
+
+    components = break_entity_id("entity:person/rabi-lamichhane")
+    assert components.subtype is None
+
+
+def test_entity_id_components_subtype_property_2_segment():
+    """EntityIdComponents.subtype (compat property) returns second segment for 2-segment prefix."""
+    from nes.core.identifiers.builders import break_entity_id
+
+    components = break_entity_id(
+        "entity:organization/political_party/national-independent-party"
+    )
+    assert components.subtype == "political_party"
+
+
+# ===========================================================================
+# New: 3-segment prefix support
+# ===========================================================================
+
+
+def test_break_entity_id_3_segment_prefix():
+    """break_entity_id supports 3-segment entity_prefix (new capability)."""
+    from nes.core.identifiers.builders import break_entity_id
+
+    # RSP-like deep hierarchy: organization/nepal_govt/moha
+    components = break_entity_id(
+        "entity:organization/nepal_govt/moha/department-of-immigration"
+    )
+    assert components.prefix == "organization/nepal_govt/moha"
+    assert components.slug == "department-of-immigration"
+    assert components.type == "organization"
+    assert components.subtype == "nepal_govt"
+
+
+def test_break_entity_id_3_segment_prefix_location():
+    """break_entity_id supports 3-segment prefix for location hierarchy."""
+    from nes.core.identifiers.builders import break_entity_id
+
+    components = break_entity_id(
+        "entity:location/bagmati/district/kathmandu"
+    )
+    assert components.prefix == "location/bagmati/district"
+    assert components.slug == "kathmandu"
+    assert components.type == "location"
+
+
+def test_break_entity_id_exceeds_max_depth_raises():
+    """break_entity_id raises ValueError when prefix depth exceeds MAX_PREFIX_DEPTH."""
+    from nes.core.identifiers.builders import break_entity_id
+
+    # 4-segment prefix exceeds MAX_PREFIX_DEPTH=3 → must raise
+    with pytest.raises(ValueError):
+        break_entity_id("entity:a/b/c/d/some-slug")
+
+
+def test_break_entity_id_invalid_prefix_raises():
+    """break_entity_id raises ValueError for missing entity: prefix."""
+    from nes.core.identifiers.builders import break_entity_id
+
+    with pytest.raises(ValueError):
+        break_entity_id("organization/nepal_govt/moha/slug")
+
+
+# ===========================================================================
+# New: build_entity_id_from_prefix
+# ===========================================================================
+
+
+def test_build_entity_id_from_prefix_1_segment():
+    """build_entity_id_from_prefix works with 1-segment prefix."""
+    from nes.core.identifiers.builders import build_entity_id_from_prefix
+
+    assert (
+        build_entity_id_from_prefix("person", "rabi-lamichhane")
+        == "entity:person/rabi-lamichhane"
+    )
+
+
+def test_build_entity_id_from_prefix_2_segment():
+    """build_entity_id_from_prefix works with 2-segment prefix."""
+    from nes.core.identifiers.builders import build_entity_id_from_prefix
+
+    assert (
+        build_entity_id_from_prefix(
+            "organization/political_party", "national-independent-party"
+        )
+        == "entity:organization/political_party/national-independent-party"
+    )
+
+
+def test_build_entity_id_from_prefix_3_segment():
+    """build_entity_id_from_prefix works with 3-segment prefix."""
+    from nes.core.identifiers.builders import build_entity_id_from_prefix
+
+    assert (
+        build_entity_id_from_prefix(
+            "organization/nepal_govt/moha", "department-of-immigration"
+        )
+        == "entity:organization/nepal_govt/moha/department-of-immigration"
+    )
 
 
 def test_build_relationship_id():

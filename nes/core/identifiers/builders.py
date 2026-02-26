@@ -2,11 +2,34 @@
 
 from typing import NamedTuple
 
+from nes.core.constraints import MAX_PREFIX_DEPTH
+
 
 class EntityIdComponents(NamedTuple):
-    type: str
-    subtype: str | None
+    """Components of a parsed entity ID.
+
+    Fields:
+        prefix: The full slash-joined classification path, e.g. "organization/nepal_govt/moha"
+        slug:   The unique slug, e.g. "department-of-immigration"
+
+    Backward-compat properties:
+        type:    First segment of prefix (e.g. "organization")
+        subtype: Second segment of prefix, or None if prefix is 1 segment
+    """
+
+    prefix: str
     slug: str
+
+    @property
+    def type(self) -> str:
+        """First segment of entity_prefix — backward compat."""
+        return self.prefix.split("/")[0]
+
+    @property
+    def subtype(self) -> str | None:
+        """Second segment of entity_prefix, or None — backward compat."""
+        parts = self.prefix.split("/")
+        return parts[1] if len(parts) >= 2 else None
 
 
 class RelationshipIdComponents(NamedTuple):
@@ -24,44 +47,66 @@ class VersionIdComponents(NamedTuple):
     version_number: int
 
 
-def _build_entity_id_core(type: str, subtype: str | None, slug: str) -> str:
-    """Build entity ID in format: entity:<type>/<subtype>/<slug> or entity:<type>/<slug> if subtype is None."""
-    if subtype is None:
-        return f"{type}/{slug}"
-    return f"{type}/{subtype}/{slug}"
+def build_entity_id_from_prefix(prefix: str, slug: str) -> str:
+    """Build entity ID from an entity_prefix and slug.
+
+    This is the primary builder for entity IDs. The prefix is a slash-joined
+    classification path of 1 to MAX_PREFIX_DEPTH segments.
+
+    Examples:
+        >>> build_entity_id_from_prefix("person", "rabi-lamichhane")
+        "entity:person/rabi-lamichhane"
+        >>> build_entity_id_from_prefix("organization/political_party", "national-independent-party")
+        "entity:organization/political_party/national-independent-party"
+        >>> build_entity_id_from_prefix("organization/nepal_govt/moha", "department-of-immigration")
+        "entity:organization/nepal_govt/moha/department-of-immigration"
+    """
+    return f"entity:{prefix}/{slug}"
 
 
 def build_entity_id(type: str, subtype: str | None, slug: str) -> str:
-    """Build entity ID in format: entity:<type>/<subtype>/<slug> or entity:<type>/<slug> if subtype is None.
+    """Build entity ID from type, subtype, and slug.
 
-    Example:
-        >>> build_entity_id("person", "politician", "ram-chandra-poudel")
-        "entity:person/ram-chandra-poudel"
+    Deprecated: use build_entity_id_from_prefix() instead.
+
+    Examples:
         >>> build_entity_id("person", None, "ram-chandra-poudel")
         "entity:person/ram-chandra-poudel"
+        >>> build_entity_id("organization", "political_party", "nepali-congress")
+        "entity:organization/political_party/nepali-congress"
     """
-    return f"entity:{_build_entity_id_core(type, subtype, slug)}"
+    prefix = type if subtype is None else f"{type}/{subtype}"
+    return build_entity_id_from_prefix(prefix, slug)
 
 
 def break_entity_id(entity_id: str) -> EntityIdComponents:
-    """Break entity ID into components: EntityIdComponents(type, subtype, slug).
+    """Break entity ID into EntityIdComponents(prefix, slug).
 
-    Example:
-        >>> break_entity_id("entity:person/ram-chandra-poudel")
-        EntityIdComponents(type='person', subtype='politician', slug='ram-chandra-poudel')
-        >>> break_entity_id("entity:person/ram-chandra-poudel")
-        EntityIdComponents(type='person', subtype=None, slug='ram-chandra-poudel')
+    Supports entity_prefix of 1 to MAX_PREFIX_DEPTH segments.
+
+    Examples:
+        >>> break_entity_id("entity:person/rabi-lamichhane")
+        EntityIdComponents(prefix='person', slug='rabi-lamichhane')
+        >>> break_entity_id("entity:organization/political_party/nepali-congress")
+        EntityIdComponents(prefix='organization/political_party', slug='nepali-congress')
+        >>> break_entity_id("entity:organization/nepal_govt/moha/department-of-immigration")
+        EntityIdComponents(prefix='organization/nepal_govt/moha', slug='department-of-immigration')
     """
     if not entity_id.startswith("entity:"):
         raise ValueError("Invalid entity ID format")
 
     parts = entity_id[7:].split("/")  # Remove "entity:" prefix
-    if len(parts) == 2:
-        return EntityIdComponents(type=parts[0], subtype=None, slug=parts[1])
-    elif len(parts) == 3:
-        return EntityIdComponents(type=parts[0], subtype=parts[1], slug=parts[2])
-    else:
-        raise ValueError("Invalid entity ID format")
+
+    # Need at least 2 parts (1-segment prefix + slug)
+    # At most MAX_PREFIX_DEPTH + 1 parts (N-segment prefix + slug)
+    if len(parts) < 2 or len(parts) > MAX_PREFIX_DEPTH + 1:
+        raise ValueError(
+            f"Invalid entity ID format: prefix depth must be 1–{MAX_PREFIX_DEPTH}"
+        )
+
+    slug = parts[-1]
+    prefix = "/".join(parts[:-1])
+    return EntityIdComponents(prefix=prefix, slug=slug)
 
 
 def build_relationship_id(source: str, target: str, type: str) -> str:

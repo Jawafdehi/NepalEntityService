@@ -11,6 +11,7 @@ from .builders import (
     break_version_id,
     build_author_id,
     build_entity_id,
+    build_entity_id_from_prefix,
     build_relationship_id,
     build_version_id,
 )
@@ -37,6 +38,7 @@ __all__ = [
     "break_version_id",
     "build_author_id",
     "build_entity_id",
+    "build_entity_id_from_prefix",
     "build_relationship_id",
     "build_version_id",
     # Validators
