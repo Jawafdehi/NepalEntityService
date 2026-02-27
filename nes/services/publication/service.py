@@ -54,19 +54,25 @@ class PublicationService:
         author_id: Optional[str] = None,
         change_description: str = "Initial entity creation",
         entity_subtype: Optional[EntitySubType] = None,
+        entity_prefix: Optional[str] = None,
     ) -> Entity:
         """Create a new entity with automatic versioning.
 
-        Supports two calling conventions for backward compatibility:
-        1. New style (keyword args): create_entity(entity_data={...}, author_id="...", ...)
-        2. Old style (positional): create_entity(EntityType.PERSON, {...}, "author:id", "desc")
+        Supports two calling conventions:
+        1. New prefix style: create_entity(entity_prefix="organization/nepal_govt/moha", ...)
+        2. Legacy style: create_entity(entity_type=EntityType.PERSON, ...)
+
+        When entity_prefix is provided it takes precedence over entity_type/entity_subtype
+        for ID generation. entity_type/entity_subtype are deprecated in favour of entity_prefix.
 
         Args:
-            entity_type: Type of the entity (optional if 'type' is in entity_data)
+            entity_type: Deprecated. Type of the entity (optional if entity_prefix or 'type' in entity_data)
             entity_data: Dictionary containing entity data
             author_id: ID of the author creating the entity
             change_description: Description of this change
-            entity_subtype: Optional subtype of the entity
+            entity_subtype: Deprecated. Subtype of the entity (use entity_prefix instead)
+            entity_prefix: N-level classification prefix (e.g. 'organization/nepal_govt/moha').
+                When set, takes precedence over entity_type/entity_subtype.
 
         Returns:
             Created entity with version 1
@@ -80,17 +86,37 @@ class PublicationService:
         if author_id is None:
             raise ValueError("author_id is required")
 
-        # Extract entity_type from entity_data if not provided explicitly
-        if entity_type is None:
-            if "type" not in entity_data:
-                raise ValueError(
-                    "Entity must have a 'type' field or entity_type parameter"
-                )
-            entity_type = EntityType(entity_data["type"])
+        from nes.core.identifiers import build_entity_id, build_entity_id_from_prefix
 
-        # Extract entity_subtype from entity_data if not provided explicitly
-        if entity_subtype is None and entity_data.get("sub_type"):
-            entity_subtype = EntitySubType(entity_data["sub_type"])
+        # entity_prefix path: derive entity_type from first prefix segment
+        if entity_prefix is not None:
+            first_segment = entity_prefix.split("/")[0]
+            entity_type = EntityType(first_segment)
+            entity_data["entity_prefix"] = entity_prefix
+            slug = entity_data.get("slug")
+            if not slug:
+                raise ValueError("Entity must have a 'slug' field")
+            entity_id = build_entity_id_from_prefix(entity_prefix, slug)
+        else:
+            # Legacy path: resolve entity_type and entity_subtype
+            if entity_type is None:
+                if "type" not in entity_data:
+                    raise ValueError(
+                        "Entity must have a 'type' field, entity_type parameter, or entity_prefix"
+                    )
+                entity_type = EntityType(entity_data["type"])
+
+            if entity_subtype is None and entity_data.get("sub_type"):
+                entity_subtype = EntitySubType(entity_data["sub_type"])
+
+            slug = entity_data.get("slug")
+            if not slug:
+                raise ValueError("Entity must have a 'slug' field")
+
+            entity_id = build_entity_id(
+                entity_type.value, entity_subtype.value if entity_subtype else None, slug
+            )
+
         # Validate required fields
         if "slug" not in entity_data:
             raise ValueError("Entity must have a 'slug' field")
@@ -107,15 +133,6 @@ class PublicationService:
 
         # Get or create author
         author = await self._get_or_create_author(author_id)
-
-        # Build entity ID to check for duplicates
-        slug = entity_data["slug"]
-
-        from nes.core.identifiers import build_entity_id
-
-        entity_id = build_entity_id(
-            entity_type.value, entity_subtype.value if entity_subtype else None, slug
-        )
 
         # Check if entity already exists
         existing = await self.database.get_entity(entity_id)
