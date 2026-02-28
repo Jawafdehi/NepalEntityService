@@ -1018,8 +1018,8 @@ class TestPublicationServiceEntityPrefix:
     @pytest.mark.asyncio
     async def test_create_entity_with_entity_prefix(self, temp_db_path):
         """create_entity with entity_prefix creates entity with correct 3-level id."""
-        from nes.services.publication import PublicationService
         from nes.core.models.entity_type_map import ALLOWED_ENTITY_PREFIXES
+        from nes.services.publication import PublicationService
 
         ALLOWED_ENTITY_PREFIXES.add("organization/nepal_govt/moha")
         try:
@@ -1087,8 +1087,8 @@ class TestPublicationServiceEntityPrefix:
     @pytest.mark.asyncio
     async def test_entity_prefix_takes_precedence(self, temp_db_path):
         """entity_prefix takes precedence over entity_type/entity_subtype when both provided."""
-        from nes.services.publication import PublicationService
         from nes.core.models.entity_type_map import ALLOWED_ENTITY_PREFIXES
+        from nes.services.publication import PublicationService
 
         ALLOWED_ENTITY_PREFIXES.add("organization/nepal_govt/moha")
         try:
@@ -1118,8 +1118,8 @@ class TestPublicationServiceEntityPrefix:
     @pytest.mark.asyncio
     async def test_create_entity_prefix_stored_and_retrievable(self, temp_db_path):
         """Entity created with entity_prefix is stored and can be retrieved by its new id."""
-        from nes.services.publication import PublicationService
         from nes.core.models.entity_type_map import ALLOWED_ENTITY_PREFIXES
+        from nes.services.publication import PublicationService
 
         ALLOWED_ENTITY_PREFIXES.add("organization/nepal_govt/moha")
         try:

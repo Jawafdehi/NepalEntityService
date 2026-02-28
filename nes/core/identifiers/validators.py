@@ -2,11 +2,7 @@
 
 import re
 
-from ..constraints import (
-    MAX_SLUG_LENGTH,
-    MIN_SLUG_LENGTH,
-    SLUG_PATTERN,
-)
+from ..constraints import MAX_SLUG_LENGTH, MIN_SLUG_LENGTH, SLUG_PATTERN
 from .builders import (
     break_author_id,
     break_entity_id,

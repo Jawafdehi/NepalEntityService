@@ -26,7 +26,6 @@ from nes.core.models.person import Person
 from nes.core.models.version import Author, VersionSummary, VersionType
 from nes.database.file_database import FileDatabase
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------

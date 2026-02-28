@@ -18,10 +18,10 @@ from httpx import ASGITransport, AsyncClient
 
 from nes.api.app import app
 from nes.config import Config
+from nes.core.models.entity import EntitySubType, EntityType
 from nes.core.models.entity_type_map import ALLOWED_ENTITY_PREFIXES
 from nes.database.file_database import FileDatabase
 from nes.services.publication import PublicationService
-
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -37,8 +37,6 @@ async def test_db_with_prefix_entities(tmp_path):
 
     db = FileDatabase(base_path=str(tmp_path / "test-db"))
     pub = PublicationService(database=db)
-
-    from nes.core.models.entity import EntitySubType, EntityType
 
     # 1-level: person
     await pub.create_entity(

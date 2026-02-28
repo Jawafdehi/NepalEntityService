@@ -24,7 +24,6 @@ from nes.core.models.version import Author, VersionSummary, VersionType
 from nes.database.file_database import FileDatabase
 from nes.services.search import SearchService
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------

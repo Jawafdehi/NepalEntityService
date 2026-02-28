@@ -20,6 +20,7 @@ from nes.api.responses import (
     VersionListResponse,
 )
 from nes.core.models.entity import EntityType
+from nes.core.models.entity_type_map import ALLOWED_ENTITY_PREFIXES
 from nes.services.search import SearchService
 
 logger = logging.getLogger(__name__)
@@ -120,8 +121,6 @@ async def list_entities(
 
     # Validate entity_prefix if provided
     if entity_prefix is not None:
-        from nes.core.models.entity_type_map import ALLOWED_ENTITY_PREFIXES
-
         if entity_prefix not in ALLOWED_ENTITY_PREFIXES:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,

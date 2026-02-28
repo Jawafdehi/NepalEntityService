@@ -2,7 +2,6 @@
 
 import pytest
 
-
 # ===========================================================================
 # Backward compat: existing type/subtype combos present in ALLOWED_ENTITY_PREFIXES
 # ===========================================================================
