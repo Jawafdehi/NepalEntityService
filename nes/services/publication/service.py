@@ -155,7 +155,7 @@ class PublicationService:
 
         # Add type, subtype, version summary and created_at to entity data
         entity_data["type"] = entity_type.value
-        if entity_subtype:
+        if entity_subtype and entity_prefix is None:
             entity_data["sub_type"] = entity_subtype.value
         entity_data["version_summary"] = version_summary
         entity_data["created_at"] = datetime.now(UTC)

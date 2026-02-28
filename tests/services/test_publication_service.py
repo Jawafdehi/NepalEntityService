@@ -1112,6 +1112,8 @@ class TestPublicationServiceEntityPrefix:
             # entity_prefix should win
             assert entity.id == "entity:organization/nepal_govt/moha/passport-section"
             assert entity.entity_prefix == "organization/nepal_govt/moha"
+            # entity_subtype must not bleed into entity_data when entity_prefix is set
+            assert entity.sub_type is None
         finally:
             ALLOWED_ENTITY_PREFIXES.discard("organization/nepal_govt/moha")
 
