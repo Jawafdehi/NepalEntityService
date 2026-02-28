@@ -63,6 +63,7 @@ class SearchService:
         sub_type: Optional[str] = None,
         attributes: Optional[Dict[str, Union[str, int, float, bool]]] = None,
         tags: Optional[List[str]] = None,
+        entity_prefix: Optional[str] = None,
         limit: int = 100,
         offset: int = 0,
     ) -> List[Entity]:
@@ -70,41 +71,22 @@ class SearchService:
 
         Performs case-insensitive text search across entity name fields
         (both English and Nepali). Supports filtering by type, subtype,
-        attributes, and tags. Results are ranked by relevance when a query is provided.
+        attributes, tags, and entity_prefix. Results are ranked by relevance
+        when a query is provided.
 
         Args:
             query: Text query to search for in entity names (case-insensitive)
             entity_type: Filter by entity type (person, organization, location)
-            sub_type: Filter by entity subtype
+            sub_type: Filter by entity subtype (deprecated: use entity_prefix)
             attributes: Filter by entity attributes (AND logic)
             tags: Filter by tags (AND logic - entity must have ALL specified tags)
+            entity_prefix: Filter by N-level prefix using startswith logic
+                (e.g. 'organization/nepal_govt' matches 'organization/nepal_govt/moha')
             limit: Maximum number of entities to return (default: 100)
             offset: Number of entities to skip (default: 0)
 
         Returns:
             List of entities matching the search criteria, ranked by relevance
-
-        Examples:
-            >>> # Basic text search
-            >>> results = await service.search_entities(query="ram")
-
-            >>> # Search with type filter
-            >>> results = await service.search_entities(
-            ...     query="poudel",
-            ...     entity_type="person"
-            ... )
-
-            >>> # Search with attribute filter
-            >>> results = await service.search_entities(
-            ...     attributes={"party": "nepali-congress"}
-            ... )
-
-            >>> # Search with tag filter
-            >>> results = await service.search_entities(tags=["senior-leader"])
-
-            >>> # Paginated search
-            >>> page1 = await service.search_entities(query="politician", limit=20, offset=0)
-            >>> page2 = await service.search_entities(query="politician", limit=20, offset=20)
         """
         return await self.database.search_entities(
             query=query,
@@ -112,6 +94,7 @@ class SearchService:
             sub_type=sub_type,
             attr_filters=attributes,
             tags=tags,
+            entity_prefix=entity_prefix,
             limit=limit,
             offset=offset,
         )

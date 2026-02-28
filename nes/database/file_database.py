@@ -471,6 +471,7 @@ class FileDatabase(EntityDatabase):
         sub_type: Optional[str] = None,
         attr_filters: Optional[Dict[str, Union[str, int, float, bool]]] = None,
         tags: Optional[List[str]] = None,
+        entity_prefix: Optional[str] = None,
         limit: int = 100,
         offset: int = 0,
     ) -> List[Entity]:
@@ -478,7 +479,7 @@ class FileDatabase(EntityDatabase):
 
         Performs case-insensitive text search across entity name fields
         (both English and Nepali). Supports filtering by type, subtype,
-        attributes, and tags. Results are ranked by relevance.
+        attributes, tags, and entity_prefix. Results are ranked by relevance.
 
         Args:
             query: Text query to search for in entity names (case-insensitive)
@@ -486,14 +487,21 @@ class FileDatabase(EntityDatabase):
             sub_type: Filter by entity subtype
             attr_filters: Filter by entity attributes (AND logic)
             tags: Filter by tags (AND logic - entity must have ALL specified tags)
+            entity_prefix: Filter by N-level prefix using startswith logic
+                (e.g. 'organization/nepal_govt' matches 'organization/nepal_govt/moha')
             limit: Maximum number of entities to return
             offset: Number of entities to skip
 
         Returns:
             List of entities matching the search criteria, ranked by relevance
         """
+        # Derive entity_type from entity_prefix first segment when not explicitly given
+        effective_type = entity_type
+        if entity_prefix and not entity_type:
+            effective_type = entity_prefix.split("/")[0]
+
         # Build search path based on type/subtype
-        search_path = self._build_entity_search_path(entity_type, sub_type)
+        search_path = self._build_entity_search_path(effective_type, sub_type)
 
         # If search path doesn't exist, return empty list
         if not search_path.exists():
@@ -512,6 +520,14 @@ class FileDatabase(EntityDatabase):
                 entity = self._load_and_filter_entity(file_path, attr_filters)
                 if not entity:
                     continue
+
+                # Apply entity_prefix filter (startswith logic)
+                if entity_prefix is not None:
+                    ep = entity.entity_prefix
+                    if ep is None or not (
+                        ep == entity_prefix or ep.startswith(entity_prefix + "/")
+                    ):
+                        continue
 
                 # Apply tag filtering (AND logic - entity must have ALL specified tags)
                 if tags and len(tags) > 0:

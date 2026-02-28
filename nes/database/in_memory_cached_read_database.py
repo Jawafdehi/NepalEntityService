@@ -212,6 +212,7 @@ class InMemoryCachedReadDatabase(EntityDatabase):
             Tuple[Tuple[str, Union[str, int, float, bool]], ...]
         ],
         tags_tuple: Optional[Tuple[str, ...]],
+        entity_prefix: Optional[str],
         limit: int,
         offset: int,
     ) -> Tuple[Entity, ...]:
@@ -279,6 +280,18 @@ class InMemoryCachedReadDatabase(EntityDatabase):
         if tags_tuple:
             entities = [e for e in entities if self._entity_matches_tags(e, tags_tuple)]
 
+        # Apply entity_prefix filter (startswith logic)
+        if entity_prefix:
+            entities = [
+                e
+                for e in entities
+                if e.entity_prefix is not None
+                and (
+                    e.entity_prefix == entity_prefix
+                    or e.entity_prefix.startswith(entity_prefix + "/")
+                )
+            ]
+
         # Apply pagination and return as tuple
         return tuple(entities[offset : offset + limit])
 
@@ -289,6 +302,7 @@ class InMemoryCachedReadDatabase(EntityDatabase):
         sub_type: Optional[str] = None,
         attr_filters: Optional[Dict[str, Union[str, int, float, bool]]] = None,
         tags: Optional[List[str]] = None,
+        entity_prefix: Optional[str] = None,
         limit: int = 100,
         offset: int = 0,
     ) -> List[Entity]:
@@ -306,7 +320,7 @@ class InMemoryCachedReadDatabase(EntityDatabase):
             tags_tuple = tuple(tags)
 
         # Create cache key
-        cache_key = f"search_entities:{query}:{entity_type}:{sub_type}:{attr_filters_tuple}:{tags_tuple}:{limit}:{offset}"
+        cache_key = f"search_entities:{query}:{entity_type}:{sub_type}:{attr_filters_tuple}:{tags_tuple}:{entity_prefix}:{limit}:{offset}"
 
         # Try to get from cache
         def create_value():
@@ -316,6 +330,7 @@ class InMemoryCachedReadDatabase(EntityDatabase):
                 sub_type,
                 attr_filters_tuple,
                 tags_tuple,
+                entity_prefix,
                 limit,
                 offset,
             )
