@@ -17,7 +17,12 @@ from pydantic import (
 
 from nes.core.identifiers import build_entity_id, build_entity_id_from_prefix
 
-from ..constraints import MAX_PREFIX_DEPTH, MAX_SLUG_LENGTH, MIN_SLUG_LENGTH, SLUG_PATTERN
+from ..constraints import (
+    MAX_PREFIX_DEPTH,
+    MAX_SLUG_LENGTH,
+    MIN_SLUG_LENGTH,
+    SLUG_PATTERN,
+)
 from .base import Attribution, Contact, EntityPicture, LangText, Name, NameKind
 from .version import VersionSummary
 

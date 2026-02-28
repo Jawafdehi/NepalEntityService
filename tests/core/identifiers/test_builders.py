@@ -128,9 +128,7 @@ def test_break_entity_id_3_segment_prefix_location():
     """break_entity_id supports 3-segment prefix for location hierarchy."""
     from nes.core.identifiers.builders import break_entity_id
 
-    components = break_entity_id(
-        "entity:location/bagmati/district/kathmandu"
-    )
+    components = break_entity_id("entity:location/bagmati/district/kathmandu")
     assert components.prefix == "location/bagmati/district"
     assert components.slug == "kathmandu"
     assert components.type == "location"

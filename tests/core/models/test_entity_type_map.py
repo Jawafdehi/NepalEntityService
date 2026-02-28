@@ -77,7 +77,9 @@ def test_allowed_prefixes_is_all_strings():
     from nes.core.models.entity_type_map import ALLOWED_ENTITY_PREFIXES
 
     for prefix in ALLOWED_ENTITY_PREFIXES:
-        assert isinstance(prefix, str), f"Expected str, got {type(prefix)} for {prefix!r}"
+        assert isinstance(
+            prefix, str
+        ), f"Expected str, got {type(prefix)} for {prefix!r}"
 
 
 def test_allowed_prefixes_no_leading_trailing_slashes():
@@ -96,6 +98,6 @@ def test_allowed_prefixes_depth_within_max():
 
     for prefix in ALLOWED_ENTITY_PREFIXES:
         depth = len(prefix.split("/"))
-        assert depth <= MAX_PREFIX_DEPTH, (
-            f"Prefix {prefix!r} has depth {depth} > MAX_PREFIX_DEPTH={MAX_PREFIX_DEPTH}"
-        )
+        assert (
+            depth <= MAX_PREFIX_DEPTH
+        ), f"Prefix {prefix!r} has depth {depth} > MAX_PREFIX_DEPTH={MAX_PREFIX_DEPTH}"

@@ -114,7 +114,9 @@ class PublicationService:
                 raise ValueError("Entity must have a 'slug' field")
 
             entity_id = build_entity_id(
-                entity_type.value, entity_subtype.value if entity_subtype else None, slug
+                entity_type.value,
+                entity_subtype.value if entity_subtype else None,
+                slug,
             )
 
         # Validate required fields

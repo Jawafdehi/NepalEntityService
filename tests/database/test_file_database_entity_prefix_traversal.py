@@ -131,7 +131,9 @@ class TestListEntitiesDepthTraversal:
         assert "entity:organization/political_party/rastriya-swatantra-party" in ids
 
     @pytest.mark.asyncio
-    async def test_discovers_three_level_deep_entities(self, db, three_level_org_entity):
+    async def test_discovers_three_level_deep_entities(
+        self, db, three_level_org_entity
+    ):
         """list_entities finds entities stored at entity/{s1}/{s2}/{s3}/{slug}.json."""
         await db.put_entity(three_level_org_entity)
 
@@ -180,7 +182,9 @@ class TestListEntitiesDepthTraversal:
 
         ids = [e.id for e in results]
         assert "entity:person/rabi-lamichhane" in ids
-        assert "entity:organization/nepal_govt/moha/department-of-immigration" not in ids
+        assert (
+            "entity:organization/nepal_govt/moha/department-of-immigration" not in ids
+        )
 
     @pytest.mark.asyncio
     async def test_three_level_entity_has_entity_prefix_after_load(
@@ -267,7 +271,9 @@ class TestEntityFromDictWithEntityPrefix:
         entity = db._entity_from_dict(data)
 
         assert entity.slug == "rastriya-swatantra-party"
-        assert entity.id == "entity:organization/political_party/rastriya-swatantra-party"
+        assert (
+            entity.id == "entity:organization/political_party/rastriya-swatantra-party"
+        )
         assert entity.entity_prefix is None
 
     def test_loads_new_style_entity_with_three_level_prefix(self, db):
@@ -294,7 +300,9 @@ class TestEntityFromDictWithEntityPrefix:
 
         assert entity.slug == "department-of-immigration"
         assert entity.entity_prefix == "organization/nepal_govt/moha"
-        assert entity.id == "entity:organization/nepal_govt/moha/department-of-immigration"
+        assert (
+            entity.id == "entity:organization/nepal_govt/moha/department-of-immigration"
+        )
 
     def test_three_level_entity_instantiated_as_organization(self, db):
         """An entity with 3-level org prefix is returned as an Organization instance."""

@@ -68,9 +68,7 @@ async def test_db_with_prefix_entities(tmp_path):
         entity_prefix="organization/nepal_govt/moha",
         entity_data={
             "slug": "department-of-immigration",
-            "names": [
-                {"kind": "PRIMARY", "en": {"full": "Department of Immigration"}}
-            ],
+            "names": [{"kind": "PRIMARY", "en": {"full": "Department of Immigration"}}],
         },
         author_id="author:test",
         change_description="setup",
@@ -181,7 +179,10 @@ class TestApiEntityPrefixFilter:
         # Exactly 1 entity should match this exact prefix
         assert len(data["entities"]) == 1
         entity = data["entities"][0]
-        assert entity["id"] == "entity:organization/nepal_govt/moha/department-of-immigration"
+        assert (
+            entity["id"]
+            == "entity:organization/nepal_govt/moha/department-of-immigration"
+        )
         assert entity["entity_prefix"] == "organization/nepal_govt/moha"
 
 
@@ -244,15 +245,15 @@ class TestApiEntityPrefixBackwardCompat:
     @pytest.mark.asyncio
     async def test_entity_type_filter_still_works(self, client):
         """GET /api/entities?entity_type=person still returns person entities."""
-        response = await client.get(
-            "/api/entities", params={"entity_type": "person"}
-        )
+        response = await client.get("/api/entities", params={"entity_type": "person"})
 
         assert response.status_code == 200
         data = response.json()
         ids = [e["id"] for e in data["entities"]]
         assert "entity:person/rabi-lamichhane" in ids
-        assert "entity:organization/nepal_govt/moha/department-of-immigration" not in ids
+        assert (
+            "entity:organization/nepal_govt/moha/department-of-immigration" not in ids
+        )
 
     @pytest.mark.asyncio
     async def test_sub_type_filter_still_works(self, client):
@@ -266,4 +267,6 @@ class TestApiEntityPrefixBackwardCompat:
         data = response.json()
         ids = [e["id"] for e in data["entities"]]
         assert "entity:organization/political_party/nepali-congress" in ids
-        assert "entity:organization/nepal_govt/moha/department-of-immigration" not in ids
+        assert (
+            "entity:organization/nepal_govt/moha/department-of-immigration" not in ids
+        )

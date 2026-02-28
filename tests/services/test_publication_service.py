@@ -1044,7 +1044,10 @@ class TestPublicationServiceEntityPrefix:
                 change_description="Add MoHA department",
             )
 
-            assert entity.id == "entity:organization/nepal_govt/moha/department-of-immigration"
+            assert (
+                entity.id
+                == "entity:organization/nepal_govt/moha/department-of-immigration"
+            )
             assert entity.entity_prefix == "organization/nepal_govt/moha"
             assert entity.slug == "department-of-immigration"
             assert entity.version_summary.version_number == 1
@@ -1125,7 +1128,9 @@ class TestPublicationServiceEntityPrefix:
 
             entity_data = {
                 "slug": "department-of-immigration",
-                "names": [{"kind": "PRIMARY", "en": {"full": "Department of Immigration"}}],
+                "names": [
+                    {"kind": "PRIMARY", "en": {"full": "Department of Immigration"}}
+                ],
             }
 
             entity = await service.create_entity(
@@ -1137,7 +1142,10 @@ class TestPublicationServiceEntityPrefix:
 
             retrieved = await db.get_entity(entity.id)
             assert retrieved is not None
-            assert retrieved.id == "entity:organization/nepal_govt/moha/department-of-immigration"
+            assert (
+                retrieved.id
+                == "entity:organization/nepal_govt/moha/department-of-immigration"
+            )
             assert retrieved.entity_prefix == "organization/nepal_govt/moha"
         finally:
             ALLOWED_ENTITY_PREFIXES.discard("organization/nepal_govt/moha")

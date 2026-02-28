@@ -173,16 +173,16 @@ class TestSearchEntitiesEntityPrefix:
 
         ids = [e.id for e in results]
         assert "entity:organization/nepal_govt/mol/legal-aid-section" in ids
-        assert "entity:organization/nepal_govt/moha/department-of-immigration" not in ids
+        assert (
+            "entity:organization/nepal_govt/moha/department-of-immigration" not in ids
+        )
 
     @pytest.mark.asyncio
     async def test_partial_prefix_returns_all_children(
         self, service, moha_department, mol_section
     ):
         """search_entities(entity_prefix='org/nepal_govt') returns all children (startswith)."""
-        results = await service.search_entities(
-            entity_prefix="organization/nepal_govt"
-        )
+        results = await service.search_entities(entity_prefix="organization/nepal_govt")
 
         ids = {e.id for e in results}
         assert "entity:organization/nepal_govt/moha/department-of-immigration" in ids
@@ -193,9 +193,7 @@ class TestSearchEntitiesEntityPrefix:
         self, service, moha_department, political_party, politician
     ):
         """entity_prefix filter excludes entities outside the prefix subtree."""
-        results = await service.search_entities(
-            entity_prefix="organization/nepal_govt"
-        )
+        results = await service.search_entities(entity_prefix="organization/nepal_govt")
 
         ids = [e.id for e in results]
         assert "entity:organization/political_party/nepali-congress" not in ids
@@ -265,7 +263,9 @@ class TestSearchEntitiesBackwardCompat:
 
         ids = [e.id for e in results]
         assert "entity:person/rabi-lamichhane" in ids
-        assert "entity:organization/nepal_govt/moha/department-of-immigration" not in ids
+        assert (
+            "entity:organization/nepal_govt/moha/department-of-immigration" not in ids
+        )
 
     @pytest.mark.asyncio
     async def test_sub_type_filter_still_works(
@@ -278,7 +278,9 @@ class TestSearchEntitiesBackwardCompat:
 
         ids = [e.id for e in results]
         assert "entity:organization/political_party/nepali-congress" in ids
-        assert "entity:organization/nepal_govt/moha/department-of-immigration" not in ids
+        assert (
+            "entity:organization/nepal_govt/moha/department-of-immigration" not in ids
+        )
 
     @pytest.mark.asyncio
     async def test_no_filters_returns_all_entities(

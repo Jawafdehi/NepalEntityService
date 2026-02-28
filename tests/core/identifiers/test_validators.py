@@ -42,9 +42,14 @@ def test_validate_existing_2_segment_ids_pass():
     from nes.core.identifiers.validators import validate_entity_id
 
     # Real entity IDs from the database
-    assert validate_entity_id("entity:person/rabi-lamichhane") == "entity:person/rabi-lamichhane"
     assert (
-        validate_entity_id("entity:organization/political_party/national-independent-party")
+        validate_entity_id("entity:person/rabi-lamichhane")
+        == "entity:person/rabi-lamichhane"
+    )
+    assert (
+        validate_entity_id(
+            "entity:organization/political_party/national-independent-party"
+        )
         == "entity:organization/political_party/national-independent-party"
     )
     assert (
@@ -56,7 +61,9 @@ def test_validate_existing_2_segment_ids_pass():
         == "entity:location/constituency/acham-1"
     )
     assert (
-        validate_entity_id("entity:organization/government_body/accham-district-development-committee")
+        validate_entity_id(
+            "entity:organization/government_body/accham-district-development-committee"
+        )
         == "entity:organization/government_body/accham-district-development-committee"
     )
 
@@ -75,7 +82,9 @@ def test_validate_3_segment_prefix_in_registry_passes():
     test_prefix = "organization/nepal_govt/moha"
     ALLOWED_ENTITY_PREFIXES.add(test_prefix)
     try:
-        result = validate_entity_id("entity:organization/nepal_govt/moha/department-of-immigration")
+        result = validate_entity_id(
+            "entity:organization/nepal_govt/moha/department-of-immigration"
+        )
         assert result == "entity:organization/nepal_govt/moha/department-of-immigration"
     finally:
         ALLOWED_ENTITY_PREFIXES.discard(test_prefix)
