@@ -320,7 +320,7 @@ class InMemoryCachedReadDatabase(EntityDatabase):
             tags_tuple = tuple(tags)
 
         # Create cache key
-        cache_key = f"search_entities:{query}:{entity_type}:{sub_type}:{attr_filters_tuple}:{tags_tuple}:{entity_prefix}:{limit}:{offset}"
+        cache_key = f"search_entities:{query}:{entity_prefix}:{attr_filters_tuple}:{tags_tuple}:{limit}:{offset}"
 
         # Try to get from cache
         def create_value():

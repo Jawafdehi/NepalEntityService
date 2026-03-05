@@ -495,13 +495,18 @@ class FileDatabase(EntityDatabase):
         Returns:
             List of entities matching the search criteria, ranked by relevance
         """
-        # Derive entity_type from entity_prefix first segment when not explicitly given
+        # Derive entity_type and sub_type from entity_prefix when not explicitly given
         effective_type = entity_type
-        if entity_prefix and not entity_type:
-            effective_type = entity_prefix.split("/")[0]
+        effective_sub_type = sub_type
+        if entity_prefix:
+            segments = entity_prefix.split("/")
+            if not entity_type:
+                effective_type = segments[0]
+            if not sub_type and len(segments) >= 2:
+                effective_sub_type = segments[1]
 
         # Build search path based on type/subtype
-        search_path = self._build_entity_search_path(effective_type, sub_type)
+        search_path = self._build_entity_search_path(effective_type, effective_sub_type)
 
         # If search path doesn't exist, return empty list
         if not search_path.exists():
