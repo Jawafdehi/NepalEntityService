@@ -190,9 +190,7 @@ class Entity(BaseModel, ABC):
             raise ValueError("entity_prefix must not be empty")
         segments = v.split("/")
         if any(s == "" for s in segments):
-            raise ValueError(
-                f"entity_prefix '{v}' contains empty segments"
-            )
+            raise ValueError(f"entity_prefix '{v}' contains empty segments")
         depth = len(segments)
         if depth > MAX_PREFIX_DEPTH:
             raise ValueError(

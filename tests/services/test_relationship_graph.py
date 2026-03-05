@@ -49,23 +49,23 @@ class TestBidirectionalTraversal:
         }
 
         person = await service.create_entity(
-     entity_prefix="person",
-     entity_data=person_data,
-     author_id="author:test",
-     change_description="Test",
- )
+            entity_prefix="person",
+            entity_data=person_data,
+            author_id="author:test",
+            change_description="Test",
+        )
         org1 = await service.create_entity(
-     entity_prefix="organization/political_party",
-     entity_data=org1_data,
-     author_id="author:test",
-     change_description="Test",
- )
+            entity_prefix="organization/political_party",
+            entity_data=org1_data,
+            author_id="author:test",
+            change_description="Test",
+        )
         org2 = await service.create_entity(
-     entity_prefix="organization/political_party",
-     entity_data=org2_data,
-     author_id="author:test",
-     change_description="Test",
- )
+            entity_prefix="organization/political_party",
+            entity_data=org2_data,
+            author_id="author:test",
+            change_description="Test",
+        )
 
         # Create relationships
         await service.create_relationship(
@@ -120,23 +120,23 @@ class TestBidirectionalTraversal:
         }
 
         person1 = await service.create_entity(
-     entity_prefix="person",
-     entity_data=person1_data,
-     author_id="author:test",
-     change_description="Test",
- )
+            entity_prefix="person",
+            entity_data=person1_data,
+            author_id="author:test",
+            change_description="Test",
+        )
         person2 = await service.create_entity(
-     entity_prefix="person",
-     entity_data=person2_data,
-     author_id="author:test",
-     change_description="Test",
- )
+            entity_prefix="person",
+            entity_data=person2_data,
+            author_id="author:test",
+            change_description="Test",
+        )
         org = await service.create_entity(
-     entity_prefix="organization/political_party",
-     entity_data=org_data,
-     author_id="author:test",
-     change_description="Test",
- )
+            entity_prefix="organization/political_party",
+            entity_data=org_data,
+            author_id="author:test",
+            change_description="Test",
+        )
 
         # Create relationships
         await service.create_relationship(
@@ -182,11 +182,11 @@ class TestBidirectionalTraversal:
                 "names": [{"kind": "PRIMARY", "en": {"full": f"Person {i}"}}],
             }
             entity = await service.create_entity(
-     entity_prefix="person",
-     entity_data=entity_data,
-     author_id="author:test",
-     change_description="Test",
- )
+                entity_prefix="person",
+                entity_data=entity_data,
+                author_id="author:test",
+                change_description="Test",
+            )
             entities.append(entity)
 
         # Create relationships
@@ -238,11 +238,11 @@ class TestDepthLimitedExploration:
                 ],
             }
             entity = await service.create_entity(
-     entity_prefix="person",
-     entity_data=entity_data,
-     author_id="author:test",
-     change_description="Test",
- )
+                entity_prefix="person",
+                entity_data=entity_data,
+                author_id="author:test",
+                change_description="Test",
+            )
             entities.append(entity)
 
         # Create relationships
@@ -291,11 +291,11 @@ class TestDepthLimitedExploration:
                 ],
             }
             entity = await service.create_entity(
-     entity_prefix="person",
-     entity_data=entity_data,
-     author_id="author:test",
-     change_description="Test",
- )
+                entity_prefix="person",
+                entity_data=entity_data,
+                author_id="author:test",
+                change_description="Test",
+            )
             entities.append(entity)
 
         # Create relationships
@@ -338,11 +338,11 @@ class TestDepthLimitedExploration:
                 "names": [{"kind": "PRIMARY", "en": {"full": f"Person {i}"}}],
             }
             entity = await service.create_entity(
-     entity_prefix="person",
-     entity_data=entity_data,
-     author_id="author:test",
-     change_description="Test",
- )
+                entity_prefix="person",
+                entity_data=entity_data,
+                author_id="author:test",
+                change_description="Test",
+            )
             entities.append(entity)
 
         # Create relationships
@@ -389,17 +389,17 @@ class TestRelationshipPathFinding:
         }
 
         entity_a = await service.create_entity(
-     entity_prefix="person",
-     entity_data=entity_a_data,
-     author_id="author:test",
-     change_description="Test",
- )
+            entity_prefix="person",
+            entity_data=entity_a_data,
+            author_id="author:test",
+            change_description="Test",
+        )
         entity_b = await service.create_entity(
-     entity_prefix="person",
-     entity_data=entity_b_data,
-     author_id="author:test",
-     change_description="Test",
- )
+            entity_prefix="person",
+            entity_data=entity_b_data,
+            author_id="author:test",
+            change_description="Test",
+        )
 
         # Create relationship
         await service.create_relationship(
@@ -440,11 +440,11 @@ class TestRelationshipPathFinding:
                 ],
             }
             entity = await service.create_entity(
-     entity_prefix="person",
-     entity_data=entity_data,
-     author_id="author:test",
-     change_description="Test",
- )
+                entity_prefix="person",
+                entity_data=entity_data,
+                author_id="author:test",
+                change_description="Test",
+            )
             entities.append(entity)
 
         # Create relationships
@@ -487,11 +487,11 @@ class TestRelationshipPathFinding:
                 ],
             }
             entity = await service.create_entity(
-     entity_prefix="person",
-     entity_data=entity_data,
-     author_id="author:test",
-     change_description="Test",
- )
+                entity_prefix="person",
+                entity_data=entity_data,
+                author_id="author:test",
+                change_description="Test",
+            )
             entities.append(entity)
 
         # Create relationships for both paths
@@ -557,17 +557,17 @@ class TestRelationshipPathFinding:
         }
 
         entity_a = await service.create_entity(
-     entity_prefix="person",
-     entity_data=entity_a_data,
-     author_id="author:test",
-     change_description="Test",
- )
+            entity_prefix="person",
+            entity_data=entity_a_data,
+            author_id="author:test",
+            change_description="Test",
+        )
         entity_b = await service.create_entity(
-     entity_prefix="person",
-     entity_data=entity_b_data,
-     author_id="author:test",
-     change_description="Test",
- )
+            entity_prefix="person",
+            entity_data=entity_b_data,
+            author_id="author:test",
+            change_description="Test",
+        )
 
         # No relationship between them
 
@@ -604,17 +604,17 @@ class TestGraphVisualization:
         }
 
         person = await service.create_entity(
-     entity_prefix="person",
-     entity_data=person_data,
-     author_id="author:test",
-     change_description="Test",
- )
+            entity_prefix="person",
+            entity_data=person_data,
+            author_id="author:test",
+            change_description="Test",
+        )
         org = await service.create_entity(
-     entity_prefix="organization/political_party",
-     entity_data=org_data,
-     author_id="author:test",
-     change_description="Test",
- )
+            entity_prefix="organization/political_party",
+            entity_data=org_data,
+            author_id="author:test",
+            change_description="Test",
+        )
 
         await service.create_relationship(
             source_entity_id=person.id,
@@ -656,17 +656,17 @@ class TestGraphVisualization:
         }
 
         person = await service.create_entity(
-     entity_prefix="person",
-     entity_data=person_data,
-     author_id="author:test",
-     change_description="Test",
- )
+            entity_prefix="person",
+            entity_data=person_data,
+            author_id="author:test",
+            change_description="Test",
+        )
         org = await service.create_entity(
-     entity_prefix="organization/political_party",
-     entity_data=org_data,
-     author_id="author:test",
-     change_description="Test",
- )
+            entity_prefix="organization/political_party",
+            entity_data=org_data,
+            author_id="author:test",
+            change_description="Test",
+        )
 
         await service.create_relationship(
             source_entity_id=person.id,
@@ -709,17 +709,17 @@ class TestGraphVisualization:
         }
 
         person = await service.create_entity(
-     entity_prefix="person",
-     entity_data=person_data,
-     author_id="author:test",
-     change_description="Test",
- )
+            entity_prefix="person",
+            entity_data=person_data,
+            author_id="author:test",
+            change_description="Test",
+        )
         org = await service.create_entity(
-     entity_prefix="organization/political_party",
-     entity_data=org_data,
-     author_id="author:test",
-     change_description="Test",
- )
+            entity_prefix="organization/political_party",
+            entity_data=org_data,
+            author_id="author:test",
+            change_description="Test",
+        )
 
         await service.create_relationship(
             source_entity_id=person.id,
