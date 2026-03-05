@@ -15,7 +15,7 @@ from typing import Any, Dict, List
 
 import pytest
 
-from nes.core.models.entity import EntitySubType, EntityType
+from nes.core.models.entity import EntityType
 from nes.core.models.relationship import Relationship
 from nes.database.file_database import FileDatabase
 
@@ -35,16 +35,14 @@ class TestEntityExistenceValidation:
         target_data = {
             "slug": "target-org",
             "type": "organization",
-            "sub_type": "political_party",
             "names": [{"kind": "PRIMARY", "en": {"full": "Target Org"}}],
         }
         target = await service.create_entity(
-            EntityType.ORGANIZATION,
-            target_data,
-            "author:test",
-            "Test",
-            EntitySubType.POLITICAL_PARTY,
-        )
+     entity_prefix="organization/political_party",
+     entity_data=target_data,
+     author_id="author:test",
+     change_description="Test",
+ )
 
         # Try to create relationship with nonexistent source
         with pytest.raises(ValueError, match="Source entity .* does not exist"):
@@ -71,8 +69,11 @@ class TestEntityExistenceValidation:
             "names": [{"kind": "PRIMARY", "en": {"full": "Source Person"}}],
         }
         source = await service.create_entity(
-            EntityType.PERSON, source_data, "author:test", "Test"
-        )
+     entity_prefix="person",
+     entity_data=source_data,
+     author_id="author:test",
+     change_description="Test",
+ )
 
         # Try to create relationship with nonexistent target
         with pytest.raises(ValueError, match="Target entity .* does not exist"):
@@ -119,20 +120,21 @@ class TestEntityExistenceValidation:
         target_data = {
             "slug": "valid-org",
             "type": "organization",
-            "sub_type": "political_party",
             "names": [{"kind": "PRIMARY", "en": {"full": "Valid Org"}}],
         }
 
         source = await service.create_entity(
-            EntityType.PERSON, source_data, "author:test", "Test"
-        )
+     entity_prefix="person",
+     entity_data=source_data,
+     author_id="author:test",
+     change_description="Test",
+ )
         target = await service.create_entity(
-            EntityType.ORGANIZATION,
-            target_data,
-            "author:test",
-            "Test",
-            EntitySubType.POLITICAL_PARTY,
-        )
+     entity_prefix="organization/political_party",
+     entity_data=target_data,
+     author_id="author:test",
+     change_description="Test",
+ )
 
         # Create relationship should succeed
         relationship = await service.create_relationship(
@@ -167,8 +169,11 @@ class TestCircularRelationshipDetection:
             "names": [{"kind": "PRIMARY", "en": {"full": "Self Ref"}}],
         }
         entity = await service.create_entity(
-            EntityType.PERSON, entity_data, "author:test", "Test"
-        )
+     entity_prefix="person",
+     entity_data=entity_data,
+     author_id="author:test",
+     change_description="Test",
+ )
 
         # Check for circular relationship (entity to itself)
         is_circular = await check_circular_relationship(
@@ -202,11 +207,17 @@ class TestCircularRelationshipDetection:
         }
 
         person_a = await service.create_entity(
-            EntityType.PERSON, person_a_data, "author:test", "Test"
-        )
+     entity_prefix="person",
+     entity_data=person_a_data,
+     author_id="author:test",
+     change_description="Test",
+ )
         person_b = await service.create_entity(
-            EntityType.PERSON, person_b_data, "author:test", "Test"
-        )
+     entity_prefix="person",
+     entity_data=person_b_data,
+     author_id="author:test",
+     change_description="Test",
+ )
 
         # Create relationship A -> B
         await service.create_relationship(
@@ -247,8 +258,11 @@ class TestCircularRelationshipDetection:
                 ],
             }
             entity = await service.create_entity(
-                EntityType.PERSON, entity_data, "author:test", "Test"
-            )
+     entity_prefix="person",
+     entity_data=entity_data,
+     author_id="author:test",
+     change_description="Test",
+ )
             entities.append(entity)
 
         # Create relationships X -> Y -> Z
@@ -298,8 +312,11 @@ class TestCircularRelationshipDetection:
                 ],
             }
             entity = await service.create_entity(
-                EntityType.PERSON, entity_data, "author:test", "Test"
-            )
+     entity_prefix="person",
+     entity_data=entity_data,
+     author_id="author:test",
+     change_description="Test",
+ )
             entities.append(entity)
 
         # Create relationships A -> B, B -> C (no circle)
@@ -347,20 +364,21 @@ class TestCircularRelationshipDetection:
         org_data = {
             "slug": "member-org",
             "type": "organization",
-            "sub_type": "political_party",
             "names": [{"kind": "PRIMARY", "en": {"full": "Member Org"}}],
         }
 
         person = await service.create_entity(
-            EntityType.PERSON, person_data, "author:test", "Test"
-        )
+     entity_prefix="person",
+     entity_data=person_data,
+     author_id="author:test",
+     change_description="Test",
+ )
         org = await service.create_entity(
-            EntityType.ORGANIZATION,
-            org_data,
-            "author:test",
-            "Test",
-            EntitySubType.POLITICAL_PARTY,
-        )
+     entity_prefix="organization/political_party",
+     entity_data=org_data,
+     author_id="author:test",
+     change_description="Test",
+ )
 
         # Create relationship person -> org (MEMBER_OF)
         await service.create_relationship(
@@ -404,20 +422,21 @@ class TestConstraintValidation:
         org_data = {
             "slug": "temporal-org",
             "type": "organization",
-            "sub_type": "political_party",
             "names": [{"kind": "PRIMARY", "en": {"full": "Temporal Org"}}],
         }
 
         person = await service.create_entity(
-            EntityType.PERSON, person_data, "author:test", "Test"
-        )
+     entity_prefix="person",
+     entity_data=person_data,
+     author_id="author:test",
+     change_description="Test",
+ )
         org = await service.create_entity(
-            EntityType.ORGANIZATION,
-            org_data,
-            "author:test",
-            "Test",
-            EntitySubType.POLITICAL_PARTY,
-        )
+     entity_prefix="organization/political_party",
+     entity_data=org_data,
+     author_id="author:test",
+     change_description="Test",
+ )
 
         # Try to create relationship with end_date before start_date
         with pytest.raises(ValueError, match="end_date cannot be before start_date"):
@@ -448,20 +467,21 @@ class TestConstraintValidation:
         org_data = {
             "slug": "type-org",
             "type": "organization",
-            "sub_type": "political_party",
             "names": [{"kind": "PRIMARY", "en": {"full": "Type Org"}}],
         }
 
         person = await service.create_entity(
-            EntityType.PERSON, person_data, "author:test", "Test"
-        )
+     entity_prefix="person",
+     entity_data=person_data,
+     author_id="author:test",
+     change_description="Test",
+ )
         org = await service.create_entity(
-            EntityType.ORGANIZATION,
-            org_data,
-            "author:test",
-            "Test",
-            EntitySubType.POLITICAL_PARTY,
-        )
+     entity_prefix="organization/political_party",
+     entity_data=org_data,
+     author_id="author:test",
+     change_description="Test",
+ )
 
         # Try to create relationship with invalid type
         with pytest.raises(ValueError, match="Invalid relationship type"):
@@ -491,20 +511,21 @@ class TestConstraintValidation:
         org_data = {
             "slug": "dup-org",
             "type": "organization",
-            "sub_type": "political_party",
             "names": [{"kind": "PRIMARY", "en": {"full": "Dup Org"}}],
         }
 
         person = await service.create_entity(
-            EntityType.PERSON, person_data, "author:test", "Test"
-        )
+     entity_prefix="person",
+     entity_data=person_data,
+     author_id="author:test",
+     change_description="Test",
+ )
         org = await service.create_entity(
-            EntityType.ORGANIZATION,
-            org_data,
-            "author:test",
-            "Test",
-            EntitySubType.POLITICAL_PARTY,
-        )
+     entity_prefix="organization/political_party",
+     entity_data=org_data,
+     author_id="author:test",
+     change_description="Test",
+ )
 
         # Create first relationship
         await service.create_relationship(
@@ -543,20 +564,21 @@ class TestConstraintValidation:
         org_data = {
             "slug": "multi-rel-org",
             "type": "organization",
-            "sub_type": "political_party",
             "names": [{"kind": "PRIMARY", "en": {"full": "Multi Rel Org"}}],
         }
 
         person = await service.create_entity(
-            EntityType.PERSON, person_data, "author:test", "Test"
-        )
+     entity_prefix="person",
+     entity_data=person_data,
+     author_id="author:test",
+     change_description="Test",
+ )
         org = await service.create_entity(
-            EntityType.ORGANIZATION,
-            org_data,
-            "author:test",
-            "Test",
-            EntitySubType.POLITICAL_PARTY,
-        )
+     entity_prefix="organization/political_party",
+     entity_data=org_data,
+     author_id="author:test",
+     change_description="Test",
+ )
 
         # Create first relationship
         await service.create_relationship(
@@ -639,11 +661,17 @@ class TestIntegrityCheckCLI:
             }
 
             person_a = await service.create_entity(
-                EntityType.PERSON, person_a_data, "author:test", "Test"
-            )
+     entity_prefix="person",
+     entity_data=person_a_data,
+     author_id="author:test",
+     change_description="Test",
+ )
             person_b = await service.create_entity(
-                EntityType.PERSON, person_b_data, "author:test", "Test"
-            )
+     entity_prefix="person",
+     entity_data=person_b_data,
+     author_id="author:test",
+     change_description="Test",
+ )
 
             # Create circular relationships (A supervises B, B supervises A)
             await service.create_relationship(
