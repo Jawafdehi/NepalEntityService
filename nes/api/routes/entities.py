@@ -79,6 +79,13 @@ async def list_entities(
     - /api/entities?attributes={"party":"nepali-congress"} - Filter by attributes
     - /api/entities?tags=politician,senior-leader - Filter by tags (AND logic)
     """
+    if entity_type is not None or sub_type is not None:
+        logger.warning(
+            "Deprecated filter used: entity_type=%s sub_type=%s — use entity_prefix instead",
+            entity_type,
+            sub_type,
+        )
+
     # Validate mutually exclusive parameters
     other_params = [
         query,

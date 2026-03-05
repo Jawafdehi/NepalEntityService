@@ -31,7 +31,7 @@ def validate_entity_id(entity_id: str) -> str:
     """Validate entity ID and return it if valid, raise ValueError if not.
 
     Validates:
-    - Format: must start with "entity:" and have 1–MAX_PREFIX_DEPTH prefix segments + slug
+    - Format: must start with "entity:" and have 1-MAX_PREFIX_DEPTH prefix segments + slug
     - Prefix: must be present in ALLOWED_ENTITY_PREFIXES
     - Slug: must match SLUG_PATTERN and length constraints
 

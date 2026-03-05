@@ -101,7 +101,7 @@ def break_entity_id(entity_id: str) -> EntityIdComponents:
     # At most MAX_PREFIX_DEPTH + 1 parts (N-segment prefix + slug)
     if len(parts) < 2 or len(parts) > MAX_PREFIX_DEPTH + 1:
         raise ValueError(
-            f"Invalid entity ID format: prefix depth must be 1–{MAX_PREFIX_DEPTH}"
+            f"Invalid entity ID format: prefix depth must be 1-{MAX_PREFIX_DEPTH}"
         )
 
     slug = parts[-1]
