@@ -6,6 +6,37 @@ from pathlib import Path
 
 import pytest
 
+_STANDARD_PREFIXES = {
+    "person",
+    "organization",
+    "organization/political_party",
+    "organization/government_body",
+    "organization/ngo",
+    "organization/international_org",
+    "organization/hospital",
+    "location",
+    "location/province",
+    "location/district",
+    "location/metropolitan_city",
+    "location/sub_metropolitan_city",
+    "location/municipality",
+    "location/rural_municipality",
+    "location/ward",
+    "location/constituency",
+    "project",
+    "project/development_project",
+}
+
+
+@pytest.fixture(autouse=True)
+def seed_allowed_entity_prefixes():
+    """Seed ALLOWED_ENTITY_PREFIXES with standard prefixes for the duration of each test."""
+    from nes.core.models.entity_type_map import ALLOWED_ENTITY_PREFIXES
+
+    ALLOWED_ENTITY_PREFIXES.update(_STANDARD_PREFIXES)
+    yield
+    ALLOWED_ENTITY_PREFIXES.difference_update(_STANDARD_PREFIXES)
+
 
 @pytest.fixture
 def temp_db_path():

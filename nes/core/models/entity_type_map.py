@@ -19,30 +19,7 @@ from nes.core.models.entity import EntitySubType, EntityType
 
 # All valid entity_prefix values. Seeded from existing type/subtype combos.
 # To add a new classification, append its slash-joined prefix string here.
-ALLOWED_ENTITY_PREFIXES: set[str] = {
-    # Person — no subtypes
-    "person",
-    # Organization
-    "organization",
-    "organization/political_party",
-    "organization/government_body",
-    "organization/ngo",
-    "organization/international_org",
-    "organization/hospital",
-    # Location — Nepal's administrative hierarchy
-    "location",
-    "location/province",
-    "location/district",
-    "location/metropolitan_city",
-    "location/sub_metropolitan_city",
-    "location/municipality",
-    "location/rural_municipality",
-    "location/ward",
-    "location/constituency",
-    # Project
-    "project",
-    "project/development_project",
-}
+ALLOWED_ENTITY_PREFIXES: set[str] = set()
 
 # ---------------------------------------------------------------------------
 # Legacy type map (deprecated — use ALLOWED_ENTITY_PREFIXES for new code)
@@ -50,6 +27,7 @@ ALLOWED_ENTITY_PREFIXES: set[str] = {
 
 # Entity type map for v2 with Nepali context
 # This maps entity types to their allowed subtypes
+# TODO: drop this once all migrations use entity_prefix
 ENTITY_TYPE_MAP = {
     EntityType.PERSON: {
         None,  # Person entities do not have subtypes
