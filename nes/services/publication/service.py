@@ -14,7 +14,7 @@ from datetime import UTC, date, datetime
 from typing import Any, Dict, List, Optional
 
 from nes.core.models.base import Name, NameKind
-from nes.core.models.entity import Entity, EntitySubType, EntityType
+from nes.core.models.entity import Entity, EntityType
 from nes.core.models.location import Location
 from nes.core.models.organization import (
     GovernmentBody,
@@ -49,30 +49,18 @@ class PublicationService:
 
     async def create_entity(
         self,
-        entity_type: Optional[EntityType] = None,
-        entity_data: Optional[Dict[str, Any]] = None,
-        author_id: Optional[str] = None,
+        entity_prefix: str,
+        entity_data: Dict[str, Any],
+        author_id: str,
         change_description: str = "Initial entity creation",
-        entity_subtype: Optional[EntitySubType] = None,
-        entity_prefix: Optional[str] = None,
     ) -> Entity:
         """Create a new entity with automatic versioning.
 
-        Supports two calling conventions:
-        1. New prefix style: create_entity(entity_prefix="organization/nepal_govt/moha", ...)
-        2. Legacy style: create_entity(entity_type=EntityType.PERSON, ...)
-
-        When entity_prefix is provided it takes precedence over entity_type/entity_subtype
-        for ID generation. entity_type/entity_subtype are deprecated in favour of entity_prefix.
-
         Args:
-            entity_type: Deprecated. Type of the entity (optional if entity_prefix or 'type' in entity_data)
+            entity_prefix: N-level classification prefix (e.g. 'person', 'organization/political_party').
             entity_data: Dictionary containing entity data
             author_id: ID of the author creating the entity
             change_description: Description of this change
-            entity_subtype: Deprecated. Subtype of the entity (use entity_prefix instead)
-            entity_prefix: N-level classification prefix (e.g. 'organization/nepal_govt/moha').
-                When set, takes precedence over entity_type/entity_subtype.
 
         Returns:
             Created entity with version 1
@@ -80,44 +68,16 @@ class PublicationService:
         Raises:
             ValueError: If entity data is invalid or required fields are missing
         """
-        # Validate required arguments
-        if entity_data is None:
-            raise ValueError("entity_data is required")
-        if author_id is None:
-            raise ValueError("author_id is required")
+        from nes.core.identifiers import build_entity_id_from_prefix
 
-        from nes.core.identifiers import build_entity_id, build_entity_id_from_prefix
+        entity_type = EntityType(entity_prefix.split("/")[0])
+        entity_data["entity_prefix"] = entity_prefix
 
-        # entity_prefix path: derive entity_type from first prefix segment
-        if entity_prefix is not None:
-            first_segment = entity_prefix.split("/")[0]
-            entity_type = EntityType(first_segment)
-            entity_data["entity_prefix"] = entity_prefix
-            slug = entity_data.get("slug")
-            if not slug:
-                raise ValueError("Entity must have a 'slug' field")
-            entity_id = build_entity_id_from_prefix(entity_prefix, slug)
-        else:
-            # Legacy path: resolve entity_type and entity_subtype
-            if entity_type is None:
-                if "type" not in entity_data:
-                    raise ValueError(
-                        "Entity must have a 'type' field, entity_type parameter, or entity_prefix"
-                    )
-                entity_type = EntityType(entity_data["type"])
+        slug = entity_data.get("slug")
+        if not slug:
+            raise ValueError("Entity must have a 'slug' field")
 
-            if entity_subtype is None and entity_data.get("sub_type"):
-                entity_subtype = EntitySubType(entity_data["sub_type"])
-
-            slug = entity_data.get("slug")
-            if not slug:
-                raise ValueError("Entity must have a 'slug' field")
-
-            entity_id = build_entity_id(
-                entity_type.value,
-                entity_subtype.value if entity_subtype else None,
-                slug,
-            )
+        entity_id = build_entity_id_from_prefix(entity_prefix, slug)
 
         # Validate required fields
         if "slug" not in entity_data:
@@ -153,10 +113,8 @@ class PublicationService:
             created_at=datetime.now(UTC),
         )
 
-        # Add type, subtype, version summary and created_at to entity data
+        # Add type, version summary and created_at to entity data
         entity_data["type"] = entity_type.value
-        if entity_subtype and entity_prefix is None:
-            entity_data["sub_type"] = entity_subtype.value
         entity_data["version_summary"] = version_summary
         entity_data["created_at"] = datetime.now(UTC)
 
@@ -611,18 +569,16 @@ class PublicationService:
         """
         entities = []
         for entity_data in entities_data:
-            entity_type = EntityType(entity_data.get("type"))
-            entity_subtype = (
-                EntitySubType(entity_data.get("sub_type"))
-                if entity_data.get("sub_type")
-                else None
-            )
+            entity_prefix = entity_data.get("entity_prefix")
+            if not entity_prefix:
+                raise ValueError(
+                    f"entity_data for slug '{entity_data.get('slug')}' must include 'entity_prefix'"
+                )
             entity = await self.create_entity(
-                entity_type=entity_type,
+                entity_prefix=entity_prefix,
                 entity_data=entity_data,
                 author_id=author_id,
                 change_description=change_description,
-                entity_subtype=entity_subtype,
             )
             entities.append(entity)
 
@@ -670,24 +626,16 @@ class PublicationService:
             ValueError: If entity type is invalid
         """
         entity_type = entity_data.get("type")
-        entity_subtype = entity_data.get("sub_type")
+        entity_prefix = entity_data.get("entity_prefix", "")
 
         if entity_type == "person" or entity_type == EntityType.PERSON:
             return Person.model_validate(entity_data)
         elif entity_type == "organization" or entity_type == EntityType.ORGANIZATION:
-            if (
-                entity_subtype == "political_party"
-                or entity_subtype == EntitySubType.POLITICAL_PARTY
-            ):
+            if entity_prefix == "organization/political_party":
                 return PoliticalParty.model_validate(entity_data)
-            elif (
-                entity_subtype == "government_body"
-                or entity_subtype == EntitySubType.GOVERNMENT_BODY
-            ):
+            elif entity_prefix == "organization/government_body":
                 return GovernmentBody.model_validate(entity_data)
-            elif (
-                entity_subtype == "hospital" or entity_subtype == EntitySubType.HOSPITAL
-            ):
+            elif entity_prefix == "organization/hospital":
                 return Hospital.model_validate(entity_data)
             else:
                 return Organization.model_validate(entity_data)

@@ -130,7 +130,7 @@ class Entity(BaseModel, ABC):
         description=(
             "N-level classification prefix (e.g. 'organization/nepal_govt/moha'). "
             "When set, takes precedence over type/sub_type for ID generation. "
-            "Must be 1–MAX_PREFIX_DEPTH slash-separated segments."
+            "Must be 1-MAX_PREFIX_DEPTH slash-separated segments."
         ),
     )
     type: EntityType = Field(
@@ -186,7 +186,14 @@ class Entity(BaseModel, ABC):
     def validate_entity_prefix_depth(cls, v: Optional[str]) -> Optional[str]:
         if v is None:
             return v
-        depth = len(v.split("/"))
+        if not v:
+            raise ValueError("entity_prefix must not be empty")
+        segments = v.split("/")
+        if any(s == "" for s in segments):
+            raise ValueError(
+                f"entity_prefix '{v}' contains empty segments"
+            )
+        depth = len(segments)
         if depth > MAX_PREFIX_DEPTH:
             raise ValueError(
                 f"entity_prefix '{v}' has depth {depth} which exceeds "
