@@ -292,6 +292,34 @@ def test_entity_prefix_depth_too_deep_raises():
         )
 
 
+def test_entity_prefix_empty_string_raises():
+    """entity_prefix set to empty string raises ValidationError."""
+    from nes.core.models.organization import Organization
+
+    with pytest.raises(ValidationError):
+        Organization(
+            slug="some-org",
+            entity_prefix="",
+            names=[Name(kind=NameKind.PRIMARY, en={"full": "Some Org"})],
+            version_summary=_make_version_summary("entity:organization/some-org"),
+            created_at=datetime.now(UTC),
+        )
+
+
+def test_entity_prefix_empty_segment_raises():
+    """entity_prefix with an empty segment raises ValidationError."""
+    from nes.core.models.organization import Organization
+
+    with pytest.raises(ValidationError):
+        Organization(
+            slug="some-org",
+            entity_prefix="organization//moha",
+            names=[Name(kind=NameKind.PRIMARY, en={"full": "Some Org"})],
+            version_summary=_make_version_summary("entity:organization//moha/some-org"),
+            created_at=datetime.now(UTC),
+        )
+
+
 def test_entity_prefix_class_determined_by_first_segment():
     """An Organization instance with a 3-level prefix still IS an Organization."""
     from nes.core.models.organization import Organization
