@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 from typing import Optional
 from urllib.parse import urlparse
+from urllib.request import url2pathname
 
 logger = logging.getLogger(__name__)
 
@@ -57,8 +58,12 @@ class Config:
                 f"  file:///absolute/path/to/nes-db/v2\n"
                 f"  file+memcached:///absolute/path/to/nes-db/v2"
             )
+
+        if parsed.netloc:
+            raise ValueError(f"NES_DB_URL should not have an authority/hostname, got '{parsed.netloc}'. Ensure you use 'file:///' (three slashes) for absolute paths.")
+
         # Extract path from URL
-        db_path = parsed.path
+        db_path = url2pathname(parsed.path)
         logger.info(f"Using NES_DB_URL: {database_url} -> {db_path}")
         return Path(db_path)
 

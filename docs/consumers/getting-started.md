@@ -31,7 +31,6 @@ poetry add nepal-entity-service
 To run your own instance of the API:
 
 ```bash
-```bash
 # Clone the repository
 git clone https://github.com/NewNepal-org/NepalEntityService.git
 cd NepalEntityService
