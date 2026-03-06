@@ -16,8 +16,15 @@ RUN pip install poetry && \
 COPY docs/ ./docs/
 
 # Fetch the public database late in the build process to maximize caching of code dependencies
+# DB_REF can be provided at build time (e.g., --build-arg DB_REF=v1.0.0 or --build-arg DB_REF=abc123)
+# If not provided, defaults to main branch
+ARG DB_REF=main
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
-RUN git clone --depth 1 https://github.com/NewNepal-org/NepalEntityService-database.git ./nes-db
+RUN git clone --depth 1 --branch "$DB_REF" https://github.com/NewNepal-org/NepalEntityService-database.git ./nes-db || \
+    (git clone https://github.com/NewNepal-org/NepalEntityService-database.git ./nes-db && \
+     cd ./nes-db && \
+     git fetch --depth=1 origin "$DB_REF" && \
+     git checkout "$DB_REF")
 
 EXPOSE 8080
 

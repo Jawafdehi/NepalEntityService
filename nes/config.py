@@ -84,6 +84,13 @@ class Config:
             )
 
         parsed = urlparse(database_url)
+        if parsed.scheme not in ("file", "file+memcached"):
+            raise ValueError(
+                f"NES_DB_URL must use 'file://' or 'file+memcached://' protocol, got '{parsed.scheme}://'. "
+                f"Examples:\n"
+                f"  file:///absolute/path/to/nes-db/v2\n"
+                f"  file+memcached:///absolute/path/to/nes-db/v2"
+            )
         return parsed.scheme
 
     @classmethod
