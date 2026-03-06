@@ -15,12 +15,13 @@ from nes.api.app import app
 
 
 @pytest_asyncio.fixture
-async def client(tmp_path):
+async def client(tmp_path, monkeypatch):
     """Create an async HTTP client for testing."""
     # Initialize database for tests that need it
     from nes.config import Config
 
     db_path = tmp_path / "test-db"
+    monkeypatch.setenv("NES_DB_URL", f"file://{db_path}")
     Config.initialize_database(base_path=str(db_path))
 
     transport = ASGITransport(app=app)

@@ -31,12 +31,13 @@ poetry add nepal-entity-service
 To run your own instance of the API:
 
 ```bash
-# Clone the repository with submodules
-git clone --recurse-submodules --depth 0 https://github.com/NewNepal-org/NepalEntityService.git
+# Clone the repository
+git clone https://github.com/NewNepal-org/NepalEntityService.git
 cd NepalEntityService
 
-# If you already cloned without submodules, initialize them:
-# git submodule update --init --recursive
+# Clone the database repository and set NES_DB_URL
+git clone --depth 1 https://github.com/NewNepal-org/NepalEntityService-database.git ./nes-db
+export NES_DB_URL=file://$(pwd)/nes-db/v2
 
 # Install dependencies with poetry
 poetry install

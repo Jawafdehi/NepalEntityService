@@ -37,11 +37,11 @@ The system operates across two repositories:
 
 2. **Database Repository** (nes-db)
    - Contains entity/relationship JSON files (100k-1M files)
-   - Managed as Git submodule at `nes-db/`
+   - Managed as a separate Git repository at `nes-db/`
    - Large repository (~1GB+)
    - Modified by migration execution
 
-**Key Concept**: Contributors submit migration code to the Service API Repository. Maintainers review and merge the code, then execute migrations which modify files in the Database Repository.
+**Key Concept**: Contributors submit migration code to the Service API Repository. Maintainers review and merge the code, then execute migrations locally which modify files in the Database Repository.
 
 ---
 
@@ -69,7 +69,6 @@ The system operates across two repositories:
 - Monitor migration progress
 - Handle failures gracefully
 - Commit changes to Database Repository
-- Update submodule references
 
 ### Documentation
 
@@ -167,8 +166,8 @@ Test the migration locally before merging:
 git fetch origin pull/123/head:pr-123
 git checkout pr-123
 
-# Update database submodule
-git submodule update
+# Ensure database repository is present and up to date
+cd nes-db && git pull origin main && cd ..
 
 # Run migration
 nes migration run NNN-migration-name
@@ -252,7 +251,6 @@ nes migration run 005-add-cabinet-ministers
 2. Entities/relationships are created in `nes-db/v2/`
 3. Changes are committed to Database Repository with metadata
 4. Commit is pushed to remote
-5. Submodule reference is updated in Service API Repository
 
 ### Step 3: Execute All Pending Migrations
 
@@ -298,17 +296,9 @@ git log -3
 ls v2/entity/person/ | tail -5
 ```
 
-### Step 5: Update Service API Repository
+### Step 5: (Skip) Update Service API Repository
 
-```bash
-# Return to main repository
-cd ..
-
-# Commit submodule update
-git add nes-db
-git commit -m "Update database submodule after migration 005"
-git push origin main
-```
+*(Historically, this step involved updating the git submodule reference. Since the database is now decoupled, this step is no longer necessary.)*
 
 ---
 
@@ -356,7 +346,6 @@ The migration system includes two GitHub Actions workflows:
 2. Executes pending migrations
 3. Commits to Database Repository
 4. Pushes to remote
-5. Updates submodule reference
 
 **Monitoring**:
 ```bash
@@ -494,19 +483,16 @@ git pull origin main
 git push origin main
 ```
 
-### Issue 7: Submodule Out of Sync
+### Issue 7: Database Repository Out of Sync
 
-**Symptom**: Service API repo shows outdated submodule reference
+**Symptom**: Local database repository is missing recent migrations.
 
 **Solution**:
 ```bash
-# Update submodule to latest
-git submodule update --remote nes-db
-
-# Commit the update
-git add nes-db
-git commit -m "Update database submodule"
-git push origin main
+# Update repository to latest
+cd nes-db
+git pull origin main
+cd ..
 ```
 
 ---
@@ -517,17 +503,18 @@ git push origin main
 
 **Full Clone** (for migration execution):
 ```bash
-# Clone with submodules
-git clone --recurse-submodules https://github.com/NewNepal-org/NepalEntityService.git
+# Clone the codebase
+git clone https://github.com/NewNepal-org/NepalEntityService.git
 cd NepalEntityService
 
-# This downloads the full database (~1GB+)
+# Clone the database (~1GB+)
+git clone https://github.com/NewNepal-org/NepalEntityService-database.git ./nes-db
 ```
 
 **Shallow Clone** (for development):
 ```bash
 # Clone with limited history
-git clone --depth 1 --recurse-submodules https://github.com/NewNepal-org/NepalEntityService.git
+git clone --depth 1 https://github.com/NewNepal-org/NepalEntityService-database.git ./nes-db
 ```
 
 ### Database Repository Optimization
@@ -671,7 +658,7 @@ Use this checklist when executing migrations:
 
 - [ ] Migration PR is approved and merged
 - [ ] Local repository is up to date
-- [ ] Database submodule is up to date
+- [ ] Database repository is up to date (run `cd nes-db && git pull && cd ..`)
 - [ ] No pending changes in database repository
 
 ## Execution
@@ -687,7 +674,6 @@ Use this checklist when executing migrations:
 - [ ] Check database repository commit
 - [ ] Verify commit message includes metadata
 - [ ] Confirm push to remote succeeded
-- [ ] Update submodule reference in Service API repo
 - [ ] Verify CI/CD workflow completed (if applicable)
 - [ ] Spot-check created entities for quality
 

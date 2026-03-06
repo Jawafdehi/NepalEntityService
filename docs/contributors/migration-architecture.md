@@ -81,7 +81,7 @@ NepalEntityService/
 │   │       ├── context.py
 │   │       └── models.py
 │   └── ...
-├── nes-db/  (Git submodule)
+├── nes-db/  (Separate Git repository)
 └── ...
 ```
 
@@ -97,7 +97,7 @@ NepalEntityService/
 
 **Characteristics**:
 - Large (~1GB+)
-- Managed as Git submodule at `nes-db/`
+- Managed as separate Git repository at `nes-db/`
 - Modified by migration execution
 - Not directly edited by contributors
 
@@ -174,12 +174,6 @@ nes-db/
 ┌─────────────────────────────────────────────────────────────┐
 │         6. Maintainer reviews and commits changes            │
 │            cd nes-db && git add . && git commit && git push  │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│         7. Update submodule in Service API Repo              │
-│            git add nes-db && git commit && git push          │
 └─────────────────────────────────────────────────────────────┘
 ```
 
