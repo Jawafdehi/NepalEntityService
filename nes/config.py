@@ -60,7 +60,9 @@ class Config:
             )
 
         if parsed.netloc:
-            raise ValueError(f"NES_DB_URL should not have an authority/hostname, got '{parsed.netloc}'. Ensure you use 'file:///' (three slashes) for absolute paths.")
+            raise ValueError(
+                f"NES_DB_URL should not have an authority/hostname, got '{parsed.netloc}'. Ensure you use 'file:///' (three slashes) for absolute paths."
+            )
 
         # Extract path from URL
         db_path = url2pathname(parsed.path)
