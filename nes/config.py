@@ -12,9 +12,6 @@ logger = logging.getLogger(__name__)
 class Config:
     """Configuration class for nes."""
 
-    # Default database path for v2
-    DEFAULT_DB_PATH = "nes-db/v2"
-
     # Global instances for database and services
     _database: Optional[object] = None  # type: EntityDatabase
     _search_service: Optional[object] = None  # type: SearchService
@@ -27,7 +24,6 @@ class Config:
         Supports multiple configuration methods in order of precedence:
         1. override_path parameter
         2. NES_DB_URL environment variable (file:// or file+memcached:// protocol)
-        3. Default path (nes-db/v2)
 
         Args:
             override_path: Optional path to override the default database path
@@ -36,44 +32,54 @@ class Config:
             Path object for the database directory
 
         Raises:
-            ValueError: If NES_DB_URL uses unsupported protocol
+            ValueError: If NES_DB_URL uses unsupported protocol or is not set
         """
         if override_path:
             return Path(override_path)
 
         # Check for NES_DB_URL environment variable
         database_url = os.getenv("NES_DB_URL")
-        if database_url:
-            parsed = urlparse(database_url)
-            # Support both file:// and file+memcached:// protocols
-            if parsed.scheme not in ("file", "file+memcached"):
-                raise ValueError(
-                    f"NES_DB_URL must use 'file://' or 'file+memcached://' protocol, got '{parsed.scheme}://'. "
-                    f"Examples:\n"
-                    f"  file:///absolute/path/to/nes-db/v2\n"
-                    f"  file+memcached:///absolute/path/to/nes-db/v2"
-                )
-            # Extract path from URL
-            db_path = parsed.path
-            logger.info(f"Using NES_DB_URL: {database_url} -> {db_path}")
-            return Path(db_path)
+        if not database_url:
+            raise ValueError(
+                "NES_DB_URL environment variable must be set. "
+                "The database is managed separately from the codebase. "
+                "Examples:\n"
+                "  file:///absolute/path/to/nes-db/v2\n"
+                "  file+memcached:///absolute/path/to/nes-db/v2"
+            )
 
-        # Use default path
-        logger.info(f"Using default database path: {cls.DEFAULT_DB_PATH}")
-        return Path(cls.DEFAULT_DB_PATH)
+        parsed = urlparse(database_url)
+        # Support both file:// and file+memcached:// protocols
+        if parsed.scheme not in ("file", "file+memcached"):
+            raise ValueError(
+                f"NES_DB_URL must use 'file://' or 'file+memcached://' protocol, got '{parsed.scheme}://'. "
+                f"Examples:\n"
+                f"  file:///absolute/path/to/nes-db/v2\n"
+                f"  file+memcached:///absolute/path/to/nes-db/v2"
+            )
+        # Extract path from URL
+        db_path = parsed.path
+        logger.info(f"Using NES_DB_URL: {database_url} -> {db_path}")
+        return Path(db_path)
 
     @classmethod
     def get_db_protocol(cls) -> str:
         """Get the database protocol from NES_DB_URL.
 
         Returns:
-            Protocol string ('file' or 'file+memcached'), defaults to 'file'
+            Protocol string ('file' or 'file+memcached')
         """
         database_url = os.getenv("NES_DB_URL")
-        if database_url:
-            parsed = urlparse(database_url)
-            return parsed.scheme
-        return "file"
+        if not database_url:
+            raise ValueError(
+                "NES_DB_URL environment variable must be set. "
+                "The database is managed separately from the codebase. Examples:\n"
+                "  file:///absolute/path/to/nes-db/v2\n"
+                "  file+memcached:///absolute/path/to/nes-db/v2"
+            )
+
+        parsed = urlparse(database_url)
+        return parsed.scheme
 
     @classmethod
     def ensure_db_path_exists(cls, db_path: Optional[Path] = None) -> Path:
@@ -92,7 +98,7 @@ class Config:
         return db_path
 
     @classmethod
-    def initialize_database(cls, base_path: str = "./nes-db/v2") -> "EntityDatabase":
+    def initialize_database(cls, base_path: Optional[str] = None) -> "EntityDatabase":
         """Initialize the global database instance.
 
         Supports different database implementations based on NES_DB_URL protocol:
@@ -100,11 +106,14 @@ class Config:
         - file+memcached:// - InMemoryCachedReadDatabase (read-only with full cache)
 
         Args:
-            base_path: Path to the database directory
+            base_path: Optional path to the database directory. Uses NES_DB_URL if not provided.
 
         Returns:
             Initialized database instance
         """
+        if base_path is None:
+            base_path = str(cls.get_db_path())
+
         protocol = cls.get_db_protocol()
 
         if protocol == "file+memcached":

@@ -66,13 +66,12 @@ exclude = '''
   | \.git
   | __pycache__
   | entity-db
-  | nes-db
 )/
 '''
 
 [tool.isort]
 profile = "black"
-skip = ["entity-db", "nes-db", ".venv"]
+skip = ["entity-db", ".venv"]
 line_length = 88
 multi_line_output = 3
 include_trailing_comma = true

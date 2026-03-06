@@ -19,9 +19,10 @@ class TestDatabaseURLConfiguration:
         # Clear all database-related env vars
         monkeypatch.delenv("NES_DB_URL", raising=False)
 
-        path = Config.get_db_path()
-
-        assert path == Path("nes-db/v2")
+        with pytest.raises(
+            ValueError, match="NES_DB_URL environment variable must be set"
+        ):
+            Config.get_db_path()
 
     def test_nes_db_url_with_file_protocol(self, monkeypatch):
         """Test NES_DB_URL with file:// protocol."""
@@ -162,9 +163,10 @@ class TestDatabaseURLConfiguration:
 
         monkeypatch.delenv("NES_DB_URL", raising=False)
 
-        protocol = Config.get_db_protocol()
-
-        assert protocol == "file"
+        with pytest.raises(
+            ValueError, match="NES_DB_URL environment variable must be set"
+        ):
+            Config.get_db_protocol()
 
     def test_get_db_protocol_returns_file_memcached(self, monkeypatch):
         """Test that get_db_protocol returns 'file+memcached' when set."""

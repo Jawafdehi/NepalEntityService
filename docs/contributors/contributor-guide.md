@@ -14,12 +14,13 @@ This guide is for developers who want to contribute to the Nepal Entity Service 
 ### 1. Clone the Repository
 
 ```bash
-# Clone with submodules (includes the database)
-git clone --recurse-submodules https://github.com/NewNepal-org/NepalEntityService.git
+# Clone the repository
+git clone https://github.com/NewNepal-org/NepalEntityService.git
 cd NepalEntityService
 
-# If you already cloned without submodules:
-git submodule update --init --recursive
+# Clone the database repository and set NES_DB_URL
+git clone --depth 1 https://github.com/NewNepal-org/NepalEntityService-database.git ./nes-db
+export NES_DB_URL=file://$(pwd)/nes-db/v2
 ```
 
 ### 2. Install Dependencies
@@ -37,13 +38,13 @@ poetry install --extras all
 
 ### 3. Set Up the Database
 
-The database is managed as a Git submodule. See the [Database Setup](/contributors/database-setup) guide for detailed configuration.
+The database is managed in a separate Git repository. See the [Database Setup](/contributors/database-setup) guide for detailed configuration.
 
 ```bash
-# Verify the database submodule
+# Verify the database
 ls -la nes-db/v2/
 
-# Set the database path (optional, defaults to ./nes-db/v2)
+# Set the database path (required)
 export NES_DB_URL=file:///absolute/path/to/nes-db/v2
 ```
 
@@ -59,7 +60,7 @@ NepalEntityService/
 │   ├── cli/                      # Command-line interface
 │   ├── scraping/                 # Web scraping and data collection
 │   └── config.py                 # Configuration management
-├── nes-db/                       # Database submodule (Git repository)
+├── nes-db/                       # Database (Separate Git repository)
 │   └── v2/                       # Version 2 database files
 ├── migrations/                   # Data migration scripts
 ├── docs/                         # Documentation
@@ -346,7 +347,7 @@ docker run -p 8195:8195 \
 - [API Consumer Guide](/consumers/api-guide) - Using the public API
 - [Data Models](/consumers/data-models) - Entity and relationship schemas
 - [Service Design](/specs/nepal-entity-service/design) - Architecture details
-- [Database Setup](/contributors/database-setup) - Git submodule configuration
+- [Database Setup](/contributors/database-setup) - Database repository configuration
 - [Usage Examples](/contributors/usage-examples) - Code examples and notebooks
 
 ### Migration Guides
