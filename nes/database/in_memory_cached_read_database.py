@@ -68,7 +68,7 @@ class InMemoryCachedReadDatabase(EntityDatabase):
         }
         self._cache_manager = CacheManager(**parse_cache_config_options(cache_opts))
         self._query_cache = self._cache_manager.get_cache(
-            "in_memory_db_queries",
+            f"in_memory_db_queries_{id(self)}",
             expire=3600,  # 1 hour expiration
         )
 
