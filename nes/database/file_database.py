@@ -531,8 +531,16 @@ class FileDatabase(EntityDatabase):
                     ep = entity.entity_prefix
                     if ep is None:
                         # Fallback for legacy entities that predate entity_prefix
-                        type_val = entity.type.value if hasattr(entity.type, "value") else entity.type
-                        sub_val = entity.sub_type.value if (entity.sub_type and hasattr(entity.sub_type, "value")) else entity.sub_type
+                        type_val = (
+                            entity.type.value
+                            if hasattr(entity.type, "value")
+                            else entity.type
+                        )
+                        sub_val = (
+                            entity.sub_type.value
+                            if (entity.sub_type and hasattr(entity.sub_type, "value"))
+                            else entity.sub_type
+                        )
                         ep = type_val if sub_val is None else f"{type_val}/{sub_val}"
                     if not (ep == entity_prefix or ep.startswith(entity_prefix + "/")):
                         continue
