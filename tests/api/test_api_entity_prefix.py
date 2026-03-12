@@ -40,7 +40,7 @@ async def test_db_with_prefix_entities(tmp_path):
 
     # 1-level: person
     await pub.create_entity(
-        entity_type=EntityType.PERSON,
+        entity_prefix="person",
         entity_data={
             "slug": "rabi-lamichhane",
             "names": [{"kind": "PRIMARY", "en": {"full": "Rabi Lamichhane"}}],
@@ -51,8 +51,7 @@ async def test_db_with_prefix_entities(tmp_path):
 
     # 2-level: organization/political_party
     await pub.create_entity(
-        entity_type=EntityType.ORGANIZATION,
-        entity_subtype=EntitySubType.POLITICAL_PARTY,
+        entity_prefix="organization/political_party",
         entity_data={
             "slug": "nepali-congress",
             "names": [{"kind": "PRIMARY", "en": {"full": "Nepali Congress"}}],

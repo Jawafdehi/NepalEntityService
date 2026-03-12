@@ -40,7 +40,7 @@ async def test_database(tmp_path):
         entity_data = get_politician_entity(slug)
         entity_data.pop("sub_type", None)
         await pub_service.create_entity(
-            entity_type=EntityType.PERSON,
+            entity_prefix="person",
             entity_data=entity_data,
             author_id="author:test-setup",
             change_description="Test data setup",
@@ -52,11 +52,10 @@ async def test_database(tmp_path):
     for slug in parties:
         entity_data = get_party_entity(slug)
         await pub_service.create_entity(
-            entity_type=EntityType.ORGANIZATION,
+            entity_prefix="organization/political_party",
             entity_data=entity_data,
             author_id="author:test-setup",
             change_description="Test data setup",
-            entity_subtype=EntitySubType.POLITICAL_PARTY,
         )
 
     return db
