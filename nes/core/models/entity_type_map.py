@@ -14,14 +14,6 @@ ENTITY_TYPE_MAP is retained for backward compatibility.
 from nes.core.models.entity import EntitySubType, EntityType
 
 # ---------------------------------------------------------------------------
-# Canonical prefix registry (replaces ENTITY_TYPE_MAP for validation)
-# ---------------------------------------------------------------------------
-
-# All valid entity_prefix values. Seeded from existing type/subtype combos.
-# To add a new classification, append its slash-joined prefix string here.
-ALLOWED_ENTITY_PREFIXES: set[str] = set()
-
-# ---------------------------------------------------------------------------
 # Legacy type map (deprecated — use ALLOWED_ENTITY_PREFIXES for new code)
 # ---------------------------------------------------------------------------
 
@@ -58,6 +50,15 @@ ENTITY_TYPE_MAP = {
         None,  # Project without specific subtype
         EntitySubType.DEVELOPMENT_PROJECT,  # Development projects (विकास परियोजना)
     },
+}
+
+# ---------------------------------------------------------------------------
+# Canonical prefix registry — derived from ENTITY_TYPE_MAP
+# ---------------------------------------------------------------------------
+ALLOWED_ENTITY_PREFIXES: set[str] = {
+    entity_type.value if subtype is None else f"{entity_type.value}/{subtype.value}"
+    for entity_type, subtypes in ENTITY_TYPE_MAP.items()
+    for subtype in subtypes
 }
 
 
