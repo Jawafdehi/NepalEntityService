@@ -67,7 +67,7 @@ class TestTagFilteringIntegrationWithMemCached:
         pub_service = PublicationService(database=file_db_for_writes)
 
         await pub_service.create_entity(
-            EntityType.PERSON,
+            "person",
             {
                 "slug": "ram-chandra-poudel",
                 "type": "person",
@@ -78,7 +78,7 @@ class TestTagFilteringIntegrationWithMemCached:
             "Integration test",
         )
         await pub_service.create_entity(
-            EntityType.PERSON,
+            "person",
             {
                 "slug": "sher-bahadur-deuba",
                 "type": "person",
@@ -110,7 +110,7 @@ class TestTagFilteringIntegrationWithMemCached:
         pub_service = PublicationService(database=file_db_for_writes)
 
         await pub_service.create_entity(
-            EntityType.PERSON,
+            "person",
             {
                 "slug": "person-a",
                 "type": "person",
@@ -121,7 +121,7 @@ class TestTagFilteringIntegrationWithMemCached:
             "Integration test",
         )
         await pub_service.create_entity(
-            EntityType.PERSON,
+            "person",
             {
                 "slug": "person-b",
                 "type": "person",
@@ -132,7 +132,7 @@ class TestTagFilteringIntegrationWithMemCached:
             "Integration test",
         )
         await pub_service.create_entity(
-            EntityType.PERSON,
+            "person",
             {
                 "slug": "person-c",
                 "type": "person",
@@ -170,7 +170,7 @@ class TestTagFilteringIntegrationWithMemCached:
 
         # Create person and organization with same tag
         await pub_service.create_entity(
-            EntityType.PERSON,
+            "person",
             {
                 "slug": "tagged-person",
                 "type": "person",
@@ -181,7 +181,7 @@ class TestTagFilteringIntegrationWithMemCached:
             "Integration test",
         )
         await pub_service.create_entity(
-            EntityType.ORGANIZATION,
+            "organization",
             {
                 "slug": "tagged-org",
                 "type": "organization",
@@ -191,7 +191,6 @@ class TestTagFilteringIntegrationWithMemCached:
             },
             "author:test",
             "Integration test",
-            EntitySubType.POLITICAL_PARTY,
         )
 
         # Act: Search via Config system with tag + type filter
@@ -214,7 +213,7 @@ class TestTagFilteringIntegrationWithMemCached:
         pub_service = PublicationService(database=file_db_for_writes)
 
         await pub_service.create_entity(
-            EntityType.PERSON,
+            "person",
             {
                 "slug": "ram-sharma",
                 "type": "person",
@@ -225,7 +224,7 @@ class TestTagFilteringIntegrationWithMemCached:
             "Integration test",
         )
         await pub_service.create_entity(
-            EntityType.PERSON,
+            "person",
             {
                 "slug": "ram-thapa",
                 "type": "person",
@@ -256,7 +255,7 @@ class TestTagFilteringIntegrationWithMemCached:
 
         # Create entities with various tag combinations
         await pub_service.create_entity(
-            EntityType.PERSON,
+            "person",
             {
                 "slug": "person-1",
                 "type": "person",
@@ -267,7 +266,7 @@ class TestTagFilteringIntegrationWithMemCached:
             "Integration test",
         )
         await pub_service.create_entity(
-            EntityType.PERSON,
+            "person",
             {
                 "slug": "person-2",
                 "type": "person",
@@ -314,7 +313,7 @@ class TestTagFilteringIntegrationWithMemCached:
         pub_service = PublicationService(database=file_db_for_writes)
 
         await pub_service.create_entity(
-            EntityType.PERSON,
+            "person",
             {
                 "slug": "production-test",
                 "type": "person",
