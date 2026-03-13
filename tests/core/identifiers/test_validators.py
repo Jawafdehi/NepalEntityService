@@ -2,6 +2,22 @@
 
 import pytest
 
+from nes.core.models.entity_type_map import ALLOWED_ENTITY_PREFIXES
+
+# ===========================================================================
+# Fixtures
+# ===========================================================================
+
+
+@pytest.fixture
+def register_moha_prefix():
+    """Register 3-level prefix for testing and clean up after."""
+    test_prefix = "organization/nepal_govt/moha"
+    ALLOWED_ENTITY_PREFIXES.add(test_prefix)
+    yield test_prefix
+    ALLOWED_ENTITY_PREFIXES.discard(test_prefix)
+
+
 # ===========================================================================
 # Backward compat: existing entity IDs still validate
 # ===========================================================================
@@ -72,28 +88,21 @@ def test_validate_existing_2_segment_ids_pass():
 # ===========================================================================
 
 
-def test_validate_3_segment_prefix_in_registry_passes():
+def test_validate_3_segment_prefix_in_registry_passes(register_moha_prefix):
     """A 3-segment entity ID passes validation when its prefix is in ALLOWED_ENTITY_PREFIXES."""
     from nes.core.identifiers.validators import validate_entity_id
-    from nes.core.models.entity_type_map import ALLOWED_ENTITY_PREFIXES
 
-    # Temporarily register a 3-level prefix for this test
-    test_prefix = "organization/nepal_govt/moha"
-    ALLOWED_ENTITY_PREFIXES.add(test_prefix)
-    try:
-        result = validate_entity_id(
-            "entity:organization/nepal_govt/moha/department-of-immigration"
-        )
-        assert result == "entity:organization/nepal_govt/moha/department-of-immigration"
-    finally:
-        ALLOWED_ENTITY_PREFIXES.discard(test_prefix)
+    result = validate_entity_id(
+        f"entity:{register_moha_prefix}/department-of-immigration"
+    )
+    assert result == f"entity:{register_moha_prefix}/department-of-immigration"
 
 
 def test_validate_unknown_prefix_raises():
     """validate_entity_id raises ValueError for a prefix not in ALLOWED_ENTITY_PREFIXES."""
     from nes.core.identifiers.validators import validate_entity_id
 
-    with pytest.raises(ValueError, match="not.*allowed|unknown|unsupported|invalid"):
+    with pytest.raises(ValueError, match=r"not.*allowed|unknown|unsupported|invalid"):
         validate_entity_id("entity:organization/unknown_category/some-org")
 
 
