@@ -72,6 +72,9 @@ class PublicationService:
 
         entity_type = EntityType(entity_prefix.split("/")[0])
         entity_data["entity_prefix"] = entity_prefix
+        entity_data.pop(
+            "sub_type", None
+        )  # entity_prefix takes precedence; discard any stale sub_type
 
         slug = entity_data.get("slug")
         if not slug:
