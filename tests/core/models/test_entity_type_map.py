@@ -1,7 +1,5 @@
 """Tests for entity type map and ALLOWED_ENTITY_PREFIXES registry."""
 
-import pytest
-
 # ===========================================================================
 # Backward compat: existing type/subtype combos present in ALLOWED_ENTITY_PREFIXES
 # ===========================================================================

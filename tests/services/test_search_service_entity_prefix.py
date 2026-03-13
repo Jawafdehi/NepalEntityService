@@ -12,6 +12,7 @@ Test Coverage:
 - unknown entity_prefix returns empty list
 """
 
+import asyncio
 from datetime import UTC, datetime
 
 import pytest
@@ -84,8 +85,6 @@ def moha_department(db):
         ),
         created_at=datetime.now(UTC),
     )
-    import asyncio
-
     asyncio.run(db.put_entity(entity))
     return entity
 
@@ -102,8 +101,6 @@ def mol_section(db):
         ),
         created_at=datetime.now(UTC),
     )
-    import asyncio
-
     asyncio.run(db.put_entity(entity))
     return entity
 
@@ -119,8 +116,6 @@ def political_party(db):
         ),
         created_at=datetime.now(UTC),
     )
-    import asyncio
-
     asyncio.run(db.put_entity(entity))
     return entity
 
@@ -134,8 +129,6 @@ def politician(db):
         version_summary=_version_summary("entity:person/rabi-lamichhane"),
         created_at=datetime.now(UTC),
     )
-    import asyncio
-
     asyncio.run(db.put_entity(entity))
     return entity
 
