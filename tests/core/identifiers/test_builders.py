@@ -189,6 +189,66 @@ def test_build_entity_id_from_prefix_3_segment():
     )
 
 
+# ===========================================================================
+# build_entity_id_from_prefix — error cases (GAP 3)
+# ===========================================================================
+
+
+def test_build_entity_id_from_prefix_empty_prefix_raises():
+    """build_entity_id_from_prefix raises ValueError when prefix is empty string."""
+    from nes.core.identifiers.builders import build_entity_id_from_prefix
+
+    with pytest.raises(ValueError):
+        build_entity_id_from_prefix("", "department-of-immigration")
+
+
+def test_build_entity_id_from_prefix_empty_slug_raises():
+    """build_entity_id_from_prefix raises ValueError when slug is empty string."""
+    from nes.core.identifiers.builders import build_entity_id_from_prefix
+
+    with pytest.raises(ValueError):
+        build_entity_id_from_prefix("organization/nepal_govt/moha", "")
+
+
+def test_build_entity_id_from_prefix_empty_segment_raises():
+    """build_entity_id_from_prefix raises ValueError when prefix has an empty segment."""
+    from nes.core.identifiers.builders import build_entity_id_from_prefix
+
+    with pytest.raises(ValueError):
+        build_entity_id_from_prefix("organization//moha", "department-of-immigration")
+
+
+def test_build_entity_id_from_prefix_exceeds_max_depth_raises():
+    """build_entity_id_from_prefix raises ValueError when prefix exceeds MAX_PREFIX_DEPTH."""
+    from nes.core.identifiers.builders import build_entity_id_from_prefix
+
+    with pytest.raises(ValueError):
+        build_entity_id_from_prefix(
+            "organization/nepal_govt/moha/extra", "department-of-immigration"
+        )
+
+
+# ===========================================================================
+# break_entity_id — missing-slug error case (GAP 4)
+# ===========================================================================
+
+
+def test_break_entity_id_only_type_no_slug_raises():
+    """break_entity_id raises ValueError when there is no slug (only 1 path segment)."""
+    from nes.core.identifiers.builders import break_entity_id
+
+    with pytest.raises(ValueError):
+        break_entity_id("entity:person")
+
+
+def test_break_entity_id_empty_segment_raises():
+    """break_entity_id raises ValueError when a path segment is empty."""
+    from nes.core.identifiers.builders import break_entity_id
+
+    with pytest.raises(ValueError):
+        break_entity_id("entity:organization//some-slug")
+
+
 def test_build_relationship_id():
     """Test building relationship ID."""
     from nes.core.identifiers.builders import build_relationship_id
