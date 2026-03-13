@@ -85,9 +85,15 @@ def political_party_entity():
 
 
 @pytest.fixture
-def three_level_org_entity():
+def three_level_org_entity(monkeypatch):
     """3-level path: entity/organization/nepal_govt/moha/department-of-immigration.json"""
-    ALLOWED_ENTITY_PREFIXES.add("organization/nepal_govt/moha")
+    import nes.core.models.entity_type_map as etm
+
+    monkeypatch.setattr(
+        etm,
+        "ALLOWED_ENTITY_PREFIXES",
+        ALLOWED_ENTITY_PREFIXES | {"organization/nepal_govt/moha"},
+    )
     entity = Organization(
         slug="department-of-immigration",
         entity_prefix="organization/nepal_govt/moha",
@@ -97,8 +103,7 @@ def three_level_org_entity():
         ),
         created_at=datetime.now(UTC),
     )
-    yield entity
-    ALLOWED_ENTITY_PREFIXES.discard("organization/nepal_govt/moha")
+    return entity
 
 
 # ---------------------------------------------------------------------------
