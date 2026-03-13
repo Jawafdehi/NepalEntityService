@@ -61,6 +61,17 @@ def build_entity_id_from_prefix(prefix: str, slug: str) -> str:
         >>> build_entity_id_from_prefix("organization/nepal_govt/moha", "department-of-immigration")
         "entity:organization/nepal_govt/moha/department-of-immigration"
     """
+    if not prefix:
+        raise ValueError("Entity prefix must not be empty")
+    segments = prefix.split("/")
+    if len(segments) > MAX_PREFIX_DEPTH:
+        raise ValueError(
+            f"Entity prefix exceeds max depth of {MAX_PREFIX_DEPTH}: '{prefix}'"
+        )
+    if any(s == "" for s in segments):
+        raise ValueError(f"Entity prefix contains empty segment: '{prefix}'")
+    if not slug:
+        raise ValueError("Entity slug must not be empty")
     return f"entity:{prefix}/{slug}"
 
 
@@ -103,6 +114,9 @@ def break_entity_id(entity_id: str) -> EntityIdComponents:
         raise ValueError(
             f"Invalid entity ID format: prefix depth must be 1-{MAX_PREFIX_DEPTH}"
         )
+
+    if any(p == "" for p in parts):
+        raise ValueError("Invalid entity ID format: empty segment")
 
     slug = parts[-1]
     prefix = "/".join(parts[:-1])

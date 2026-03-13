@@ -33,9 +33,11 @@ def seed_allowed_entity_prefixes():
     """Seed ALLOWED_ENTITY_PREFIXES with standard prefixes for the duration of each test."""
     from nes.core.models.entity_type_map import ALLOWED_ENTITY_PREFIXES
 
+    original = set(ALLOWED_ENTITY_PREFIXES)
     ALLOWED_ENTITY_PREFIXES.update(_STANDARD_PREFIXES)
     yield
-    ALLOWED_ENTITY_PREFIXES.difference_update(_STANDARD_PREFIXES)
+    ALLOWED_ENTITY_PREFIXES.clear()
+    ALLOWED_ENTITY_PREFIXES.update(original)
 
 
 @pytest.fixture

@@ -68,7 +68,7 @@ class PublicationService:
         Raises:
             ValueError: If entity data is invalid or required fields are missing
         """
-        from nes.core.identifiers import build_entity_id_from_prefix
+        from nes.core.identifiers import build_entity_id_from_prefix, validate_entity_id
 
         entity_type = EntityType(entity_prefix.split("/")[0])
         entity_data["entity_prefix"] = entity_prefix
@@ -78,6 +78,7 @@ class PublicationService:
             raise ValueError("Entity must have a 'slug' field")
 
         entity_id = build_entity_id_from_prefix(entity_prefix, slug)
+        validate_entity_id(entity_id)
 
         # Validate required fields
         if "slug" not in entity_data:
