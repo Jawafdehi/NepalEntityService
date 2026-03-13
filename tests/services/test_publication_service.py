@@ -1027,3 +1027,64 @@ class TestPublicationServiceEntityPrefix:
             assert retrieved.entity_prefix == "organization/nepal_govt/moha"
         finally:
             ALLOWED_ENTITY_PREFIXES.discard("organization/nepal_govt/moha")
+
+    @pytest.mark.asyncio
+    async def test_create_entity_invalid_prefix_raises(self, temp_db_path):
+        """create_entity raises ValueError when entity_prefix is not in ALLOWED_ENTITY_PREFIXES."""
+        from nes.services.publication import PublicationService
+
+        db = FileDatabase(base_path=str(temp_db_path))
+        service = PublicationService(database=db)
+
+        entity_data = {
+            "slug": "some-dept",
+            "names": [{"kind": "PRIMARY", "en": {"full": "Some Department"}}],
+        }
+
+        with pytest.raises(ValueError):
+            await service.create_entity(
+                entity_prefix="organization/unknown_ministry/xyz",
+                entity_data=entity_data,
+                author_id="author:system-importer",
+                change_description="Test",
+            )
+
+    @pytest.mark.asyncio
+    async def test_create_entity_entity_prefix_in_entity_data_overridden_by_param(
+        self, temp_db_path
+    ):
+        """entity_prefix passed as parameter takes precedence over any entity_prefix in entity_data.
+
+        Requirement 21.9: when entity_prefix is provided it SHALL take precedence.
+        """
+        from nes.core.models.entity_type_map import ALLOWED_ENTITY_PREFIXES
+        from nes.services.publication import PublicationService
+
+        ALLOWED_ENTITY_PREFIXES.add("organization/nepal_govt/moha")
+        try:
+            db = FileDatabase(base_path=str(temp_db_path))
+            service = PublicationService(database=db)
+
+            # entity_data contains a different entity_prefix value — param wins
+            entity_data = {
+                "slug": "department-of-immigration",
+                "entity_prefix": "organization/political_party",  # will be overridden
+                "names": [
+                    {"kind": "PRIMARY", "en": {"full": "Department of Immigration"}}
+                ],
+            }
+
+            entity = await service.create_entity(
+                entity_prefix="organization/nepal_govt/moha",
+                entity_data=entity_data,
+                author_id="author:system-importer",
+                change_description="Test precedence",
+            )
+
+            assert entity.entity_prefix == "organization/nepal_govt/moha"
+            assert (
+                entity.id
+                == "entity:organization/nepal_govt/moha/department-of-immigration"
+            )
+        finally:
+            ALLOWED_ENTITY_PREFIXES.discard("organization/nepal_govt/moha")
