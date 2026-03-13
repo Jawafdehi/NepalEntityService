@@ -615,15 +615,16 @@ class TestIntegrityCheckCLI:
         assert result.exit_code == 0
         assert "integrity" in result.output.lower()
 
-    def test_integrity_check_reports_orphaned_relationships(self, temp_db_path):
+    def test_integrity_check_reports_orphaned_relationships(
+        self, temp_db_path, monkeypatch
+    ):
         """Test that integrity check reports relationships with missing entities."""
         from click.testing import CliRunner
 
         from nes.cli import cli
-        from nes.config import Config
 
         # Set up database path
-        Config.DB_PATH = str(temp_db_path)
+        monkeypatch.setenv("NES_DB_URL", f"file://{temp_db_path}")
 
         runner = CliRunner()
         result = runner.invoke(cli, ["integrity", "check"])
@@ -631,14 +632,15 @@ class TestIntegrityCheckCLI:
         # Should complete successfully (no issues in empty database)
         assert result.exit_code == 0
 
-    def test_integrity_check_reports_circular_relationships(self, temp_db_path):
+    def test_integrity_check_reports_circular_relationships(
+        self, temp_db_path, monkeypatch
+    ):
         """Test that integrity check reports circular relationships."""
         import asyncio
 
         from click.testing import CliRunner
 
         from nes.cli import cli
-        from nes.config import Config
         from nes.database.file_database import FileDatabase
         from nes.services.publication import PublicationService
 
@@ -693,22 +695,23 @@ class TestIntegrityCheckCLI:
         asyncio.run(setup_circular_relationships())
 
         # Run integrity check
-        Config.DB_PATH = str(temp_db_path)
+        monkeypatch.setenv("NES_DB_URL", f"file://{temp_db_path}")
         runner = CliRunner()
         result = runner.invoke(cli, ["integrity", "check"])
 
         # Should report circular relationships
         assert "circular" in result.output.lower() or "cycle" in result.output.lower()
 
-    def test_integrity_check_reports_duplicate_relationships(self, temp_db_path):
+    def test_integrity_check_reports_duplicate_relationships(
+        self, temp_db_path, monkeypatch
+    ):
         """Test that integrity check reports duplicate relationships."""
         from click.testing import CliRunner
 
         from nes.cli import cli
-        from nes.config import Config
 
         # Set up database path
-        Config.DB_PATH = str(temp_db_path)
+        monkeypatch.setenv("NES_DB_URL", f"file://{temp_db_path}")
 
         runner = CliRunner()
         result = runner.invoke(cli, ["integrity", "check"])
@@ -728,17 +731,16 @@ class TestIntegrityCheckCLI:
         # Should have --fix option
         assert "--fix" in result.output or "--repair" in result.output
 
-    def test_integrity_check_json_output(self, temp_db_path):
+    def test_integrity_check_json_output(self, temp_db_path, monkeypatch):
         """Test that integrity check can output JSON format."""
         import json
 
         from click.testing import CliRunner
 
         from nes.cli import cli
-        from nes.config import Config
 
         # Set up database path
-        Config.DB_PATH = str(temp_db_path)
+        monkeypatch.setenv("NES_DB_URL", f"file://{temp_db_path}")
 
         runner = CliRunner()
         result = runner.invoke(cli, ["integrity", "check", "--json"])

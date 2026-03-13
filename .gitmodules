@@ -1,3 +1,0 @@
-[submodule "nes-db"]
-	path = nes-db
-	url = https://github.com/NewNepal-org/NepalEntityService-database.git
