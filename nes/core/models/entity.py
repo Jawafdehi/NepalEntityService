@@ -188,9 +188,11 @@ class Entity(BaseModel, ABC):
             return v
         if not v:
             raise ValueError("entity_prefix must not be empty")
+        if v.strip() != v:
+            raise ValueError(f"entity_prefix '{v}' must not have leading or trailing whitespace")
         segments = v.split("/")
-        if any(s == "" for s in segments):
-            raise ValueError(f"entity_prefix '{v}' contains empty segments")
+        if any(s == "" or s.strip() != s or not s.strip() for s in segments):
+            raise ValueError(f"entity_prefix '{v}' contains empty or whitespace-only segments")
         depth = len(segments)
         if depth > MAX_PREFIX_DEPTH:
             raise ValueError(

@@ -337,6 +337,48 @@ def test_entity_prefix_class_determined_by_first_segment():
     assert org.type == "organization"
 
 
+def test_entity_prefix_whitespace_only_raises():
+    """entity_prefix set to whitespace-only string raises ValidationError."""
+    from nes.core.models.organization import Organization
+
+    with pytest.raises(ValidationError):
+        Organization(
+            slug="some-org",
+            entity_prefix="   ",
+            names=[Name(kind=NameKind.PRIMARY, en={"full": "Some Org"})],
+            version_summary=_make_version_summary("entity:organization/some-org"),
+            created_at=datetime.now(UTC),
+        )
+
+
+def test_entity_prefix_leading_trailing_whitespace_raises():
+    """entity_prefix with leading/trailing whitespace raises ValidationError."""
+    from nes.core.models.organization import Organization
+
+    with pytest.raises(ValidationError):
+        Organization(
+            slug="some-org",
+            entity_prefix=" organization/nepal_govt",
+            names=[Name(kind=NameKind.PRIMARY, en={"full": "Some Org"})],
+            version_summary=_make_version_summary("entity:organization/nepal_govt/some-org"),
+            created_at=datetime.now(UTC),
+        )
+
+
+def test_entity_prefix_padded_segment_raises():
+    """entity_prefix with a whitespace-padded segment raises ValidationError."""
+    from nes.core.models.organization import Organization
+
+    with pytest.raises(ValidationError):
+        Organization(
+            slug="some-org",
+            entity_prefix="organization/ nepal_govt",
+            names=[Name(kind=NameKind.PRIMARY, en={"full": "Some Org"})],
+            version_summary=_make_version_summary("entity:organization/nepal_govt/some-org"),
+            created_at=datetime.now(UTC),
+        )
+
+
 def test_entity_cannot_be_instantiated_directly():
     """Test that Entity class cannot be instantiated directly."""
     # Should fail when trying to instantiate Entity directly
