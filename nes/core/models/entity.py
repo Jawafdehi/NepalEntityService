@@ -223,6 +223,19 @@ class Entity(BaseModel, ABC):
             )
         return self
 
+    @model_validator(mode="after")
+    def validate_entity_prefix_matches_type(self) -> "Entity":
+        """Ensure the first segment of entity_prefix matches the declared type."""
+        if self.entity_prefix is not None:
+            prefix_root = self.entity_prefix.split("/")[0]
+            type_val = self.type.value if hasattr(self.type, "value") else self.type
+            if prefix_root != type_val:
+                raise ValueError(
+                    f"entity_prefix '{self.entity_prefix}' root '{prefix_root}' "
+                    f"does not match entity type '{type_val}'"
+                )
+        return self
+
     @field_validator("names")
     @classmethod
     def validate_names(cls, v: List[Name]):

@@ -15,7 +15,6 @@ from typing import Any, Dict, List
 
 import pytest
 
-from nes.core.models.entity import EntityType
 from nes.core.models.relationship import Relationship
 from nes.database.file_database import FileDatabase
 
