@@ -34,59 +34,61 @@ async def test_db_with_prefix_entities(tmp_path):
     ALLOWED_ENTITY_PREFIXES.add("organization/nepal_govt")
     ALLOWED_ENTITY_PREFIXES.add("organization/nepal_govt/moha")
     ALLOWED_ENTITY_PREFIXES.add("organization/nepal_govt/mol")
+    try:
+        db = FileDatabase(base_path=str(tmp_path / "test-db"))
+        pub = PublicationService(database=db)
 
-    db = FileDatabase(base_path=str(tmp_path / "test-db"))
-    pub = PublicationService(database=db)
+        # 1-level: person
+        await pub.create_entity(
+            entity_prefix="person",
+            entity_data={
+                "slug": "rabi-lamichhane",
+                "names": [{"kind": "PRIMARY", "en": {"full": "Rabi Lamichhane"}}],
+            },
+            author_id="author:test",
+            change_description="setup",
+        )
 
-    # 1-level: person
-    await pub.create_entity(
-        entity_prefix="person",
-        entity_data={
-            "slug": "rabi-lamichhane",
-            "names": [{"kind": "PRIMARY", "en": {"full": "Rabi Lamichhane"}}],
-        },
-        author_id="author:test",
-        change_description="setup",
-    )
+        # 2-level: organization/political_party
+        await pub.create_entity(
+            entity_prefix="organization/political_party",
+            entity_data={
+                "slug": "nepali-congress",
+                "names": [{"kind": "PRIMARY", "en": {"full": "Nepali Congress"}}],
+            },
+            author_id="author:test",
+            change_description="setup",
+        )
 
-    # 2-level: organization/political_party
-    await pub.create_entity(
-        entity_prefix="organization/political_party",
-        entity_data={
-            "slug": "nepali-congress",
-            "names": [{"kind": "PRIMARY", "en": {"full": "Nepali Congress"}}],
-        },
-        author_id="author:test",
-        change_description="setup",
-    )
+        # 3-level: organization/nepal_govt/moha
+        await pub.create_entity(
+            entity_prefix="organization/nepal_govt/moha",
+            entity_data={
+                "slug": "department-of-immigration",
+                "names": [
+                    {"kind": "PRIMARY", "en": {"full": "Department of Immigration"}}
+                ],
+            },
+            author_id="author:test",
+            change_description="setup",
+        )
 
-    # 3-level: organization/nepal_govt/moha
-    await pub.create_entity(
-        entity_prefix="organization/nepal_govt/moha",
-        entity_data={
-            "slug": "department-of-immigration",
-            "names": [{"kind": "PRIMARY", "en": {"full": "Department of Immigration"}}],
-        },
-        author_id="author:test",
-        change_description="setup",
-    )
+        # 3-level: organization/nepal_govt/mol
+        await pub.create_entity(
+            entity_prefix="organization/nepal_govt/mol",
+            entity_data={
+                "slug": "legal-aid-section",
+                "names": [{"kind": "PRIMARY", "en": {"full": "Legal Aid Section"}}],
+            },
+            author_id="author:test",
+            change_description="setup",
+        )
 
-    # 3-level: organization/nepal_govt/mol
-    await pub.create_entity(
-        entity_prefix="organization/nepal_govt/mol",
-        entity_data={
-            "slug": "legal-aid-section",
-            "names": [{"kind": "PRIMARY", "en": {"full": "Legal Aid Section"}}],
-        },
-        author_id="author:test",
-        change_description="setup",
-    )
-
-    yield db
-
-    ALLOWED_ENTITY_PREFIXES.discard("organization/nepal_govt")
-    ALLOWED_ENTITY_PREFIXES.discard("organization/nepal_govt/moha")
-    ALLOWED_ENTITY_PREFIXES.discard("organization/nepal_govt/mol")
+        yield db
+    finally:
+        ALLOWED_ENTITY_PREFIXES.discard("organization/nepal_govt")
+        ALLOWED_ENTITY_PREFIXES.discard("organization/nepal_govt/moha")
+        ALLOWED_ENTITY_PREFIXES.discard("organization/nepal_govt/mol")
 
 
 @pytest_asyncio.fixture
@@ -97,10 +99,12 @@ async def client(test_db_with_prefix_entities):
     Config._database = test_db_with_prefix_entities
     Config._search_service = None  # force recreation with the new DB
     transport = ASGITransport(app=app)
-    async with AsyncClient(transport=transport, base_url="http://test") as ac:
-        yield ac
-    Config._database = original_db
-    Config._search_service = original_search_service
+    try:
+        async with AsyncClient(transport=transport, base_url="http://test") as ac:
+            yield ac
+    finally:
+        Config._database = original_db
+        Config._search_service = original_search_service
 
 
 # ---------------------------------------------------------------------------
