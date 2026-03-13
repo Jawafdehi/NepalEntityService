@@ -360,7 +360,9 @@ def test_entity_prefix_leading_trailing_whitespace_raises():
             slug="some-org",
             entity_prefix=" organization/nepal_govt",
             names=[Name(kind=NameKind.PRIMARY, en={"full": "Some Org"})],
-            version_summary=_make_version_summary("entity:organization/nepal_govt/some-org"),
+            version_summary=_make_version_summary(
+                "entity:organization/nepal_govt/some-org"
+            ),
             created_at=datetime.now(UTC),
         )
 
@@ -374,7 +376,9 @@ def test_entity_prefix_padded_segment_raises():
             slug="some-org",
             entity_prefix="organization/ nepal_govt",
             names=[Name(kind=NameKind.PRIMARY, en={"full": "Some Org"})],
-            version_summary=_make_version_summary("entity:organization/nepal_govt/some-org"),
+            version_summary=_make_version_summary(
+                "entity:organization/nepal_govt/some-org"
+            ),
             created_at=datetime.now(UTC),
         )
 
