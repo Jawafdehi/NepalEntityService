@@ -70,12 +70,20 @@ class VersionListResponse(BaseModel):
     offset: int = Field(..., description="Number of results skipped")
 
 
-class EntitySchemaResponse(BaseModel):
-    """Response model for entity schema endpoint."""
+class EntityPrefixListResponse(BaseModel):
+    """Response model for entity prefix list endpoint."""
 
-    entity_types: Dict[str, Any] = Field(
-        ..., description="Available entity types and their subtypes"
+    prefixes: List[str] = Field(
+        ..., description="List of available entity prefixes"
     )
+
+
+class EntityPrefixSchemaResponse(BaseModel):
+    """Response model for entity prefix schema endpoint."""
+
+    prefix: str = Field(..., description="The entity prefix")
+    description: str = Field(..., description="Description of the entity type")
+    json_schema: Dict[str, Any] = Field(..., description="JSON schema for the entity type")
 
 
 class RelationshipSchemaResponse(BaseModel):

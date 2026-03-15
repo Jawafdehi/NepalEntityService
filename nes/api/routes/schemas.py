@@ -2,58 +2,84 @@
 
 This module provides endpoints for discovering available entity types,
 subtypes, and relationship types:
-- GET /api/schemas - Get entity type schemas
+- GET /api/entity_prefixes - List all available entity prefixes
+- GET /api/entity_prefixes/{prefix}/schema - Get schema for a specific entity prefix
 - GET /api/schemas/relationships - Get relationship type schemas
 """
 
 import logging
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException, Path
 
-from nes.api.responses import EntitySchemaResponse, RelationshipSchemaResponse
-from nes.core.models.entity import EntitySubType, EntityType
-from nes.core.models.entity_type_map import ENTITY_TYPE_MAP
+from nes.api.responses import (
+    EntityPrefixListResponse,
+    EntityPrefixSchemaResponse,
+    RelationshipSchemaResponse,
+)
+from nes.core.models.entity_type_map import ALLOWED_ENTITY_PREFIXES, ENTITY_PREFIX_MAP
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/api/schemas", tags=["schemas"])
+router = APIRouter(tags=["schemas"])
 
 
-@router.get("", response_model=EntitySchemaResponse)
-async def get_entity_schemas():
-    """Get available entity types and their subtypes.
+@router.get("/api/entity_prefixes", response_model=EntityPrefixListResponse)
+async def list_entity_prefixes():
+    """List all available entity prefixes.
 
-    Returns a structured representation of all entity types (person, organization, location)
-    and their available subtypes, reflecting Nepal's political and administrative structure.
+    Returns a simple list of all supported entity prefix strings,
+    reflecting Nepal's political and administrative structure.
 
     Returns:
-        Dictionary mapping entity types to their subtypes and descriptions
+        List of entity prefix strings
     """
-    entity_types = {}
+    return EntityPrefixListResponse(prefixes=sorted(ALLOWED_ENTITY_PREFIXES))
 
-    # Build entity type schema
-    for entity_type, subtypes in ENTITY_TYPE_MAP.items():
-        type_name = (
-            entity_type.value if hasattr(entity_type, "value") else str(entity_type)
+
+@router.get("/api/entity_prefixes/{prefix:path}/schema", response_model=EntityPrefixSchemaResponse)
+async def get_entity_prefix_schema(
+    prefix: str = Path(..., description="Entity prefix (e.g., 'person', 'organization/political_party')")
+):
+    """Get the JSON schema for a specific entity prefix.
+
+    Returns the Pydantic model schema for the specified entity prefix,
+    which can be used for validation and documentation.
+
+    Args:
+        prefix: The entity prefix to get the schema for
+
+    Returns:
+        JSON schema for the entity type
+
+    Raises:
+        HTTPException: 404 if the prefix is not found
+    """
+    if prefix not in ALLOWED_ENTITY_PREFIXES:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Entity prefix '{prefix}' not found. Use /api/entity_prefixes to see available prefixes."
         )
+    
+    # Get the entity class for this prefix
+    entity_class = ENTITY_PREFIX_MAP.get(prefix)
+    
+    if entity_class is None:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Entity class not found for prefix '{prefix}'"
+        )
+    
+    # Get the JSON schema from the Pydantic model
+    schema = entity_class.model_json_schema()
+    
+    return EntityPrefixSchemaResponse(
+        prefix=prefix,
+        description=_get_entity_prefix_description(prefix),
+        json_schema=schema
+    )
 
-        # Convert subtypes to list of strings
-        subtype_list = []
-        for subtype in subtypes:
-            if subtype is None:
-                continue
-            subtype_name = subtype.value if hasattr(subtype, "value") else str(subtype)
-            subtype_list.append(subtype_name)
 
-        entity_types[type_name] = {
-            "subtypes": subtype_list,
-            "description": _get_entity_type_description(type_name),
-        }
-
-    return EntitySchemaResponse(entity_types=entity_types)
-
-
-@router.get("/relationships", response_model=RelationshipSchemaResponse)
+@router.get("/api/schemas/relationships", response_model=RelationshipSchemaResponse)
 async def get_relationship_schemas():
     """Get available relationship types.
 
@@ -76,19 +102,41 @@ async def get_relationship_schemas():
     return RelationshipSchemaResponse(relationship_types=relationship_types)
 
 
-def _get_entity_type_description(entity_type: str) -> str:
-    """Get a description for an entity type.
+def _get_entity_prefix_description(prefix: str) -> str:
+    """Get a description for an entity prefix.
 
     Args:
-        entity_type: The entity type name
+        prefix: The entity prefix (e.g., "person", "organization/political_party")
 
     Returns:
         Description string
     """
     descriptions = {
+        # Person
         "person": "Individuals including politicians, civil servants, and public figures",
-        "organization": "Organizations including political parties, government bodies, NGOs, and international organizations",
-        "location": "Geographic locations including provinces, districts, municipalities, and electoral constituencies",
+        
+        # Organization
+        "organization": "Organizations (general)",
+        "organization/political_party": "Registered political parties in Nepal",
+        "organization/government_body": "Government ministries, departments, and constitutional bodies",
+        "organization/hospital": "Hospitals and health facilities",
+        "organization/ngo": "Non-governmental organizations",
+        "organization/international_org": "International organizations operating in Nepal",
+        
+        # Location
+        "location": "Geographic locations (general)",
+        "location/province": "Nepal's 7 provinces (प्रदेश)",
+        "location/district": "Nepal's 77 districts (जिल्ला)",
+        "location/metropolitan_city": "Metropolitan cities (महानगरपालिका) - 6 cities with >300k population",
+        "location/sub_metropolitan_city": "Sub-metropolitan cities (उपमहानगरपालिका) - cities with 100k-300k population",
+        "location/municipality": "Municipalities (नगरपालिका) - urban local bodies",
+        "location/rural_municipality": "Rural municipalities (गाउँपालिका) - rural local bodies",
+        "location/ward": "Wards (वडा) - smallest administrative unit",
+        "location/constituency": "Electoral constituencies (निर्वाचन क्षेत्र)",
+        
+        # Project
+        "project": "Development projects and initiatives (general)",
+        "project/development_project": "Development projects (विकास परियोजना)",
     }
 
-    return descriptions.get(entity_type, "")
+    return descriptions.get(prefix, f"Entity type: {prefix}")
