@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
 from nes.core.models.entity import Entity
-from nes.core.models.entity_type_map import ENTITY_PREFIX_MAP, ALLOWED_ENTITY_PREFIXES
+from nes.core.models.entity_type_map import ALLOWED_ENTITY_PREFIXES, ENTITY_PREFIX_MAP
 from nes.core.models.relationship import Relationship
 from nes.core.models.version import Author, Version
 from nes.core.utils.entity_utils import entity_from_dict
@@ -678,37 +678,39 @@ class FileDatabase(EntityDatabase):
         """
         # Determine entity_prefix for class lookup
         entity_prefix = data.get("entity_prefix")
-        
+
         if entity_prefix is None:
             # Backward compatibility: construct entity_prefix from type and sub_type
             # for class lookup only, without modifying the original data
             if "type" not in data:
-                raise ValueError("Entity must have either 'entity_prefix' or 'type' field")
-            
+                raise ValueError(
+                    "Entity must have either 'entity_prefix' or 'type' field"
+                )
+
             entity_type = data["type"]
             entity_subtype = data.get("sub_type")
-            
+
             if entity_subtype:
                 lookup_prefix = f"{entity_type}/{entity_subtype}"
             else:
                 lookup_prefix = entity_type
-            
+
             # Look up the entity class directly
             entity_class = ENTITY_PREFIX_MAP.get(lookup_prefix)
-            
+
             if entity_class is None:
                 # Try matching just the base type
                 entity_class = ENTITY_PREFIX_MAP.get(entity_type)
-                
+
                 if entity_class is None:
                     raise ValueError(
                         f"Unknown entity type/subtype: '{lookup_prefix}'. "
                         f"Supported prefixes: {', '.join(sorted(ALLOWED_ENTITY_PREFIXES))}"
                     )
-            
+
             # Validate using the determined class, preserving entity_prefix: None
             return entity_class.model_validate(data)
-        
+
         # New-style entity with entity_prefix set - use entity_from_dict
         return entity_from_dict(data)
 

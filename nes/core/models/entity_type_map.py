@@ -10,7 +10,8 @@ corresponding model classes. It is a flat dict of slash-joined strings
 ALLOWED_ENTITY_PREFIXES is derived from ENTITY_PREFIX_MAP keys.
 """
 
-from typing import Dict, Type
+# Import Entity subclasses (avoiding circular imports by importing here)
+from typing import TYPE_CHECKING, Dict, Type
 
 from nes.core.models.entity import EntitySubType, EntityType
 
@@ -18,23 +19,22 @@ from nes.core.models.entity import EntitySubType, EntityType
 # Canonical prefix-to-class map
 # ---------------------------------------------------------------------------
 
-# Import Entity subclasses (avoiding circular imports by importing here)
-from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from nes.core.models.entity import Entity
 
+
 # Lazy imports to avoid circular dependencies
 def _get_entity_prefix_map() -> Dict[str, Type["Entity"]]:
     """Get the entity prefix map with lazy imports."""
-    from nes.core.models.person import Person
+    from nes.core.models.location import Location
     from nes.core.models.organization import (
-        Organization,
-        PoliticalParty,
         GovernmentBody,
         Hospital,
+        Organization,
+        PoliticalParty,
     )
-    from nes.core.models.location import Location
+    from nes.core.models.person import Person
     from nes.core.models.project import Project
 
     return {

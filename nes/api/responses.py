@@ -73,9 +73,7 @@ class VersionListResponse(BaseModel):
 class EntityPrefixListResponse(BaseModel):
     """Response model for entity prefix list endpoint."""
 
-    prefixes: List[str] = Field(
-        ..., description="List of available entity prefixes"
-    )
+    prefixes: List[str] = Field(..., description="List of available entity prefixes")
 
 
 class EntityPrefixSchemaResponse(BaseModel):
@@ -83,7 +81,9 @@ class EntityPrefixSchemaResponse(BaseModel):
 
     prefix: str = Field(..., description="The entity prefix")
     description: str = Field(..., description="Description of the entity type")
-    json_schema: Dict[str, Any] = Field(..., description="JSON schema for the entity type")
+    json_schema: Dict[str, Any] = Field(
+        ..., description="JSON schema for the entity type"
+    )
 
 
 class RelationshipSchemaResponse(BaseModel):

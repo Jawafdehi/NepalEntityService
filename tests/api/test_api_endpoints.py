@@ -459,11 +459,11 @@ class TestSchemaEndpoints:
 
         assert "prefixes" in data
         prefixes = data["prefixes"]
-        
+
         # Check that prefixes is a list
         assert isinstance(prefixes, list)
         assert len(prefixes) > 0
-        
+
         # Check that key prefixes exist
         assert "person" in prefixes
         assert "organization" in prefixes
@@ -484,19 +484,21 @@ class TestSchemaEndpoints:
         assert "prefix" in data
         assert "description" in data
         assert "json_schema" in data
-        
+
         assert data["prefix"] == "person"
         assert isinstance(data["description"], str)
         assert len(data["description"]) > 0
-        
+
         # Check that json_schema has expected structure
         schema = data["json_schema"]
         assert "properties" in schema
         assert "required" in schema
         assert "type" in schema
-        
+
         # Test with organization/political_party prefix
-        response = await client.get("/api/entity_prefixes/organization/political_party/schema")
+        response = await client.get(
+            "/api/entity_prefixes/organization/political_party/schema"
+        )
         assert response.status_code == 200
         data = response.json()
         assert data["prefix"] == "organization/political_party"
@@ -918,11 +920,11 @@ class TestTagsEndpoint:
 
         assert "prefixes" in data
         prefixes = data["prefixes"]
-        
+
         # Check that prefixes is a list
         assert isinstance(prefixes, list)
         assert len(prefixes) > 0
-        
+
         # Check that key prefixes exist
         assert "person" in prefixes
         assert "organization" in prefixes
@@ -943,19 +945,21 @@ class TestTagsEndpoint:
         assert "prefix" in data
         assert "description" in data
         assert "json_schema" in data
-        
+
         assert data["prefix"] == "person"
         assert isinstance(data["description"], str)
         assert len(data["description"]) > 0
-        
+
         # Check that json_schema has expected structure
         schema = data["json_schema"]
         assert "properties" in schema
         assert "required" in schema
         assert "type" in schema
-        
+
         # Test with organization/political_party prefix
-        response = await client.get("/api/entity_prefixes/organization/political_party/schema")
+        response = await client.get(
+            "/api/entity_prefixes/organization/political_party/schema"
+        )
         assert response.status_code == 200
         data = response.json()
         assert data["prefix"] == "organization/political_party"

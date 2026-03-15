@@ -36,9 +36,15 @@ async def list_entity_prefixes():
     return EntityPrefixListResponse(prefixes=sorted(ALLOWED_ENTITY_PREFIXES))
 
 
-@router.get("/api/entity_prefixes/{prefix:path}/schema", response_model=EntityPrefixSchemaResponse)
+@router.get(
+    "/api/entity_prefixes/{prefix:path}/schema",
+    response_model=EntityPrefixSchemaResponse,
+)
 async def get_entity_prefix_schema(
-    prefix: str = Path(..., description="Entity prefix (e.g., 'person', 'organization/political_party')")
+    prefix: str = Path(
+        ...,
+        description="Entity prefix (e.g., 'person', 'organization/political_party')",
+    )
 ):
     """Get the JSON schema for a specific entity prefix.
 
@@ -57,25 +63,24 @@ async def get_entity_prefix_schema(
     if prefix not in ALLOWED_ENTITY_PREFIXES:
         raise HTTPException(
             status_code=404,
-            detail=f"Entity prefix '{prefix}' not found. Use /api/entity_prefixes to see available prefixes."
+            detail=f"Entity prefix '{prefix}' not found. Use /api/entity_prefixes to see available prefixes.",
         )
-    
+
     # Get the entity class for this prefix
     entity_class = ENTITY_PREFIX_MAP.get(prefix)
-    
+
     if entity_class is None:
         raise HTTPException(
-            status_code=500,
-            detail=f"Entity class not found for prefix '{prefix}'"
+            status_code=500, detail=f"Entity class not found for prefix '{prefix}'"
         )
-    
+
     # Get the JSON schema from the Pydantic model
     schema = entity_class.model_json_schema()
-    
+
     return EntityPrefixSchemaResponse(
         prefix=prefix,
         description=_get_entity_prefix_description(prefix),
-        json_schema=schema
+        json_schema=schema,
     )
 
 
@@ -114,7 +119,6 @@ def _get_entity_prefix_description(prefix: str) -> str:
     descriptions = {
         # Person
         "person": "Individuals including politicians, civil servants, and public figures",
-        
         # Organization
         "organization": "Organizations (general)",
         "organization/political_party": "Registered political parties in Nepal",
@@ -122,7 +126,6 @@ def _get_entity_prefix_description(prefix: str) -> str:
         "organization/hospital": "Hospitals and health facilities",
         "organization/ngo": "Non-governmental organizations",
         "organization/international_org": "International organizations operating in Nepal",
-        
         # Location
         "location": "Geographic locations (general)",
         "location/province": "Nepal's 7 provinces (प्रदेश)",
@@ -133,7 +136,6 @@ def _get_entity_prefix_description(prefix: str) -> str:
         "location/rural_municipality": "Rural municipalities (गाउँपालिका) - rural local bodies",
         "location/ward": "Wards (वडा) - smallest administrative unit",
         "location/constituency": "Electoral constituencies (निर्वाचन क्षेत्र)",
-        
         # Project
         "project": "Development projects and initiatives (general)",
         "project/development_project": "Development projects (विकास परियोजना)",

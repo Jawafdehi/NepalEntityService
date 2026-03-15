@@ -25,3 +25,5 @@ dist/
 
 entity-db/tmp
 .service-account-key.json
+
+/nes-db

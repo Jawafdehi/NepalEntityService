@@ -10,7 +10,7 @@ in sync with NES's entity model evolution.
 from typing import Any, Dict
 
 from nes.core.models.entity import Entity
-from nes.core.models.entity_type_map import ENTITY_PREFIX_MAP, ALLOWED_ENTITY_PREFIXES
+from nes.core.models.entity_type_map import ALLOWED_ENTITY_PREFIXES, ENTITY_PREFIX_MAP
 
 
 def entity_from_dict(data: Dict[str, Any]) -> Entity:
@@ -39,7 +39,7 @@ def entity_from_dict(data: Dict[str, Any]) -> Entity:
         raise ValueError("Entity must have an 'entity_prefix' field")
 
     entity_prefix = data["entity_prefix"]
-    
+
     if entity_prefix is None:
         raise ValueError("Entity 'entity_prefix' field cannot be None")
 
