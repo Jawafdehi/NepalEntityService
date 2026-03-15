@@ -13,8 +13,6 @@ ALLOWED_ENTITY_PREFIXES is derived from ENTITY_PREFIX_MAP keys.
 # Import Entity subclasses (avoiding circular imports by importing here)
 from typing import TYPE_CHECKING, Dict, Type
 
-from nes.core.models.entity import EntitySubType, EntityType
-
 # ---------------------------------------------------------------------------
 # Canonical prefix-to-class map
 # ---------------------------------------------------------------------------
