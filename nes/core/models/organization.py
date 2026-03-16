@@ -73,7 +73,7 @@ class GovernmentBody(Organization):
     government_type: Optional[GovernmentType] = Field(
         None, description="Type of government (federal, provincial, local)"
     )
-
+    address: Optional[Address] = Field(None, description="Government body address")
 
 class Hospital(Organization):
     """Hospital organization."""

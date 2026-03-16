@@ -1,0 +1,845 @@
+[
+  {
+    "district": "achham",
+    "url": "https://election.gov.np/en/district/achham",
+    "address": "Achham",
+    "phones_e164": [
+      "+97797620234"
+    ],
+    "emails": [
+      "deo.achham@election.gov.np"
+    ]
+  },
+  {
+    "district": "arghakhanchi",
+    "url": "https://election.gov.np/en/district/arghakhanchi",
+    "address": "Sandhikharka-1,Prashasan Tole",
+    "phones_e164": [
+      "+97777420139"
+    ],
+    "emails": [
+      "deo.arghakhanchi@election.gov.np"
+    ]
+  },
+  {
+    "address": null,
+    "phones_e164": [],
+    "emails": [
+      "deo.ilam@election.gov.np"
+    ],
+    "note": "API returns 500 — email from website footer",
+    "district": "ilam",
+    "url": "https://election.gov.np/en/district/ilam"
+  },
+  {
+    "district": "udayapur",
+    "url": "https://election.gov.np/en/district/udayapur",
+    "address": "Triyuga-10, Bokse",
+    "phones_e164": [
+      "+97735422262"
+    ],
+    "emails": [
+      "deo.udayapur@election.gov.np"
+    ]
+  },
+  {
+    "district": "okhaldhunga",
+    "url": "https://election.gov.np/en/district/okhaldhunga",
+    "address": "Siddhicharan-11, Gairigaun",
+    "phones_e164": [
+      "+97737520181"
+    ],
+    "emails": [
+      "deo.okhaldhunga@election.gov.np"
+    ]
+  },
+  {
+    "district": "kanchanpur",
+    "url": "https://election.gov.np/en/district/kanchanpur",
+    "address": "Kanchanpur, Ward-1",
+    "phones_e164": [
+      "+97715328663"
+    ],
+    "emails": [
+      "kanchanpur@election.gov.np"
+    ]
+  },
+  {
+    "address": null,
+    "phones_e164": [],
+    "emails": [
+      "deo.kapilvastu@election.gov.np"
+    ],
+    "note": "API returns 500 — email from website footer",
+    "district": "kapilvastu",
+    "url": "https://election.gov.np/en/district/kapilvastu"
+  },
+  {
+    "district": "kathmandu",
+    "url": "https://election.gov.np/en/district/kathmandu",
+    "address": "Kathmandu-10, Anamnagar",
+    "phones_e164": [
+      "+97715172244"
+    ],
+    "emails": [
+      "deo.kathmandu@election.gov.np"
+    ]
+  },
+  {
+    "district": "kavrepalanchok",
+    "url": "https://election.gov.np/en/district/kavrepalanchok",
+    "address": "Dhulikhel-7, Sanjibani Marg",
+    "phones_e164": [
+      "+97711490487"
+    ],
+    "emails": [
+      "deo.kavre@election.gov.np"
+    ]
+  },
+  {
+    "district": "kalikot",
+    "url": "https://election.gov.np/en/district/kalikot",
+    "address": "Kalikot, Ward-1",
+    "phones_e164": [
+      "+97715328663"
+    ],
+    "emails": [
+      "kalikot@election.gov.np"
+    ]
+  },
+  {
+    "district": "kaski",
+    "url": "https://election.gov.np/en/district/kaski",
+    "address": "Pokhara-7, Pardi",
+    "phones_e164": [
+      "+97761462674"
+    ],
+    "emails": [
+      "deo.kaski@election.gov.np"
+    ]
+  },
+  {
+    "district": "kailali",
+    "url": "https://election.gov.np/en/district/kailali",
+    "address": "Dhangadi-1,Nainadevi Road",
+    "phones_e164": [
+      "+97791523383"
+    ],
+    "emails": [
+      "deo.kailali@election.gov.np"
+    ]
+  },
+  {
+    "district": "khotang",
+    "url": "https://election.gov.np/en/district/khotang",
+    "address": "Diktel Rupakot Majhuwagadhi-1, Khotang",
+    "phones_e164": [
+      "+97736420288"
+    ],
+    "emails": [
+      "deo.khotang@election.gov.np"
+    ]
+  },
+  {
+    "district": "gulmi",
+    "url": "https://election.gov.np/en/district/gulmi",
+    "address": "Gulmi",
+    "phones_e164": [
+      "+97715328663"
+    ],
+    "emails": [
+      "deo.gulmi@election.gov.np"
+    ]
+  },
+  {
+    "district": "gorkha",
+    "url": "https://election.gov.np/en/district/gorkha",
+    "address": "Gorkha-6",
+    "phones_e164": [
+      "+97764420796"
+    ],
+    "emails": [
+      "deo.gorkha@election.gov.np"
+    ]
+  },
+  {
+    "district": "chitwan",
+    "url": "https://election.gov.np/en/district/chitwan",
+    "address": "Bharatpur-10",
+    "phones_e164": [
+      "+97756590691"
+    ],
+    "emails": [
+      "deo.chitwan@election.gov.np"
+    ]
+  },
+  {
+    "district": "jajarkot",
+    "url": "https://election.gov.np/en/district/jajarkot",
+    "address": "Bheri-4,Bahundada",
+    "phones_e164": [
+      "+97789430149"
+    ],
+    "emails": [
+      "deo.jajarkot@election.gov.np"
+    ]
+  },
+  {
+    "district": "jumla",
+    "url": "https://election.gov.np/en/district/jumla",
+    "address": "Chandannath-4, Bharatiwada",
+    "phones_e164": [
+      "+97787520195"
+    ],
+    "emails": [
+      "deo.jumla@election.gov.np"
+    ]
+  },
+  {
+    "district": "jhapa",
+    "url": "https://election.gov.np/en/district/jhapa",
+    "address": "Bhadrapur-8, Office Line",
+    "phones_e164": [
+      "+97723453162"
+    ],
+    "emails": [
+      "deo.jhapa@election.gov.np"
+    ]
+  },
+  {
+    "district": "dadeldhura",
+    "url": "https://election.gov.np/en/district/dadeldhura",
+    "address": "Amargadi-5, Tufandada",
+    "phones_e164": [
+      "+97796410154"
+    ],
+    "emails": [
+      "deo.dadeldhura@election.gov.np"
+    ]
+  },
+  {
+    "district": "doti",
+    "url": "https://election.gov.np/en/district/doti",
+    "address": "Dipayal Silgadhi-5, Zero Point",
+    "phones_e164": [
+      "+97794411083"
+    ],
+    "emails": [
+      "deo.doti@election.gov.np"
+    ]
+  },
+  {
+    "district": "dolpa",
+    "url": "https://election.gov.np/en/district/dolpa",
+    "address": "Thulibhberi-3, Dunai",
+    "phones_e164": [
+      "+97787550137"
+    ],
+    "emails": [
+      "deo.dolpa@election.gov.np"
+    ]
+  },
+  {
+    "district": "tanahun",
+    "url": "https://election.gov.np/en/district/tanahun",
+    "address": "Byas-3, Damauli",
+    "phones_e164": [
+      "+97765563644"
+    ],
+    "emails": [
+      "deo.tanahun@election.gov.np"
+    ]
+  },
+  {
+    "district": "taplejung",
+    "url": "https://election.gov.np/en/district/taplejung",
+    "address": "Phungling-2, Dahalbari",
+    "phones_e164": [
+      "+97724460101"
+    ],
+    "emails": [
+      "deo.taplejung@election.gov.np"
+    ]
+  },
+  {
+    "district": "terhathum",
+    "url": "https://election.gov.np/en/district/terhathum",
+    "address": "Myanglung-2, Bhadaure Jane Bato",
+    "phones_e164": [
+      "+97726460478"
+    ],
+    "emails": [
+      "deo.terhathum@election.gov.np"
+    ]
+  },
+  {
+    "district": "dang",
+    "url": "https://election.gov.np/en/district/dang",
+    "address": "Ghorahi-15, Ghorahi",
+    "phones_e164": [
+      "+97782560820"
+    ],
+    "emails": [
+      "deodang56@gmail.com"
+    ]
+  },
+  {
+    "district": "darchula",
+    "url": "https://election.gov.np/en/district/darchula",
+    "address": "Mahakali-4, Khalanga",
+    "phones_e164": [
+      "+97793420221"
+    ],
+    "emails": [
+      "deo.darchula@election.gov.np"
+    ]
+  },
+  {
+    "district": "dailekh",
+    "url": "https://election.gov.np/en/district/dailekh",
+    "address": "Narayan-8, Tartang",
+    "phones_e164": [
+      "+97789410111"
+    ],
+    "emails": [
+      "deo.dailekh@election.gov.np"
+    ]
+  },
+  {
+    "district": "dolakha",
+    "url": "https://election.gov.np/en/district/dolakha",
+    "address": "Bhimeshwor-6, Kalinchowk Marg, Simpani",
+    "phones_e164": [
+      "+97749421443"
+    ],
+    "emails": [
+      "deo.dolakha@election.gov.np"
+    ]
+  },
+  {
+    "district": "dhankuta",
+    "url": "https://election.gov.np/en/district/dhankuta",
+    "address": "Dhankuta-4, Debrebas",
+    "phones_e164": [
+      "+97726522766"
+    ],
+    "emails": [
+      "deo.dhankuta@election.gov.np"
+    ]
+  },
+  {
+    "district": "dhanusha",
+    "url": "https://election.gov.np/en/district/dhanusha",
+    "address": "Janakpurdham-4, Bidhyapati Chowk",
+    "phones_e164": [
+      "+97741523196"
+    ],
+    "emails": [
+      "peo.province2@election.gov.np"
+    ]
+  },
+  {
+    "district": "dhading",
+    "url": "https://election.gov.np/en/district/dhading",
+    "address": "Nilkantha-3, Siran Bajar",
+    "phones_e164": [
+      "+97710520319"
+    ],
+    "emails": [
+      "deo.dhading@election.gov.np"
+    ]
+  },
+  {
+    "district": "nawalparasi-bardaghat-west",
+    "url": "https://election.gov.np/en/district/nawalparasi-bardaghat-west",
+    "address": "Nawalparasi (Bardaghat West) Municipality, Ward-1",
+    "phones_e164": [
+      "+97715328663"
+    ],
+    "emails": [
+      "nawalparasi-bw@election.gov.np"
+    ]
+  },
+  {
+    "district": "nawalparasi-bardaghat-east",
+    "url": "https://election.gov.np/en/district/nawalparasi-bardaghat-east",
+    "address": "Nawalparasi (Bardaghat East), Ward-1",
+    "phones_e164": [
+      "+97715328663"
+    ],
+    "emails": [
+      "nawalparasi-be@election.gov.np"
+    ]
+  },
+  {
+    "district": "nuwakot",
+    "url": "https://election.gov.np/en/district/nuwakot",
+    "address": "Bidur-4, Bidur",
+    "phones_e164": [
+      "+97710560877"
+    ],
+    "emails": [
+      "deo.nuwakot@election.gov.np"
+    ]
+  },
+  {
+    "district": "parbat",
+    "url": "https://election.gov.np/en/district/parbat",
+    "address": "Kushma-5, Badagau",
+    "phones_e164": [
+      "+97767420109"
+    ],
+    "emails": [
+      "deo.parbat@election.gov.np"
+    ]
+  },
+  {
+    "district": "parsa",
+    "url": "https://election.gov.np/en/district/parsa",
+    "address": "Birjung-13, Radhemai",
+    "phones_e164": [
+      "+97751525838"
+    ],
+    "emails": [
+      "deo.parsa@election.gov.np"
+    ]
+  },
+  {
+    "address": null,
+    "phones_e164": [],
+    "emails": [
+      "deo.panchthar@election.gov.np"
+    ],
+    "note": "API returns 500 — email from website footer",
+    "district": "panchthar",
+    "url": "https://election.gov.np/en/district/panchthar"
+  },
+  {
+    "district": "palpa",
+    "url": "https://election.gov.np/en/district/palpa",
+    "address": "Palpa, Ward-1",
+    "phones_e164": [
+      "+97715328663"
+    ],
+    "emails": [
+      "palpa@election.gov.np"
+    ]
+  },
+  {
+    "district": "pyuthan",
+    "url": "https://election.gov.np/en/district/pyuthan",
+    "address": "Pyuthan, Ward-1",
+    "phones_e164": [
+      "+97715328663"
+    ],
+    "emails": [
+      "pyuthan@election.gov.np"
+    ]
+  },
+  {
+    "district": "bajhang",
+    "url": "https://election.gov.np/en/district/bajhang",
+    "address": "Jayaprithivi-10, Prashan Road Chowk",
+    "phones_e164": [
+      "+97792421038"
+    ],
+    "emails": [
+      "deo.bajhang@election.gov.np"
+    ]
+  },
+  {
+    "district": "bardiya",
+    "url": "https://election.gov.np/en/district/bardiya",
+    "address": "Gulariya-6, Hulak Chowk",
+    "phones_e164": [
+      "+97784420503"
+    ],
+    "emails": [
+      "deo.bardiya@election.gov.np"
+    ]
+  },
+  {
+    "district": "banke",
+    "url": "https://election.gov.np/en/district/banke",
+    "address": "Nepaljung-8, Rambagh",
+    "phones_e164": [
+      "+97781530676"
+    ],
+    "emails": [
+      "deo.banke@election.gov.np"
+    ]
+  },
+  {
+    "district": "baglung",
+    "url": "https://election.gov.np/en/district/baglung",
+    "address": "Baglung Municipality, Ward-1",
+    "phones_e164": [
+      "+97715328663"
+    ],
+    "emails": [
+      "baglung@election.gov.np"
+    ]
+  },
+  {
+    "district": "bajura",
+    "url": "https://election.gov.np/en/district/bajura",
+    "address": "Badimalika Municipality, Ward-1",
+    "phones_e164": [
+      "+97797541008"
+    ],
+    "emails": [
+      "bajura@election.gov.np"
+    ]
+  },
+  {
+    "district": "bara",
+    "url": "https://election.gov.np/en/district/bara",
+    "address": "Kalaiya-5, Ghusukapur, Kalaiya",
+    "phones_e164": [
+      "+97753550475"
+    ],
+    "emails": [
+      "deo.bara@election.gov.np"
+    ]
+  },
+  {
+    "district": "baitadi",
+    "url": "https://election.gov.np/en/district/baitadi",
+    "address": "Baitadi Municipality, Ward-1",
+    "phones_e164": [
+      "+97715328663"
+    ],
+    "emails": [
+      "baitadi@election.gov.np"
+    ]
+  },
+  {
+    "address": null,
+    "phones_e164": [],
+    "emails": [
+      "deo.bhaktapur@election.gov.np"
+    ],
+    "note": "API returns 500 — email from website footer",
+    "district": "bhaktapur",
+    "url": "https://election.gov.np/en/district/bhaktapur"
+  },
+  {
+    "district": "bhojpur",
+    "url": "https://election.gov.np/en/district/bhojpur",
+    "address": "Bhojpur-9",
+    "phones_e164": [
+      "+97729420044"
+    ],
+    "emails": [
+      "deo.bhojpur@election.gov.np"
+    ]
+  },
+  {
+    "district": "makwanpur",
+    "url": "https://election.gov.np/en/district/makwanpur",
+    "address": "Hetauda-5, Pushpalal Marg, Sanopokhara",
+    "phones_e164": [
+      "+97757524686"
+    ],
+    "emails": [
+      "deo.makawanpur@election.gov.np"
+    ]
+  },
+  {
+    "district": "manang",
+    "url": "https://election.gov.np/en/district/manang",
+    "address": "Chame-4, Chame Mada",
+    "phones_e164": [
+      "+97766440208"
+    ],
+    "emails": [
+      "deo.manang@election.gov.np"
+    ]
+  },
+  {
+    "district": "mahottari",
+    "url": "https://election.gov.np/en/district/mahottari",
+    "address": "Jaleshwar -2, CDO Office Line",
+    "phones_e164": [
+      "+97744520262"
+    ],
+    "emails": [
+      "deo.mahottari@election.gov.np"
+    ]
+  },
+  {
+    "district": "mugu",
+    "url": "https://election.gov.np/en/district/mugu",
+    "address": "Chhayanath Rara-2,Gamgadhi",
+    "phones_e164": [
+      "+97787550137"
+    ],
+    "emails": [
+      "deo.mugu@election.gov.np"
+    ]
+  },
+  {
+    "district": "mustang",
+    "url": "https://election.gov.np/en/district/mustang",
+    "address": "Mustang, Ward-1",
+    "phones_e164": [
+      "+97715328663"
+    ],
+    "emails": [
+      "mustang@election.gov.np"
+    ]
+  },
+  {
+    "district": "morang",
+    "url": "https://election.gov.np/en/district/morang",
+    "address": "Biratnagar-10, Tintoliya",
+    "phones_e164": [
+      "+97721474990"
+    ],
+    "emails": [
+      "deo.morang@election.gov.np"
+    ]
+  },
+  {
+    "district": "myagdi",
+    "url": "https://election.gov.np/en/district/myagdi",
+    "address": "Beni-7, Mangalghat, Benibajar",
+    "phones_e164": [
+      "+97769520526"
+    ],
+    "emails": [
+      "deo.myagdi@election.gov.np"
+    ]
+  },
+  {
+    "district": "rasuwa",
+    "url": "https://election.gov.np/en/district/rasuwa",
+    "address": "Gosaikunda -6, Dhunche",
+    "phones_e164": [
+      "+97710540154"
+    ],
+    "emails": [
+      "deo.rasuwa@election.gov.np"
+    ]
+  },
+  {
+    "district": "ramechhap",
+    "url": "https://election.gov.np/en/district/ramechhap",
+    "address": "Manthali-1, Buspark",
+    "phones_e164": [
+      "+97748540146"
+    ],
+    "emails": [
+      "deo.ramechhap@election.gov.np"
+    ]
+  },
+  {
+    "district": "rukum-west",
+    "url": "https://election.gov.np/en/district/rukum-west",
+    "address": "Musikot-1, Sahid Maidan",
+    "phones_e164": [
+      "+97788530157"
+    ],
+    "emails": [
+      "deo.rukumwest@election.gov.np"
+    ]
+  },
+  {
+    "district": "rukum-east",
+    "url": "https://election.gov.np/en/district/rukum-east",
+    "address": "Sisne-5, Kamaldaha",
+    "phones_e164": [
+      "+97788413080"
+    ],
+    "emails": [
+      "deo.rukumeast@election.gov.np"
+    ]
+  },
+  {
+    "district": "rupandehi",
+    "url": "https://election.gov.np/en/district/rupandehi",
+    "address": "Siddharthanagar, Ward-1",
+    "phones_e164": [
+      "+97771573712"
+    ],
+    "emails": [
+      "rupandehi@election.gov.np"
+    ]
+  },
+  {
+    "district": "rolpa",
+    "url": "https://election.gov.np/en/district/rolpa",
+    "address": "Rolpa-4, Khadyatole",
+    "phones_e164": [
+      "+97786440129"
+    ],
+    "emails": [
+      "deo.rolpa@election.gov.np"
+    ]
+  },
+  {
+    "district": "rautahat",
+    "url": "https://election.gov.np/en/district/rautahat",
+    "address": "Gaur-1, 2 No. Road, Gaur",
+    "phones_e164": [
+      "+97755520100"
+    ],
+    "emails": [
+      "deo.rautahat@ecn.gov.np"
+    ]
+  },
+  {
+    "district": "lamjung",
+    "url": "https://election.gov.np/en/district/lamjung",
+    "address": "Besishahar-8, Danaiphat, Shera",
+    "phones_e164": [
+      "+97766520132"
+    ],
+    "emails": [
+      "deo.lamjung@election.gov.np"
+    ]
+  },
+  {
+    "district": "lalitpur",
+    "url": "https://election.gov.np/en/district/lalitpur",
+    "address": "Lalitpur-5, Jawalakhel",
+    "phones_e164": [
+      "+97715524425"
+    ],
+    "emails": [
+      "deo.lalitpur@election.gov.np"
+    ]
+  },
+  {
+    "district": "sankhuwasabha",
+    "url": "https://election.gov.np/en/district/sankhuwasabha",
+    "address": "Khandbari-7, Naya Bajar",
+    "phones_e164": [
+      "+97729560273"
+    ],
+    "emails": [
+      "deo.sankhuwasabha@election.gov.np"
+    ]
+  },
+  {
+    "district": "saptari",
+    "url": "https://election.gov.np/en/district/saptari",
+    "address": "Rajbiraj-9, Rupani Road",
+    "phones_e164": [
+      "+97731531453"
+    ],
+    "emails": [
+      "deo.saptari@election.gov.np"
+    ]
+  },
+  {
+    "district": "sarlahi",
+    "url": "https://election.gov.np/en/district/sarlahi",
+    "address": "Malangwa-10, Ji.Bi.Sa Chowk",
+    "phones_e164": [
+      "+97746520447"
+    ],
+    "emails": [
+      "deo.sarlahi@election.gov.np"
+    ]
+  },
+  {
+    "district": "salyan",
+    "url": "https://election.gov.np/en/district/salyan",
+    "address": "Salyan",
+    "phones_e164": [
+      "+97788520190"
+    ],
+    "emails": [
+      "deo.salyan@election.gov.np"
+    ]
+  },
+  {
+    "district": "sindhupalchok",
+    "url": "https://election.gov.np/en/district/sindhupalchok",
+    "address": "Chautara Sangachowk Gadhi-5, Tundikhel, Chautara",
+    "phones_e164": [
+      "+97711620074"
+    ],
+    "emails": [
+      "deo.sindhupalchok@election.gov.np"
+    ]
+  },
+  {
+    "district": "sindhuli",
+    "url": "https://election.gov.np/en/district/sindhuli",
+    "address": "Sindhuli",
+    "phones_e164": [
+      "+97747520322"
+    ],
+    "emails": [
+      "deo.sindhuli@election.gov.np"
+    ]
+  },
+  {
+    "district": "siraha",
+    "url": "https://election.gov.np/en/district/siraha",
+    "address": "Siraha-1, Hem Narayan Chowk",
+    "phones_e164": [
+      "+97733520265"
+    ],
+    "emails": [
+      "deo.siraha@election.gov.np"
+    ]
+  },
+  {
+    "district": "sunsari",
+    "url": "https://election.gov.np/en/district/sunsari",
+    "address": "Inaruwa-1, Bhagawati Marg",
+    "phones_e164": [
+      "+97725565011"
+    ],
+    "emails": [
+      "deo.sunsari@election.gov.np"
+    ]
+  },
+  {
+    "district": "surkhet",
+    "url": "https://election.gov.np/en/district/surkhet",
+    "address": "Birendranagar-7, Ittram",
+    "phones_e164": [
+      "+97783520822"
+    ],
+    "emails": [
+      "deo.surkhet@election.gov.np"
+    ]
+  },
+  {
+    "district": "solukhumbu",
+    "url": "https://election.gov.np/en/district/solukhumbu",
+    "address": "Solududhkunda-5, Salleri",
+    "phones_e164": [
+      "+97738520003"
+    ],
+    "emails": [
+      "deo.solukhumbu@election.gov.np"
+    ]
+  },
+  {
+    "district": "syangja",
+    "url": "https://election.gov.np/en/district/syangja",
+    "address": "Putalibajar-1, Syangja Bajar",
+    "phones_e164": [
+      "+97763424399"
+    ],
+    "emails": [
+      "deo.syangja@election.gov.np"
+    ]
+  },
+  {
+    "district": "humla",
+    "url": "https://election.gov.np/en/district/humla",
+    "address": "Humla, Ward-1",
+    "phones_e164": [
+      "+97715328663"
+    ],
+    "emails": [
+      "humla@election.gov.np"
+    ]
+  }
+]
