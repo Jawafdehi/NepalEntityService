@@ -15,9 +15,14 @@ from pydantic import (
     model_validator,
 )
 
-from nes.core.identifiers import build_entity_id
+from nes.core.identifiers import build_entity_id, build_entity_id_from_prefix
 
-from ..constraints import MAX_SLUG_LENGTH, MIN_SLUG_LENGTH, SLUG_PATTERN
+from ..constraints import (
+    MAX_PREFIX_DEPTH,
+    MAX_SLUG_LENGTH,
+    MIN_SLUG_LENGTH,
+    SLUG_PATTERN,
+)
 from .base import Attribution, Contact, EntityPicture, LangText, Name, NameKind
 from .version import VersionSummary
 
@@ -120,13 +125,21 @@ class Entity(BaseModel, ABC):
         pattern=SLUG_PATTERN,
         description="URL-friendly identifier for the entity",
     )
+    entity_prefix: Optional[str] = Field(
+        None,
+        description=(
+            "N-level classification prefix (e.g. 'organization/nepal_govt/moha'). "
+            "When set, takes precedence over type/sub_type for ID generation. "
+            "Must be 1-MAX_PREFIX_DEPTH slash-separated segments."
+        ),
+    )
     type: EntityType = Field(
         ...,
         description="Type of entity",
     )
     sub_type: Optional[EntitySubType] = Field(
         None,
-        description="Subtype classification for the entity",
+        description="Subtype classification for the entity (deprecated: use entity_prefix)",
     )
     names: List[Name] = Field(
         ..., description="List of names associated with the entity"
@@ -168,10 +181,37 @@ class Entity(BaseModel, ABC):
         None, description="Pictures associated with the entity"
     )
 
+    @field_validator("entity_prefix")
+    @classmethod
+    def validate_entity_prefix_depth(cls, v: Optional[str]) -> Optional[str]:
+        if v is None:
+            return v
+        if not v:
+            raise ValueError("entity_prefix must not be empty")
+        if v.strip() != v:
+            raise ValueError(
+                f"entity_prefix '{v}' must not have leading or trailing whitespace"
+            )
+        segments = v.split("/")
+        if any(s == "" or s.strip() != s or not s.strip() for s in segments):
+            raise ValueError(
+                f"entity_prefix '{v}' contains empty or whitespace-only segments"
+            )
+        depth = len(segments)
+        if depth > MAX_PREFIX_DEPTH:
+            raise ValueError(
+                f"entity_prefix '{v}' has depth {depth} which exceeds "
+                f"MAX_PREFIX_DEPTH={MAX_PREFIX_DEPTH}"
+            )
+        return v
+
     @computed_field
     @property
     def id(self) -> str:
-        # Handle both enum and string types
+        # entity_prefix takes precedence over type/sub_type when set
+        if self.entity_prefix is not None:
+            return build_entity_id_from_prefix(self.entity_prefix, self.slug)
+        # Fallback: backward-compat path using type + sub_type
         type_val = self.type.value if hasattr(self.type, "value") else self.type
         subtype_val = (
             self.sub_type.value
@@ -187,6 +227,19 @@ class Entity(BaseModel, ABC):
             raise ValueError(
                 "Cannot instantiate Entity directly. Use Person, Organization, or Location instead."
             )
+        return self
+
+    @model_validator(mode="after")
+    def validate_entity_prefix_matches_type(self) -> "Entity":
+        """Ensure the first segment of entity_prefix matches the declared type."""
+        if self.entity_prefix is not None:
+            prefix_root = self.entity_prefix.split("/")[0]
+            type_val = self.type.value if hasattr(self.type, "value") else self.type
+            if prefix_root != type_val:
+                raise ValueError(
+                    f"entity_prefix '{self.entity_prefix}' root '{prefix_root}' "
+                    f"does not match entity type '{type_val}'"
+                )
         return self
 
     @field_validator("names")

@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Nepal Entity Service uses a file-based database stored in the `nes-db` directory, which is managed as a Git submodule pointing to the [NepalEntityService-database](https://github.com/NewNepal-org/NepalEntityService-database) repository.
+The Nepal Entity Service uses a file-based database. The database is managed in a separate repository ([NepalEntityService-database](https://github.com/NewNepal-org/NepalEntityService-database)). You must clone it locally and set its path via an environment variable.
 
 ## Configuration
 
@@ -72,23 +72,18 @@ NES_DB_URL=file:///app/nes-db/v2
 NES_DB_URL=file+memcached:///app/nes-db/v2
 ```
 
-## Git Submodule Setup
+## Database Repository Setup
 
-### Initial Clone
+### Cloning the Database
 
-When cloning the repository for the first time, initialize the submodule:
-
-```bash
-git clone git@github.com:NewNepal-org/NepalEntityService.git
-cd NepalEntityService
-git submodule init
-git submodule update
-```
-
-Or clone with submodules in one command:
+Clone the database repository to a location of your choice:
 
 ```bash
-git clone --recurse-submodules git@github.com:NewNepal-org/NepalEntityService.git
+# Recommended: Shallow clone for local development (faster)
+git clone --depth 1 git@github.com:NewNepal-org/NepalEntityService-database.git ./nes-db
+
+# Or full clone if you plan to contribute data changes:
+git clone git@github.com:NewNepal-org/NepalEntityService-database.git ./nes-db
 ```
 
 ### Updating the Database
@@ -96,7 +91,9 @@ git clone --recurse-submodules git@github.com:NewNepal-org/NepalEntityService.gi
 To pull the latest database changes:
 
 ```bash
-git submodule update --remote nes-db
+cd nes-db
+git pull origin main
+cd ..
 ```
 
 ### Committing Database Changes
@@ -104,29 +101,18 @@ git submodule update --remote nes-db
 If you make changes to the database that should be shared:
 
 ```bash
-# Navigate to the submodule
+# Navigate to the database repository
 cd nes-db
 
 # Commit and push changes
 git add .
 git commit -m "Update database"
 git push origin main
-
-# Return to main repository
-cd ..
-
-# Commit the submodule reference update
-git add nes-db
-git commit -m "Update database submodule reference"
-git push
 ```
 
 ## Docker Setup
 
-The Dockerfile automatically:
-1. Copies the `nes-db` directory into the container
-2. Creates the `nes-db/v2` directory if it doesn't exist
-3. Sets `DATABASE_URL=file:///app/nes-db/v2` as the default
+The Dockerfile automatically fetches a shallow clone of the database during the build process to ensure the container has the necessary data to run. 
 
 ### Building with Docker
 
@@ -134,12 +120,12 @@ The Dockerfile automatically:
 # Build the image
 docker build -t nepal-entity-service .
 
-# Run with default database
+# Run with default database (uses the clone fetched during build)
 docker run -p 8195:8195 nepal-entity-service
 
-# Run with custom database path (mount volume)
+# Run with custom local database path (mount volume)
 docker run -p 8195:8195 \
-  -v /path/to/your/database:/app/nes-db/v2 \
+  -v /path/to/your/local/nes-db/v2:/app/nes-db/v2 \
   -e NES_DB_URL=file:///app/nes-db/v2 \
   nepal-entity-service
 ```
@@ -148,8 +134,7 @@ docker run -p 8195:8195 \
 
 ```
 NepalEntityService/
-├── nes-db/                    # Git submodule
-│   ├── .git                   # Submodule git metadata
+├── nes-db/                    # Separate database repository
 │   ├── README.md              # Database repository README
 │   └── v2/                    # Version 2 database files
 │       ├── entities/          # Entity JSON files
@@ -163,13 +148,13 @@ NepalEntityService/
 
 ## Troubleshooting
 
-### Submodule Not Initialized
+### Database Repository Not Found
 
-If the `nes-db` directory is empty:
+If you get a file not found error when starting the application, ensure you have cloned the database repository and properly set your `NES_DB_URL`:
 
 ```bash
-git submodule init
-git submodule update
+git clone --depth 1 git@github.com:NewNepal-org/NepalEntityService-database.git ./nes-db
+export NES_DB_URL=file://$(pwd)/nes-db/v2
 ```
 
 ### Permission Issues
@@ -211,13 +196,14 @@ NES_DB_URL=postgres://localhost/nes-db
 
 1. **Start with latest database:**
    ```bash
-   git submodule update --remote nes-db
+   cd nes-db && git pull origin main && cd ..
    ```
 
 2. **Set up environment:**
    ```bash
    cp .env.example .env
-   # Edit .env with your absolute path
+   # Edit .env and SET NES_DB_URL to your absolute path!
+   # Example: export NES_DB_URL=file://$(pwd)/nes-db/v2
    ```
 
 3. **Run the service:**
@@ -234,6 +220,4 @@ NES_DB_URL=postgres://localhost/nes-db
    git commit -m "Add new entities"
    git push
    cd ..
-   git add nes-db
-   git commit -m "Update database reference"
    ```

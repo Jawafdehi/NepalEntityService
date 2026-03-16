@@ -2,13 +2,7 @@
 
 import re
 
-from ..constraints import (
-    MAX_SLUG_LENGTH,
-    MAX_SUBTYPE_LENGTH,
-    MAX_TYPE_LENGTH,
-    MIN_SLUG_LENGTH,
-    SLUG_PATTERN,
-)
+from ..constraints import MAX_SLUG_LENGTH, MIN_SLUG_LENGTH, SLUG_PATTERN
 from .builders import (
     break_author_id,
     break_entity_id,
@@ -36,10 +30,10 @@ def is_valid_entity_id(entity_id: str) -> bool:
 def validate_entity_id(entity_id: str) -> str:
     """Validate entity ID and return it if valid, raise ValueError if not.
 
-    Validates against the same rules as the Entity model:
-    - Type must match ENTITY_TYPE_PATTERN and length constraints
-    - Subtype (if present) must match ENTITY_SUBTYPE_PATTERN and length constraints
-    - Slug must match SLUG_PATTERN and length constraints
+    Validates:
+    - Format: must start with "entity:" and have 1-MAX_PREFIX_DEPTH prefix segments + slug
+    - Prefix: must be present in ALLOWED_ENTITY_PREFIXES
+    - Slug: must match SLUG_PATTERN and length constraints
 
     Args:
         entity_id: The entity ID string to validate
@@ -48,35 +42,21 @@ def validate_entity_id(entity_id: str) -> str:
         The validated entity ID
 
     Raises:
-        ValueError: If the entity ID format is invalid
+        ValueError: If the entity ID format or prefix is invalid
     """
-    from nes.core.models.entity import EntitySubType, EntityType
-    from nes.core.models.entity_type_map import ENTITY_TYPE_MAP
+    from nes.core.models.entity_type_map import ALLOWED_ENTITY_PREFIXES
 
     try:
         components = break_entity_id(entity_id)
     except ValueError as e:
         raise ValueError(f"Invalid entity ID format: {entity_id}") from e
 
-    # Validate type
-    if len(components.type) > MAX_TYPE_LENGTH:
-        raise ValueError(f"Entity type too long: {components.type}")
-    if components.type not in EntityType:
-        raise ValueError(f"Unsupported entity type {components.type}.")
-
-    entity_type = EntityType(components.type)
-
-    # Validate subtype if present
-    if components.subtype is not None:
-        if components.subtype not in EntitySubType:
-            raise ValueError(f"Unsupported entity sub type {components.subtype}.")
-
-        entity_subtype = EntitySubType(components.subtype)
-
-        if entity_subtype not in ENTITY_TYPE_MAP[entity_type]:
-            raise ValueError(
-                f"Entity subtype {components.subtype} not supported for entity type {entity_type}."
-            )
+    # Validate prefix against the canonical registry
+    if components.prefix not in ALLOWED_ENTITY_PREFIXES:
+        raise ValueError(
+            f"Entity prefix '{components.prefix}' is not allowed. "
+            f"Add it to ALLOWED_ENTITY_PREFIXES in nes/core/models/entity_type_map.py."
+        )
 
     # Validate slug
     if len(components.slug) < MIN_SLUG_LENGTH or len(components.slug) > MAX_SLUG_LENGTH:

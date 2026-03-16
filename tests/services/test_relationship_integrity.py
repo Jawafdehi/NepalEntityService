@@ -15,7 +15,6 @@ from typing import Any, Dict, List
 
 import pytest
 
-from nes.core.models.entity import EntitySubType, EntityType
 from nes.core.models.relationship import Relationship
 from nes.database.file_database import FileDatabase
 
@@ -35,15 +34,13 @@ class TestEntityExistenceValidation:
         target_data = {
             "slug": "target-org",
             "type": "organization",
-            "sub_type": "political_party",
             "names": [{"kind": "PRIMARY", "en": {"full": "Target Org"}}],
         }
         target = await service.create_entity(
-            EntityType.ORGANIZATION,
-            target_data,
-            "author:test",
-            "Test",
-            EntitySubType.POLITICAL_PARTY,
+            entity_prefix="organization/political_party",
+            entity_data=target_data,
+            author_id="author:test",
+            change_description="Test",
         )
 
         # Try to create relationship with nonexistent source
@@ -71,7 +68,10 @@ class TestEntityExistenceValidation:
             "names": [{"kind": "PRIMARY", "en": {"full": "Source Person"}}],
         }
         source = await service.create_entity(
-            EntityType.PERSON, source_data, "author:test", "Test"
+            entity_prefix="person",
+            entity_data=source_data,
+            author_id="author:test",
+            change_description="Test",
         )
 
         # Try to create relationship with nonexistent target
@@ -119,19 +119,20 @@ class TestEntityExistenceValidation:
         target_data = {
             "slug": "valid-org",
             "type": "organization",
-            "sub_type": "political_party",
             "names": [{"kind": "PRIMARY", "en": {"full": "Valid Org"}}],
         }
 
         source = await service.create_entity(
-            EntityType.PERSON, source_data, "author:test", "Test"
+            entity_prefix="person",
+            entity_data=source_data,
+            author_id="author:test",
+            change_description="Test",
         )
         target = await service.create_entity(
-            EntityType.ORGANIZATION,
-            target_data,
-            "author:test",
-            "Test",
-            EntitySubType.POLITICAL_PARTY,
+            entity_prefix="organization/political_party",
+            entity_data=target_data,
+            author_id="author:test",
+            change_description="Test",
         )
 
         # Create relationship should succeed
@@ -167,7 +168,10 @@ class TestCircularRelationshipDetection:
             "names": [{"kind": "PRIMARY", "en": {"full": "Self Ref"}}],
         }
         entity = await service.create_entity(
-            EntityType.PERSON, entity_data, "author:test", "Test"
+            entity_prefix="person",
+            entity_data=entity_data,
+            author_id="author:test",
+            change_description="Test",
         )
 
         # Check for circular relationship (entity to itself)
@@ -202,10 +206,16 @@ class TestCircularRelationshipDetection:
         }
 
         person_a = await service.create_entity(
-            EntityType.PERSON, person_a_data, "author:test", "Test"
+            entity_prefix="person",
+            entity_data=person_a_data,
+            author_id="author:test",
+            change_description="Test",
         )
         person_b = await service.create_entity(
-            EntityType.PERSON, person_b_data, "author:test", "Test"
+            entity_prefix="person",
+            entity_data=person_b_data,
+            author_id="author:test",
+            change_description="Test",
         )
 
         # Create relationship A -> B
@@ -247,7 +257,10 @@ class TestCircularRelationshipDetection:
                 ],
             }
             entity = await service.create_entity(
-                EntityType.PERSON, entity_data, "author:test", "Test"
+                entity_prefix="person",
+                entity_data=entity_data,
+                author_id="author:test",
+                change_description="Test",
             )
             entities.append(entity)
 
@@ -298,7 +311,10 @@ class TestCircularRelationshipDetection:
                 ],
             }
             entity = await service.create_entity(
-                EntityType.PERSON, entity_data, "author:test", "Test"
+                entity_prefix="person",
+                entity_data=entity_data,
+                author_id="author:test",
+                change_description="Test",
             )
             entities.append(entity)
 
@@ -347,19 +363,20 @@ class TestCircularRelationshipDetection:
         org_data = {
             "slug": "member-org",
             "type": "organization",
-            "sub_type": "political_party",
             "names": [{"kind": "PRIMARY", "en": {"full": "Member Org"}}],
         }
 
         person = await service.create_entity(
-            EntityType.PERSON, person_data, "author:test", "Test"
+            entity_prefix="person",
+            entity_data=person_data,
+            author_id="author:test",
+            change_description="Test",
         )
         org = await service.create_entity(
-            EntityType.ORGANIZATION,
-            org_data,
-            "author:test",
-            "Test",
-            EntitySubType.POLITICAL_PARTY,
+            entity_prefix="organization/political_party",
+            entity_data=org_data,
+            author_id="author:test",
+            change_description="Test",
         )
 
         # Create relationship person -> org (MEMBER_OF)
@@ -404,19 +421,20 @@ class TestConstraintValidation:
         org_data = {
             "slug": "temporal-org",
             "type": "organization",
-            "sub_type": "political_party",
             "names": [{"kind": "PRIMARY", "en": {"full": "Temporal Org"}}],
         }
 
         person = await service.create_entity(
-            EntityType.PERSON, person_data, "author:test", "Test"
+            entity_prefix="person",
+            entity_data=person_data,
+            author_id="author:test",
+            change_description="Test",
         )
         org = await service.create_entity(
-            EntityType.ORGANIZATION,
-            org_data,
-            "author:test",
-            "Test",
-            EntitySubType.POLITICAL_PARTY,
+            entity_prefix="organization/political_party",
+            entity_data=org_data,
+            author_id="author:test",
+            change_description="Test",
         )
 
         # Try to create relationship with end_date before start_date
@@ -448,19 +466,20 @@ class TestConstraintValidation:
         org_data = {
             "slug": "type-org",
             "type": "organization",
-            "sub_type": "political_party",
             "names": [{"kind": "PRIMARY", "en": {"full": "Type Org"}}],
         }
 
         person = await service.create_entity(
-            EntityType.PERSON, person_data, "author:test", "Test"
+            entity_prefix="person",
+            entity_data=person_data,
+            author_id="author:test",
+            change_description="Test",
         )
         org = await service.create_entity(
-            EntityType.ORGANIZATION,
-            org_data,
-            "author:test",
-            "Test",
-            EntitySubType.POLITICAL_PARTY,
+            entity_prefix="organization/political_party",
+            entity_data=org_data,
+            author_id="author:test",
+            change_description="Test",
         )
 
         # Try to create relationship with invalid type
@@ -491,19 +510,20 @@ class TestConstraintValidation:
         org_data = {
             "slug": "dup-org",
             "type": "organization",
-            "sub_type": "political_party",
             "names": [{"kind": "PRIMARY", "en": {"full": "Dup Org"}}],
         }
 
         person = await service.create_entity(
-            EntityType.PERSON, person_data, "author:test", "Test"
+            entity_prefix="person",
+            entity_data=person_data,
+            author_id="author:test",
+            change_description="Test",
         )
         org = await service.create_entity(
-            EntityType.ORGANIZATION,
-            org_data,
-            "author:test",
-            "Test",
-            EntitySubType.POLITICAL_PARTY,
+            entity_prefix="organization/political_party",
+            entity_data=org_data,
+            author_id="author:test",
+            change_description="Test",
         )
 
         # Create first relationship
@@ -543,19 +563,20 @@ class TestConstraintValidation:
         org_data = {
             "slug": "multi-rel-org",
             "type": "organization",
-            "sub_type": "political_party",
             "names": [{"kind": "PRIMARY", "en": {"full": "Multi Rel Org"}}],
         }
 
         person = await service.create_entity(
-            EntityType.PERSON, person_data, "author:test", "Test"
+            entity_prefix="person",
+            entity_data=person_data,
+            author_id="author:test",
+            change_description="Test",
         )
         org = await service.create_entity(
-            EntityType.ORGANIZATION,
-            org_data,
-            "author:test",
-            "Test",
-            EntitySubType.POLITICAL_PARTY,
+            entity_prefix="organization/political_party",
+            entity_data=org_data,
+            author_id="author:test",
+            change_description="Test",
         )
 
         # Create first relationship
@@ -594,15 +615,16 @@ class TestIntegrityCheckCLI:
         assert result.exit_code == 0
         assert "integrity" in result.output.lower()
 
-    def test_integrity_check_reports_orphaned_relationships(self, temp_db_path):
+    def test_integrity_check_reports_orphaned_relationships(
+        self, temp_db_path, monkeypatch
+    ):
         """Test that integrity check reports relationships with missing entities."""
         from click.testing import CliRunner
 
         from nes.cli import cli
-        from nes.config import Config
 
         # Set up database path
-        Config.DB_PATH = str(temp_db_path)
+        monkeypatch.setenv("NES_DB_URL", f"file://{temp_db_path}")
 
         runner = CliRunner()
         result = runner.invoke(cli, ["integrity", "check"])
@@ -610,14 +632,15 @@ class TestIntegrityCheckCLI:
         # Should complete successfully (no issues in empty database)
         assert result.exit_code == 0
 
-    def test_integrity_check_reports_circular_relationships(self, temp_db_path):
+    def test_integrity_check_reports_circular_relationships(
+        self, temp_db_path, monkeypatch
+    ):
         """Test that integrity check reports circular relationships."""
         import asyncio
 
         from click.testing import CliRunner
 
         from nes.cli import cli
-        from nes.config import Config
         from nes.database.file_database import FileDatabase
         from nes.services.publication import PublicationService
 
@@ -639,10 +662,16 @@ class TestIntegrityCheckCLI:
             }
 
             person_a = await service.create_entity(
-                EntityType.PERSON, person_a_data, "author:test", "Test"
+                entity_prefix="person",
+                entity_data=person_a_data,
+                author_id="author:test",
+                change_description="Test",
             )
             person_b = await service.create_entity(
-                EntityType.PERSON, person_b_data, "author:test", "Test"
+                entity_prefix="person",
+                entity_data=person_b_data,
+                author_id="author:test",
+                change_description="Test",
             )
 
             # Create circular relationships (A supervises B, B supervises A)
@@ -666,22 +695,23 @@ class TestIntegrityCheckCLI:
         asyncio.run(setup_circular_relationships())
 
         # Run integrity check
-        Config.DB_PATH = str(temp_db_path)
+        monkeypatch.setenv("NES_DB_URL", f"file://{temp_db_path}")
         runner = CliRunner()
         result = runner.invoke(cli, ["integrity", "check"])
 
         # Should report circular relationships
         assert "circular" in result.output.lower() or "cycle" in result.output.lower()
 
-    def test_integrity_check_reports_duplicate_relationships(self, temp_db_path):
+    def test_integrity_check_reports_duplicate_relationships(
+        self, temp_db_path, monkeypatch
+    ):
         """Test that integrity check reports duplicate relationships."""
         from click.testing import CliRunner
 
         from nes.cli import cli
-        from nes.config import Config
 
         # Set up database path
-        Config.DB_PATH = str(temp_db_path)
+        monkeypatch.setenv("NES_DB_URL", f"file://{temp_db_path}")
 
         runner = CliRunner()
         result = runner.invoke(cli, ["integrity", "check"])
@@ -701,17 +731,16 @@ class TestIntegrityCheckCLI:
         # Should have --fix option
         assert "--fix" in result.output or "--repair" in result.output
 
-    def test_integrity_check_json_output(self, temp_db_path):
+    def test_integrity_check_json_output(self, temp_db_path, monkeypatch):
         """Test that integrity check can output JSON format."""
         import json
 
         from click.testing import CliRunner
 
         from nes.cli import cli
-        from nes.config import Config
 
         # Set up database path
-        Config.DB_PATH = str(temp_db_path)
+        monkeypatch.setenv("NES_DB_URL", f"file://{temp_db_path}")
 
         runner = CliRunner()
         result = runner.invoke(cli, ["integrity", "check", "--json"])

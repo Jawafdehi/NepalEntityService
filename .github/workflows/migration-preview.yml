@@ -17,8 +17,13 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          submodules: recursive
           token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Checkout nes-db
+        uses: actions/checkout@v4
+        with:
+          repository: NewNepal-org/NepalEntityService-database
+          path: nes-db
       
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -33,14 +38,14 @@ jobs:
       
       - name: Show pending migrations
         run: |
-          export NES_DB_PATH=./nes-db
+          export NES_DB_URL=file://${{ github.workspace }}/nes-db/v2
           nes migration list --pending
       
       - name: Run migrations
         id: run
         continue-on-error: true
         run: |
-          export NES_DB_PATH=./nes-db
+          export NES_DB_URL=file://${{ github.workspace }}/nes-db/v2
           echo y | nes migration run --all 2>&1 | tee migration_output.txt
           echo "exit_code=$?" >> $GITHUB_OUTPUT
 

@@ -46,7 +46,7 @@ async def test_database(tmp_path):
     ram_poudel = get_politician_entity("ram-chandra-poudel")
     ram_poudel.pop("sub_type", None)
     await pub_service.create_entity(
-        entity_type=EntityType.PERSON,
+        entity_prefix="person",
         entity_data=ram_poudel,
         author_id="author:test-setup",
         change_description="Test data setup",
@@ -55,7 +55,7 @@ async def test_database(tmp_path):
     sher_deuba = get_politician_entity("sher-bahadur-deuba")
     sher_deuba.pop("sub_type", None)
     await pub_service.create_entity(
-        entity_type=EntityType.PERSON,
+        entity_prefix="person",
         entity_data=sher_deuba,
         author_id="author:test-setup",
         change_description="Test data setup",
@@ -64,7 +64,7 @@ async def test_database(tmp_path):
     kp_oli = get_politician_entity("khadga-prasad-oli")
     kp_oli.pop("sub_type", None)
     await pub_service.create_entity(
-        entity_type=EntityType.PERSON,
+        entity_prefix="person",
         entity_data=kp_oli,
         author_id="author:test-setup",
         change_description="Test data setup",
@@ -73,20 +73,18 @@ async def test_database(tmp_path):
     # Political parties
     nepali_congress = get_party_entity("nepali-congress")
     await pub_service.create_entity(
-        entity_type=EntityType.ORGANIZATION,
+        entity_prefix="organization/political_party",
         entity_data=nepali_congress,
         author_id="author:test-setup",
         change_description="Test data setup",
-        entity_subtype=EntitySubType.POLITICAL_PARTY,
     )
 
     cpn_uml = get_party_entity("cpn-uml")
     await pub_service.create_entity(
-        entity_type=EntityType.ORGANIZATION,
+        entity_prefix="organization/political_party",
         entity_data=cpn_uml,
         author_id="author:test-setup",
         change_description="Test data setup",
-        entity_subtype=EntitySubType.POLITICAL_PARTY,
     )
 
     # Create relationships
@@ -436,31 +434,7 @@ class TestVersionEndpoints:
 
 
 class TestSchemaEndpoints:
-    """Tests for /api/schemas endpoint."""
-
-    @pytest.mark.asyncio
-    async def test_get_entity_schemas(self, client):
-        """Test getting available entity types and subtypes."""
-        response = await client.get("/api/schemas")
-
-        assert response.status_code == 200
-        data = response.json()
-
-        assert "entity_types" in data
-        assert "person" in data["entity_types"]
-        assert "organization" in data["entity_types"]
-        assert "location" in data["entity_types"]
-
-        # Check organization subtypes
-        org_subtypes = data["entity_types"]["organization"]["subtypes"]
-        assert "political_party" in org_subtypes
-        assert "government_body" in org_subtypes
-
-        # Check location subtypes
-        loc_subtypes = data["entity_types"]["location"]["subtypes"]
-        assert "province" in loc_subtypes
-        assert "district" in loc_subtypes
-        assert "metropolitan_city" in loc_subtypes
+    """Tests for /api/entity_prefixes and /api/schemas/relationships endpoints."""
 
     @pytest.mark.asyncio
     async def test_get_relationship_types(self, client):
@@ -474,6 +448,70 @@ class TestSchemaEndpoints:
         assert "MEMBER_OF" in data["relationship_types"]
         assert "AFFILIATED_WITH" in data["relationship_types"]
         assert "EMPLOYED_BY" in data["relationship_types"]
+
+    @pytest.mark.asyncio
+    async def test_list_entity_prefixes(self, client):
+        """Test listing all available entity prefixes."""
+        response = await client.get("/api/entity_prefixes")
+
+        assert response.status_code == 200
+        data = response.json()
+
+        assert "prefixes" in data
+        prefixes = data["prefixes"]
+
+        # Check that prefixes is a list
+        assert isinstance(prefixes, list)
+        assert len(prefixes) > 0
+
+        # Check that key prefixes exist
+        assert "person" in prefixes
+        assert "organization" in prefixes
+        assert "organization/political_party" in prefixes
+        assert "location" in prefixes
+        assert "location/province" in prefixes
+        assert "project" in prefixes
+
+    @pytest.mark.asyncio
+    async def test_get_entity_prefix_schema(self, client):
+        """Test getting schema for a specific entity prefix."""
+        # Test with person prefix
+        response = await client.get("/api/entity_prefixes/person/schema")
+
+        assert response.status_code == 200
+        data = response.json()
+
+        assert "prefix" in data
+        assert "description" in data
+        assert "json_schema" in data
+
+        assert data["prefix"] == "person"
+        assert isinstance(data["description"], str)
+        assert len(data["description"]) > 0
+
+        # Check that json_schema has expected structure
+        schema = data["json_schema"]
+        assert "properties" in schema
+        assert "required" in schema
+        assert "type" in schema
+
+        # Test with organization/political_party prefix
+        response = await client.get(
+            "/api/entity_prefixes/organization/political_party/schema"
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert data["prefix"] == "organization/political_party"
+
+    @pytest.mark.asyncio
+    async def test_get_entity_prefix_schema_not_found(self, client):
+        """Test getting schema for non-existent prefix returns 404."""
+        response = await client.get("/api/entity_prefixes/invalid_prefix/schema")
+
+        assert response.status_code == 404
+        data = response.json()
+        assert "detail" in data
+        assert "not found" in data["detail"].lower()
 
 
 # ============================================================================

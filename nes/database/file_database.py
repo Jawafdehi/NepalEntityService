@@ -20,19 +20,11 @@ from datetime import date, datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
-from nes.core.models.entity import Entity, EntitySubType, EntityType
-from nes.core.models.entity_type_map import ENTITY_TYPE_MAP
-from nes.core.models.location import Location
-from nes.core.models.organization import (
-    GovernmentBody,
-    Hospital,
-    Organization,
-    PoliticalParty,
-)
-from nes.core.models.person import Person
-from nes.core.models.project import Project
+from nes.core.models.entity import Entity
+from nes.core.models.entity_type_map import ALLOWED_ENTITY_PREFIXES, ENTITY_PREFIX_MAP
 from nes.core.models.relationship import Relationship
 from nes.core.models.version import Author, Version
+from nes.core.utils.entity_utils import entity_from_dict
 
 from .entity_database import EntityDatabase
 
@@ -471,6 +463,7 @@ class FileDatabase(EntityDatabase):
         sub_type: Optional[str] = None,
         attr_filters: Optional[Dict[str, Union[str, int, float, bool]]] = None,
         tags: Optional[List[str]] = None,
+        entity_prefix: Optional[str] = None,
         limit: int = 100,
         offset: int = 0,
     ) -> List[Entity]:
@@ -478,7 +471,7 @@ class FileDatabase(EntityDatabase):
 
         Performs case-insensitive text search across entity name fields
         (both English and Nepali). Supports filtering by type, subtype,
-        attributes, and tags. Results are ranked by relevance.
+        attributes, tags, and entity_prefix. Results are ranked by relevance.
 
         Args:
             query: Text query to search for in entity names (case-insensitive)
@@ -486,14 +479,26 @@ class FileDatabase(EntityDatabase):
             sub_type: Filter by entity subtype
             attr_filters: Filter by entity attributes (AND logic)
             tags: Filter by tags (AND logic - entity must have ALL specified tags)
+            entity_prefix: Filter by N-level prefix using startswith logic
+                (e.g. 'organization/nepal_govt' matches 'organization/nepal_govt/moha')
             limit: Maximum number of entities to return
             offset: Number of entities to skip
 
         Returns:
             List of entities matching the search criteria, ranked by relevance
         """
+        # Derive entity_type and sub_type from entity_prefix when not explicitly given
+        effective_type = entity_type
+        effective_sub_type = sub_type
+        if entity_prefix:
+            segments = entity_prefix.split("/")
+            if not entity_type:
+                effective_type = segments[0]
+            if not sub_type and len(segments) >= 2:
+                effective_sub_type = segments[1]
+
         # Build search path based on type/subtype
-        search_path = self._build_entity_search_path(entity_type, sub_type)
+        search_path = self._build_entity_search_path(effective_type, effective_sub_type)
 
         # If search path doesn't exist, return empty list
         if not search_path.exists():
@@ -512,6 +517,25 @@ class FileDatabase(EntityDatabase):
                 entity = self._load_and_filter_entity(file_path, attr_filters)
                 if not entity:
                     continue
+
+                # Apply entity_prefix filter (startswith logic)
+                if entity_prefix is not None:
+                    ep = entity.entity_prefix
+                    if ep is None:
+                        # Fallback for legacy entities that predate entity_prefix
+                        type_val = (
+                            entity.type.value
+                            if hasattr(entity.type, "value")
+                            else entity.type
+                        )
+                        sub_val = (
+                            entity.sub_type.value
+                            if (entity.sub_type and hasattr(entity.sub_type, "value"))
+                            else entity.sub_type
+                        )
+                        ep = type_val if sub_val is None else f"{type_val}/{sub_val}"
+                    if not (ep == entity_prefix or ep.startswith(entity_prefix + "/")):
+                        continue
 
                 # Apply tag filtering (AND logic - entity must have ALL specified tags)
                 if tags and len(tags) > 0:
@@ -639,6 +663,9 @@ class FileDatabase(EntityDatabase):
     def _entity_from_dict(self, data: dict) -> Entity:
         """Convert a dictionary to an Entity instance.
 
+        This method handles backward compatibility for entities that use the old
+        'type' and 'sub_type' fields instead of 'entity_prefix'.
+
         Args:
             data: Dictionary representation of an entity
 
@@ -647,34 +674,45 @@ class FileDatabase(EntityDatabase):
 
         Raises:
             ValueError: If entity type is invalid
-            KeyError: If entity type/subtype combination is not found
+            pydantic.ValidationError: If data fails validation
         """
-        if "type" not in data:
-            raise ValueError("Entity must have a 'type' field")
+        # Determine entity_prefix for class lookup
+        entity_prefix = data.get("entity_prefix")
 
-        entity_type = EntityType(data["type"])
-        entity_subtype = (
-            EntitySubType(data["sub_type"]) if data.get("sub_type") else None
-        )
+        if entity_prefix is None:
+            # Backward compatibility: construct entity_prefix from type and sub_type
+            # for class lookup only, without modifying the original data
+            if "type" not in data:
+                raise ValueError(
+                    "Entity must have either 'entity_prefix' or 'type' field"
+                )
 
-        # Determine the correct entity class based on type and subtype
-        if entity_type == EntityType.PERSON:
-            return Person.model_validate(data)
-        elif entity_type == EntityType.ORGANIZATION:
-            if entity_subtype == EntitySubType.POLITICAL_PARTY:
-                return PoliticalParty.model_validate(data)
-            elif entity_subtype == EntitySubType.GOVERNMENT_BODY:
-                return GovernmentBody.model_validate(data)
-            elif entity_subtype == EntitySubType.HOSPITAL:
-                return Hospital.model_validate(data)
+            entity_type = data["type"]
+            entity_subtype = data.get("sub_type")
+
+            if entity_subtype:
+                lookup_prefix = f"{entity_type}/{entity_subtype}"
             else:
-                return Organization.model_validate(data)
-        elif entity_type == EntityType.LOCATION:
-            return Location.model_validate(data)
-        elif entity_type == EntityType.PROJECT:
-            return Project.model_validate(data)
-        else:
-            raise ValueError(f"Unknown entity type: {entity_type}")
+                lookup_prefix = entity_type
+
+            # Look up the entity class directly
+            entity_class = ENTITY_PREFIX_MAP.get(lookup_prefix)
+
+            if entity_class is None:
+                # Try matching just the base type
+                entity_class = ENTITY_PREFIX_MAP.get(entity_type)
+
+                if entity_class is None:
+                    raise ValueError(
+                        f"Unknown entity type/subtype: '{lookup_prefix}'. "
+                        f"Supported prefixes: {', '.join(sorted(ALLOWED_ENTITY_PREFIXES))}"
+                    )
+
+            # Validate using the determined class, preserving entity_prefix: None
+            return entity_class.model_validate(data)
+
+        # New-style entity with entity_prefix set - use entity_from_dict
+        return entity_from_dict(data)
 
     # ========================================================================
     # Relationship CRUD Operations

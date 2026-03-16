@@ -33,6 +33,8 @@ class Organization(Entity):
         default="organization", description="Entity type, always organization"
     )
 
+    address: Optional[Address] = Field(None, description="Organization address")
+
 
 class PartySymbol(BaseModel):
     """Political party symbol."""
@@ -53,7 +55,6 @@ class PoliticalParty(Organization):
         default=EntitySubType.POLITICAL_PARTY,
         description="Organization subtype, always political_party",
     )
-    address: Optional[Address] = Field(None, description="Party headquarters address")
     party_chief: Optional[LangText] = Field(
         None, description="Party chief or main official"
     )
@@ -87,4 +88,3 @@ class Hospital(Organization):
     ownership: Optional[OwnershipType] = Field(
         None, description="Ownership type (Public/Private/Government)"
     )
-    address: Optional[Address] = Field(None, description="Hospital address")

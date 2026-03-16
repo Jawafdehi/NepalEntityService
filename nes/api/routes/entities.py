@@ -20,6 +20,7 @@ from nes.api.responses import (
     VersionListResponse,
 )
 from nes.core.models.entity import EntityType
+from nes.core.models.entity_type_map import ALLOWED_ENTITY_PREFIXES
 from nes.services.search import SearchService
 
 logger = logging.getLogger(__name__)
@@ -36,9 +37,20 @@ async def list_entities(
         None, description="Text query to search in entity names"
     ),
     entity_type: Optional[str] = Query(
-        None, description="Filter by entity type (person, organization, location)"
+        None,
+        description="(Deprecated: use entity_prefix) Filter by entity type (person, organization, location)",
     ),
-    sub_type: Optional[str] = Query(None, description="Filter by entity subtype"),
+    sub_type: Optional[str] = Query(
+        None, description="(Deprecated: use entity_prefix) Filter by entity subtype"
+    ),
+    entity_prefix: Optional[str] = Query(
+        None,
+        description=(
+            "Filter by N-level entity prefix using startswith logic "
+            "(e.g. 'organization/nepal_govt' matches all nepal_govt children). "
+            "Must be a value registered in ALLOWED_ENTITY_PREFIXES."
+        ),
+    ),
     attributes: Optional[str] = Query(
         None, description="Filter by attributes (JSON object)"
     ),
@@ -67,11 +79,19 @@ async def list_entities(
     - /api/entities?attributes={"party":"nepali-congress"} - Filter by attributes
     - /api/entities?tags=politician,senior-leader - Filter by tags (AND logic)
     """
+    if entity_type is not None or sub_type is not None:
+        logger.warning(
+            "Deprecated filter used: entity_type=%s sub_type=%s — use entity_prefix instead",
+            entity_type,
+            sub_type,
+        )
+
     # Validate mutually exclusive parameters
     other_params = [
         query,
         entity_type,
         sub_type,
+        entity_prefix,
         attributes,
         tags,
         limit != 100,
@@ -106,6 +126,22 @@ async def list_entities(
             },
         )
 
+    # Validate entity_prefix if provided
+    if entity_prefix is not None:
+        if entity_prefix not in ALLOWED_ENTITY_PREFIXES:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={
+                    "error": {
+                        "code": "INVALID_ENTITY_PREFIX",
+                        "message": (
+                            f"Invalid entity_prefix: '{entity_prefix}'. "
+                            "Must be a registered prefix in ALLOWED_ENTITY_PREFIXES."
+                        ),
+                    }
+                },
+            )
+
     # Parse attributes JSON if provided
     attr_filters = None
     if attributes:
@@ -139,6 +175,7 @@ async def list_entities(
             query=query,
             entity_type=entity_type,
             sub_type=sub_type,
+            entity_prefix=entity_prefix,
             attributes=attr_filters,
             tags=tags_list,
             limit=limit,

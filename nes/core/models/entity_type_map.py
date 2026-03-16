@@ -2,44 +2,73 @@
 
 This module defines the valid combinations of entity types and subtypes,
 reflecting Nepal's political and administrative structure.
+
+ENTITY_PREFIX_MAP is the canonical registry mapping entity_prefix values to their
+corresponding model classes. It is a flat dict of slash-joined strings
+(e.g. "organization/political_party") to Entity subclasses.
+
+ALLOWED_ENTITY_PREFIXES is derived from ENTITY_PREFIX_MAP keys.
 """
 
-from nes.core.models.entity import EntitySubType, EntityType
+# Import Entity subclasses (avoiding circular imports by importing here)
+from typing import TYPE_CHECKING, Dict, Type
 
-# Entity type map for v2 with Nepali context
-# This maps entity types to their allowed subtypes
-ENTITY_TYPE_MAP = {
-    EntityType.PERSON: {
-        None,  # Person entities do not have subtypes
-        # All persons (politicians, civil servants, activists, etc.) use the same type
-        # Roles and positions are captured in attributes
-    },
-    EntityType.ORGANIZATION: {
-        None,  # Organization without specific subtype
-        EntitySubType.POLITICAL_PARTY,  # Nepali political parties
-        EntitySubType.GOVERNMENT_BODY,  # Government ministries, departments, constitutional bodies
-        EntitySubType.HOSPITAL,  # Hospitals and health facilities
-        EntitySubType.NGO,  # Non-governmental organizations
-        EntitySubType.INTERNATIONAL_ORG,  # International organizations in Nepal
-    },
-    EntityType.LOCATION: {
-        None,  # Location without specific subtype
-        # Nepal's administrative hierarchy (federal structure since 2015)
-        EntitySubType.PROVINCE,  # 7 provinces (प्रदेश)
-        EntitySubType.DISTRICT,  # 77 districts (जिल्ला)
-        EntitySubType.METROPOLITAN_CITY,  # 6 metropolitan cities (महानगरपालिका)
-        EntitySubType.SUB_METROPOLITAN_CITY,  # 11 sub-metropolitan cities (उपमहानगरपालिका)
-        EntitySubType.MUNICIPALITY,  # 276 municipalities (नगरपालिका)
-        EntitySubType.RURAL_MUNICIPALITY,  # 460 rural municipalities (गाउँपालिका)
-        EntitySubType.WARD,  # Wards within municipalities (वडा)
-        EntitySubType.CONSTITUENCY,  # Electoral constituencies (निर्वाचन क्षेत्र)
-    },
-    EntityType.PROJECT: {
-        None,  # Project without specific subtype
-        EntitySubType.DEVELOPMENT_PROJECT,  # Development projects (विकास परियोजना)
-    },
-}
+# ---------------------------------------------------------------------------
+# Canonical prefix-to-class map
+# ---------------------------------------------------------------------------
 
+
+if TYPE_CHECKING:
+    from nes.core.models.entity import Entity
+
+
+# Lazy imports to avoid circular dependencies
+def _get_entity_prefix_map() -> Dict[str, Type["Entity"]]:
+    """Get the entity prefix map with lazy imports."""
+    from nes.core.models.location import Location
+    from nes.core.models.organization import (
+        GovernmentBody,
+        Hospital,
+        Organization,
+        PoliticalParty,
+    )
+    from nes.core.models.person import Person
+    from nes.core.models.project import Project
+
+    return {
+        # Person entities (no subtypes)
+        "person": Person,
+        # Organization entities
+        "organization": Organization,
+        "organization/political_party": PoliticalParty,
+        "organization/government_body": GovernmentBody,  # TODO: Deprecate this.
+        "organization/government": GovernmentBody,
+        "organization/government/federal": GovernmentBody,
+        "organization/hospital": Hospital,
+        "organization/ngo": Organization,
+        "organization/international_org": Organization,
+        # Location entities
+        "location": Location,
+        "location/province": Location,
+        "location/district": Location,
+        "location/metropolitan_city": Location,
+        "location/sub_metropolitan_city": Location,
+        "location/municipality": Location,
+        "location/rural_municipality": Location,
+        "location/ward": Location,
+        "location/constituency": Location,
+        # Project entities
+        "project": Project,
+        "project/development_project": Project,
+    }
+
+
+# Flat map from entity_prefix to entity class
+# This provides a direct lookup for entity class based on the full prefix path
+ENTITY_PREFIX_MAP: Dict[str, Type["Entity"]] = _get_entity_prefix_map()
+
+# Canonical set of allowed entity prefixes (derived from ENTITY_PREFIX_MAP keys)
+ALLOWED_ENTITY_PREFIXES: set[str] = set(ENTITY_PREFIX_MAP.keys())
 
 # Nepali administrative hierarchy documentation
 NEPALI_ADMINISTRATIVE_HIERARCHY = """

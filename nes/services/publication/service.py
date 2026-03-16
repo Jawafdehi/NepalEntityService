@@ -14,18 +14,10 @@ from datetime import UTC, date, datetime
 from typing import Any, Dict, List, Optional
 
 from nes.core.models.base import Name, NameKind
-from nes.core.models.entity import Entity, EntitySubType, EntityType
-from nes.core.models.location import Location
-from nes.core.models.organization import (
-    GovernmentBody,
-    Hospital,
-    Organization,
-    PoliticalParty,
-)
-from nes.core.models.person import Person
-from nes.core.models.project import Project
+from nes.core.models.entity import Entity, EntityType
 from nes.core.models.relationship import Relationship, RelationshipType
 from nes.core.models.version import Author, Version, VersionSummary, VersionType
+from nes.core.utils.entity_utils import entity_from_dict
 from nes.database.entity_database import EntityDatabase
 
 logger = logging.getLogger(__name__)
@@ -49,24 +41,18 @@ class PublicationService:
 
     async def create_entity(
         self,
-        entity_type: Optional[EntityType] = None,
-        entity_data: Optional[Dict[str, Any]] = None,
-        author_id: Optional[str] = None,
+        entity_prefix: str,
+        entity_data: Dict[str, Any],
+        author_id: str,
         change_description: str = "Initial entity creation",
-        entity_subtype: Optional[EntitySubType] = None,
     ) -> Entity:
         """Create a new entity with automatic versioning.
 
-        Supports two calling conventions for backward compatibility:
-        1. New style (keyword args): create_entity(entity_data={...}, author_id="...", ...)
-        2. Old style (positional): create_entity(EntityType.PERSON, {...}, "author:id", "desc")
-
         Args:
-            entity_type: Type of the entity (optional if 'type' is in entity_data)
+            entity_prefix: N-level classification prefix (e.g. 'person', 'organization/political_party').
             entity_data: Dictionary containing entity data
             author_id: ID of the author creating the entity
             change_description: Description of this change
-            entity_subtype: Optional subtype of the entity
 
         Returns:
             Created entity with version 1
@@ -74,26 +60,26 @@ class PublicationService:
         Raises:
             ValueError: If entity data is invalid or required fields are missing
         """
-        # Validate required arguments
-        if entity_data is None:
-            raise ValueError("entity_data is required")
-        if author_id is None:
-            raise ValueError("author_id is required")
+        from nes.core.identifiers import build_entity_id_from_prefix, validate_entity_id
 
-        # Extract entity_type from entity_data if not provided explicitly
-        if entity_type is None:
-            if "type" not in entity_data:
-                raise ValueError(
-                    "Entity must have a 'type' field or entity_type parameter"
-                )
-            entity_type = EntityType(entity_data["type"])
+        entity_type = EntityType(entity_prefix.split("/")[0])
+        entity_data["entity_prefix"] = entity_prefix
 
-        # Extract entity_subtype from entity_data if not provided explicitly
-        if entity_subtype is None and entity_data.get("sub_type"):
-            entity_subtype = EntitySubType(entity_data["sub_type"])
-        # Validate required fields
-        if "slug" not in entity_data:
+        entity_data.pop(
+            "type", None
+        )  # entity_prefix takes precedence; discard any stale sub_type
+        entity_data.pop(
+            "sub_type", None
+        )  # entity_prefix takes precedence; discard any stale sub_type
+
+        slug = entity_data.get("slug")
+        if not slug:
             raise ValueError("Entity must have a 'slug' field")
+
+        entity_id = build_entity_id_from_prefix(entity_prefix, slug)
+        validate_entity_id(entity_id)
+
+        # Validate required fields
         if "names" not in entity_data or not entity_data["names"]:
             raise ValueError("Entity must have at least one name")
 
@@ -107,15 +93,6 @@ class PublicationService:
 
         # Get or create author
         author = await self._get_or_create_author(author_id)
-
-        # Build entity ID to check for duplicates
-        slug = entity_data["slug"]
-
-        from nes.core.identifiers import build_entity_id
-
-        entity_id = build_entity_id(
-            entity_type.value, entity_subtype.value if entity_subtype else None, slug
-        )
 
         # Check if entity already exists
         existing = await self.database.get_entity(entity_id)
@@ -134,15 +111,13 @@ class PublicationService:
             created_at=datetime.now(UTC),
         )
 
-        # Add type, subtype, version summary and created_at to entity data
+        # Add type, version summary and created_at to entity data
         entity_data["type"] = entity_type.value
-        if entity_subtype:
-            entity_data["sub_type"] = entity_subtype.value
         entity_data["version_summary"] = version_summary
         entity_data["created_at"] = datetime.now(UTC)
 
-        # Create entity instance based on type
-        entity = self._create_entity_instance(entity_data)
+        # Create entity instance based on entity_prefix
+        entity = entity_from_dict(entity_data)
 
         # Store entity in database
         await self.database.put_entity(entity)
@@ -592,18 +567,16 @@ class PublicationService:
         """
         entities = []
         for entity_data in entities_data:
-            entity_type = EntityType(entity_data.get("type"))
-            entity_subtype = (
-                EntitySubType(entity_data.get("sub_type"))
-                if entity_data.get("sub_type")
-                else None
-            )
+            entity_prefix = entity_data.get("entity_prefix")
+            if not entity_prefix:
+                raise ValueError(
+                    f"entity_data for slug '{entity_data.get('slug')}' must include 'entity_prefix'"
+                )
             entity = await self.create_entity(
-                entity_type=entity_type,
+                entity_prefix=entity_prefix,
                 entity_data=entity_data,
                 author_id=author_id,
                 change_description=change_description,
-                entity_subtype=entity_subtype,
             )
             entities.append(entity)
 
@@ -637,44 +610,3 @@ class PublicationService:
         await self.database.put_author(author)
 
         return author
-
-    def _create_entity_instance(self, entity_data: Dict[str, Any]) -> Entity:
-        """Create an entity instance of the appropriate type.
-
-        Args:
-            entity_data: Dictionary containing entity data
-
-        Returns:
-            Entity instance (Person, Organization, or Location)
-
-        Raises:
-            ValueError: If entity type is invalid
-        """
-        entity_type = entity_data.get("type")
-        entity_subtype = entity_data.get("sub_type")
-
-        if entity_type == "person" or entity_type == EntityType.PERSON:
-            return Person.model_validate(entity_data)
-        elif entity_type == "organization" or entity_type == EntityType.ORGANIZATION:
-            if (
-                entity_subtype == "political_party"
-                or entity_subtype == EntitySubType.POLITICAL_PARTY
-            ):
-                return PoliticalParty.model_validate(entity_data)
-            elif (
-                entity_subtype == "government_body"
-                or entity_subtype == EntitySubType.GOVERNMENT_BODY
-            ):
-                return GovernmentBody.model_validate(entity_data)
-            elif (
-                entity_subtype == "hospital" or entity_subtype == EntitySubType.HOSPITAL
-            ):
-                return Hospital.model_validate(entity_data)
-            else:
-                return Organization.model_validate(entity_data)
-        elif entity_type == "location" or entity_type == EntityType.LOCATION:
-            return Location.model_validate(entity_data)
-        elif entity_type == "project" or entity_type == EntityType.PROJECT:
-            return Project.model_validate(entity_data)
-        else:
-            raise ValueError(f"Unknown entity type: {entity_type}")
