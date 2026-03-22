@@ -285,9 +285,9 @@ def test_entity_prefix_depth_too_deep_raises():
     with pytest.raises(ValidationError):
         Organization(
             slug="some-org",
-            entity_prefix="organization/a/b/c",  # 4 segments — exceeds MAX_PREFIX_DEPTH=3
+            entity_prefix="organization/a/b/c/d",  # 5 segments — exceeds MAX_PREFIX_DEPTH=4
             names=[Name(kind=NameKind.PRIMARY, en={"full": "Some Org"})],
-            version_summary=_make_version_summary("entity:organization/a/b/c/some-org"),
+            version_summary=_make_version_summary("entity:organization/a/b/c/d/some-org"),
             created_at=datetime.now(UTC),
         )
 

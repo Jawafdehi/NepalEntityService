@@ -137,9 +137,9 @@ def test_break_entity_id_exceeds_max_depth_raises():
     """break_entity_id raises ValueError when prefix depth exceeds MAX_PREFIX_DEPTH."""
     from nes.core.identifiers.builders import break_entity_id
 
-    # 4-segment prefix exceeds MAX_PREFIX_DEPTH=3 → must raise
+    # 5-segment prefix exceeds MAX_PREFIX_DEPTH=4 → must raise
     with pytest.raises(ValueError):
-        break_entity_id("entity:a/b/c/d/some-slug")
+        break_entity_id("entity:a/b/c/d/e/some-slug")
 
 
 def test_break_entity_id_invalid_prefix_raises():
@@ -224,7 +224,7 @@ def test_build_entity_id_from_prefix_exceeds_max_depth_raises():
 
     with pytest.raises(ValueError):
         build_entity_id_from_prefix(
-            "organization/nepal_govt/moha/extra", "department-of-immigration"
+            "organization/nepal_govt/moha/extra/too_deep", "department-of-immigration"
         )
 
 

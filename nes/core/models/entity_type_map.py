@@ -44,6 +44,11 @@ def _get_entity_prefix_map() -> Dict[str, Type["Entity"]]:
         "organization/government_body": GovernmentBody,  # TODO: Deprecate this.
         "organization/government": GovernmentBody,
         "organization/government/federal": GovernmentBody,
+        # Commission entities (constitutional bodies and their branches)
+        "organization/government/commission/federal": GovernmentBody,
+        "organization/government/commission/province": GovernmentBody,
+        "organization/government/commission/regional": GovernmentBody,
+        "organization/government/commission/district": GovernmentBody,
         "organization/hospital": Hospital,
         "organization/ngo": Organization,
         "organization/international_org": Organization,

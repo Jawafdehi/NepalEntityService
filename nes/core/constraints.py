@@ -12,7 +12,8 @@ MAX_DESCRIPTION_LENGTH = 5000
 # Entity prefix depth
 # Controls the maximum number of segments allowed in an entity_prefix
 # e.g. "organization/nepal_govt/moha" has depth 3
-MAX_PREFIX_DEPTH = 3
+# e.g. "organization/government/commission/federal" has depth 4
+MAX_PREFIX_DEPTH = 4
 
 # Regex patterns
 SLUG_PATTERN = r"^[a-z0-9-]+$"
