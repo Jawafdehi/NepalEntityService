@@ -4,11 +4,11 @@ Welcome to the **Nepal Entity Service** (NES) documentation. 🇳🇵 NES is an 
 
 Nepal Entity Service is built on three core principles:
 
-- **🔓 Open Source**: The entire codebase is open source and available on [GitHub](https://github.com/NewNepal-org/NepalEntityService). Anyone can contribute, review, or run their own instance.
+- **🔓 Open Source**: The entire codebase is open source and available on [GitHub](https://github.com/Jawafdehi/NepalEntityService). Anyone can contribute, review, or run their own instance.
 
 - **📊 Open Data**: All entity data is publicly accessible and maintained through transparent, community-driven migrations. Every change is tracked, reviewed, and versioned with complete audit trails. Learn more about [database update workflows](/contributors/workflows).
 
-- **🌐 Open API**: A free, public REST API at [https://nes.newnepal.org/api](https://nes.newnepal.org/api) provides read access to all entity data without authentication. Build applications, conduct research, or integrate with your projects freely.
+- **🌐 Open API**: A free, public REST API at [https://nes.jawafdehi.org/api](https://nes.jawafdehi.org/api) provides read access to all entity data without authentication. Build applications, conduct research, or integrate with your projects freely.
 
 ## Entities hosted
 
@@ -45,8 +45,8 @@ Nepal Entity Service is built on three core principles:
 Start here if you want to use the public Nepal Entity Service API:
 
 - **[Getting Started](/consumers/getting-started)** - Quick start guide for using the API
-- **[API Consumer Guide](/consumers/api-guide)** - Using the public API at https://nes.newnepal.org/api
-- **[OpenAPI Documentation](https://nes.newnepal.org/docs)** - Interactive API reference
+- **[API Consumer Guide](/consumers/api-guide)** - Using the public API at https://nes.jawafdehi.org/api
+- **[OpenAPI Documentation](https://nes.jawafdehi.org/docs)** - Interactive API reference
 - **[Data Models](/consumers/data-models)** - Understanding entity and relationship schemas
 - **[Examples](/consumers/examples)** - Common usage patterns and code examples
 
@@ -180,7 +180,7 @@ Ready to start using the Nepal Entity Service? Check out the [Getting Started](/
 Nepal Entity Service v2 is currently in active development as an open source, open data initiative.
 
 ### Open Access
-- **Public API**: Free, read-only access at https://nes.newnepal.org/api
+- **Public API**: Free, read-only access at https://nes.jawafdehi.org/api
 - **No Authentication Required**: Access all entity data without API keys or registration
 - **Community Maintained**: Data updates through transparent migration workflow
 
@@ -218,11 +218,11 @@ We welcome contributions from everyone who shares our commitment to ethical tech
 - **Researchers**: Use the data and API for academic research
 - **Civic Technologists**: Build transparency and accountability applications
 
-For more information about contributing, see our [Contributor Guide](/contributors/contributor-guide) or visit our [GitHub repository](https://github.com/NewNepal-org/NepalEntityService).
+For more information about contributing, see our [Contributor Guide](/contributors/contributor-guide) or visit our [GitHub repository](https://github.com/Jawafdehi/NepalEntityService).
 
 ### Full License Text
 
-The complete Hippocratic License 3.0 text is available in the [LICENSE](https://github.com/NewNepal-org/NepalEntityService/blob/main/LICENSE) file in the repository. For more information about the Hippocratic License, visit [firstdonoharm.dev](https://firstdonoharm.dev/).
+The complete Hippocratic License 3.0 text is available in the [LICENSE](https://github.com/Jawafdehi/NepalEntityService/blob/main/LICENSE) file in the repository. For more information about the Hippocratic License, visit [firstdonoharm.dev](https://firstdonoharm.dev/).
 
 ---
 

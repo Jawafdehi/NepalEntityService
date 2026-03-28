@@ -86,6 +86,6 @@ export JAWAFDEHI_API_TOKEN=<your_admin_token>
 
 ## References
 
-- [NESQ Architecture](https://github.com/NewNepal-org/newnepal-meta/blob/main/docs/2026-03-03-nesq/nesq_action_specs.md)
+- [NESQ Architecture](https://github.com/Jawafdehi/jawafdehi-meta/blob/main/docs/2026-03-03-nesq/nesq_action_specs.md)
 - [Constitutional Commissions Migration README](README.md)
-- [Jawafdehi API Documentation](https://github.com/NewNepal-org/JawafdehiAPI)
+- [Jawafdehi API Documentation](https://github.com/Jawafdehi/JawafdehiAPI)

@@ -488,7 +488,7 @@ class CandidateMigration:
     def _build_picture(self, candidate_id: int) -> EntityPicture:
         return EntityPicture(
             type=EntityPictureType.THUMB,
-            url=f"https://assets.nes.newnepal.org/assets/images/election-commission-2079-pictures/{candidate_id}.jpg",
+            url=f"https://assets.nes.jawafdehi.org/assets/images/election-commission-2079-pictures/{candidate_id}.jpg",
             description="Source: Nepal Election Commission",
         )
 

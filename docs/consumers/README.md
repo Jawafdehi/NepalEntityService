@@ -12,7 +12,7 @@ Documentation for users who want to consume the Nepal Entity Service API.
 ## What You'll Find Here
 
 This section contains documentation for API consumers who want to:
-- Use the public Nepal Entity Service API at https://nes.newnepal.org/api
+- Use the public Nepal Entity Service API at https://nes.jawafdehi.org/api
 - Integrate NES data into their applications
 - Query and retrieve entity information
 - Understand the data models and schemas

@@ -65,7 +65,7 @@ async def migrate(context: MigrationContext) -> None:
         # Check if this party's slug exists in the symbols file
         if party_slug in existing_symbols:
             # Build the picture URL
-            picture_url = f"https://assets.nes.newnepal.org/assets/images/2082-election-symbols/{party_slug}.png"
+            picture_url = f"https://assets.nes.jawafdehi.org/assets/images/2082-election-symbols/{party_slug}.png"
 
             # Create the picture object
             picture = EntityPicture(

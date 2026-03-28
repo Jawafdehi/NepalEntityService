@@ -59,14 +59,14 @@ Anyone can contribute migrations! Common contributors include:
 
 ```bash
 # Fork the repository on GitHub
-# https://github.com/NewNepal-org/NepalEntityService
+# https://github.com/Jawafdehi/NepalEntityService
 
 # Clone your fork
 git clone https://github.com/YOUR_USERNAME/NepalEntityService.git
 cd NepalEntityService
 
 # Add upstream remote
-git remote add upstream https://github.com/NewNepal-org/NepalEntityService.git
+git remote add upstream https://github.com/Jawafdehi/NepalEntityService.git
 ```
 
 ### Install Dependencies

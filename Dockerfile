@@ -20,8 +20,8 @@ COPY docs/ ./docs/
 # If not provided, defaults to main branch
 ARG DB_REF=main
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
-RUN git clone --depth 1 --branch "$DB_REF" https://github.com/NewNepal-org/NepalEntityService-database.git ./nes-db || \
-    (git clone https://github.com/NewNepal-org/NepalEntityService-database.git ./nes-db && \
+RUN git clone --depth 1 --branch "$DB_REF" https://github.com/Jawafdehi/NepalEntityService-database.git ./nes-db || \
+    (git clone https://github.com/Jawafdehi/NepalEntityService-database.git ./nes-db && \
      cd ./nes-db && \
      git fetch --depth=1 origin "$DB_REF" && \
      git checkout "$DB_REF")

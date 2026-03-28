@@ -12,7 +12,7 @@ Search for a person by name:
 import requests
 
 response = requests.get(
-    "https://nes.newnepal.org/api/entities",
+    "https://nes.jawafdehi.org/api/entities",
     params={
         "query": "ram chandra poudel",
         "entity_type": "person"
@@ -36,7 +36,7 @@ Retrieve complete information about an entity:
 import requests
 
 entity_id = "entity:person/ram-chandra-poudel"
-response = requests.get(f"https://nes.newnepal.org/api/entities/{entity_id}")
+response = requests.get(f"https://nes.jawafdehi.org/api/entities/{entity_id}")
 
 entity = response.json()
 
@@ -65,7 +65,7 @@ import requests
 
 party_id = "entity:organization/political_party/nepali-congress"
 response = requests.get(
-    "https://nes.newnepal.org/api/relationships",
+    "https://nes.jawafdehi.org/api/relationships",
     params={
         "relationship_type": "MEMBER_OF",
         "target_entity_id": party_id,
@@ -79,7 +79,7 @@ print(f"Found {data['total']} members")
 # Get details for each member
 for rel in data['relationships']:
     person_id = rel['source_entity_id']
-    person_response = requests.get(f"https://nes.newnepal.org/api/entities/{person_id}")
+    person_response = requests.get(f"https://nes.jawafdehi.org/api/entities/{person_id}")
     person = person_response.json()
     
     name = person['names'][0]['en']['full']
@@ -99,7 +99,7 @@ from collections import Counter
 
 # Fetch all 2079 Federal election elected representatives
 response = requests.get(
-    "https://nes.newnepal.org/api/entities",
+    "https://nes.jawafdehi.org/api/entities",
     params={
         "entity_type": "person",
         "tags": "federal-election-2079-elected",
@@ -150,7 +150,7 @@ import requests
 
 # Get all candidates (including those who didn't win)
 candidates_response = requests.get(
-    "https://nes.newnepal.org/api/entities",
+    "https://nes.jawafdehi.org/api/entities",
     params={
         "entity_type": "person",
         "tags": "federal-election-2079-candidate"
@@ -159,7 +159,7 @@ candidates_response = requests.get(
 
 # Get only elected representatives
 elected_response = requests.get(
-    "https://nes.newnepal.org/api/entities",
+    "https://nes.jawafdehi.org/api/entities",
     params={
         "entity_type": "person",
         "tags": "federal-election-2079-elected"
@@ -181,7 +181,7 @@ import requests
 
 # Find all elected representatives with "poudel" in their name
 response = requests.get(
-    "https://nes.newnepal.org/api/entities",
+    "https://nes.jawafdehi.org/api/entities",
     params={
         "query": "poudel",
         "entity_type": "person",
@@ -206,7 +206,7 @@ import requests
 
 # Get federal election winners
 federal_response = requests.get(
-    "https://nes.newnepal.org/api/entities",
+    "https://nes.jawafdehi.org/api/entities",
     params={
         "entity_type": "person",
         "tags": "federal-election-2079-elected"
@@ -215,7 +215,7 @@ federal_response = requests.get(
 
 # Get provincial election winners
 provincial_response = requests.get(
-    "https://nes.newnepal.org/api/entities",
+    "https://nes.jawafdehi.org/api/entities",
     params={
         "entity_type": "person",
         "tags": "provincial-election-2079-elected"
@@ -238,7 +238,7 @@ import requests
 
 # Get 2082 Federal election candidates
 response_2082 = requests.get(
-    "https://nes.newnepal.org/api/entities",
+    "https://nes.jawafdehi.org/api/entities",
     params={
         "entity_type": "person",
         "tags": "federal-election-2082-candidate"
@@ -276,7 +276,7 @@ import requests
 import json
 
 response = requests.get(
-    "https://nes.newnepal.org/api/entities",
+    "https://nes.jawafdehi.org/api/entities",
     params={
         "query": "pradesh",
         "entity_type": "location",
@@ -307,7 +307,7 @@ def get_all_entities(entity_type, page_size=20):
     
     while True:
         response = requests.get(
-            "https://nes.newnepal.org/api/entities",
+            "https://nes.jawafdehi.org/api/entities",
             params={
                 "entity_type": entity_type,
                 "limit": page_size,
@@ -342,7 +342,7 @@ from datetime import datetime
 entity_id = "entity:person/ram-chandra-poudel"
 
 # Get version history
-response = requests.get(f"https://nes.newnepal.org/api/entities/{entity_id}/versions")
+response = requests.get(f"https://nes.jawafdehi.org/api/entities/{entity_id}/versions")
 versions = response.json()['versions']
 
 print(f"Entity has {len(versions)} versions\n")
@@ -385,7 +385,7 @@ def build_relationship_graph(entity_id, depth=2):
         visited.add(entity_id)
         
         # Get entity details
-        entity_response = requests.get(f"https://nes.newnepal.org/api/entities/{entity_id}")
+        entity_response = requests.get(f"https://nes.jawafdehi.org/api/entities/{entity_id}")
         entity = entity_response.json()
         entity_name = entity['names'][0]['en']['full']
         
@@ -394,7 +394,7 @@ def build_relationship_graph(entity_id, depth=2):
         
         # Get relationships
         rel_response = requests.get(
-            f"https://nes.newnepal.org/api/entities/{entity_id}/relationships"
+            f"https://nes.jawafdehi.org/api/entities/{entity_id}/relationships"
         )
         relationships = rel_response.json()['relationships']
         
@@ -443,7 +443,7 @@ function EntitySearch() {
     setLoading(true);
     try {
       const response = await fetch(
-        `https://nes.newnepal.org/api/entities?query=${encodeURIComponent(query)}`
+        `https://nes.jawafdehi.org/api/entities?query=${encodeURIComponent(query)}`
       );
       const data = await response.json();
       setEntities(data.entities);
@@ -524,7 +524,7 @@ export default {
       this.loading = true;
       try {
         const response = await fetch(
-          `https://nes.newnepal.org/api/entities?query=${encodeURIComponent(this.query)}`
+          `https://nes.jawafdehi.org/api/entities?query=${encodeURIComponent(this.query)}`
         );
         const data = await response.json();
         this.entities = data.entities;
@@ -551,7 +551,7 @@ from collections import Counter
 
 # Get all persons
 response = requests.get(
-    "https://nes.newnepal.org/api/entities",
+    "https://nes.jawafdehi.org/api/entities",
     params={"entity_type": "person", "limit": 1000}
 )
 
@@ -582,18 +582,18 @@ def generate_entity_report(entity_id):
     """Generate a comprehensive report for an entity."""
     
     # Get entity details
-    entity_response = requests.get(f"https://nes.newnepal.org/api/entities/{entity_id}")
+    entity_response = requests.get(f"https://nes.jawafdehi.org/api/entities/{entity_id}")
     entity = entity_response.json()
     
     # Get relationships
     rel_response = requests.get(
-        f"https://nes.newnepal.org/api/entities/{entity_id}/relationships"
+        f"https://nes.jawafdehi.org/api/entities/{entity_id}/relationships"
     )
     relationships = rel_response.json()['relationships']
     
     # Get version history
     version_response = requests.get(
-        f"https://nes.newnepal.org/api/entities/{entity_id}/versions"
+        f"https://nes.jawafdehi.org/api/entities/{entity_id}/versions"
     )
     versions = version_response.json()['versions']
     
@@ -620,7 +620,7 @@ def generate_entity_report(entity_id):
     print(f"\nRelationships ({len(relationships)}):")
     for rel in relationships[:5]:  # Show first 5
         target_response = requests.get(
-            f"https://nes.newnepal.org/api/entities/{rel['target_entity_id']}"
+            f"https://nes.jawafdehi.org/api/entities/{rel['target_entity_id']}"
         )
         target = target_response.json()
         target_name = target['names'][0]['en']['full']
@@ -677,7 +677,7 @@ def safe_api_call(url, params=None):
 
 # Use it
 data = safe_api_call(
-    "https://nes.newnepal.org/api/entities",
+    "https://nes.jawafdehi.org/api/entities",
     params={"query": "poudel"}
 )
 

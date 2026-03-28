@@ -1220,7 +1220,7 @@ class TestSearchServiceTagFilteringWithInMemoryCachedDB:
     """Test tag-based filtering with InMemoryCachedReadDatabase.
 
     This test class verifies tag filtering works correctly with the production
-    database configuration used by nes.newnepal.org API, which uses
+    database configuration used by nes.jawafdehi.org API, which uses
     InMemoryCachedReadDatabase wrapper around FileDatabase.
 
     These tests mirror TestSearchServiceTagFiltering but use the cached database

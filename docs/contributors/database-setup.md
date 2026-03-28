@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Nepal Entity Service uses a file-based database. The database is managed in a separate repository ([NepalEntityService-database](https://github.com/NewNepal-org/NepalEntityService-database)). You must clone it locally and set its path via an environment variable.
+The Nepal Entity Service uses a file-based database. The database is managed in a separate repository ([NepalEntityService-database](https://github.com/Jawafdehi/NepalEntityService-database)). You must clone it locally and set its path via an environment variable.
 
 ## Configuration
 
@@ -80,10 +80,10 @@ Clone the database repository to a location of your choice:
 
 ```bash
 # Recommended: Shallow clone for local development (faster)
-git clone --depth 1 git@github.com:NewNepal-org/NepalEntityService-database.git ./nes-db
+git clone --depth 1 git@github.com:Jawafdehi/NepalEntityService-database.git ./nes-db
 
 # Or full clone if you plan to contribute data changes:
-git clone git@github.com:NewNepal-org/NepalEntityService-database.git ./nes-db
+git clone git@github.com:Jawafdehi/NepalEntityService-database.git ./nes-db
 ```
 
 ### Updating the Database
@@ -153,7 +153,7 @@ NepalEntityService/
 If you get a file not found error when starting the application, ensure you have cloned the database repository and properly set your `NES_DB_URL`:
 
 ```bash
-git clone --depth 1 git@github.com:NewNepal-org/NepalEntityService-database.git ./nes-db
+git clone --depth 1 git@github.com:Jawafdehi/NepalEntityService-database.git ./nes-db
 export NES_DB_URL=file://$(pwd)/nes-db/v2
 ```
 

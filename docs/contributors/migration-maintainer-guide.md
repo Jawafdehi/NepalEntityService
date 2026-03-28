@@ -350,7 +350,7 @@ The migration system includes two GitHub Actions workflows:
 **Monitoring**:
 ```bash
 # Check workflow status on GitHub
-# https://github.com/NewNepal-org/NepalEntityService/actions
+# https://github.com/Jawafdehi/NepalEntityService/actions
 
 # View workflow logs for details
 ```
@@ -504,17 +504,17 @@ cd ..
 **Full Clone** (for migration execution):
 ```bash
 # Clone the codebase
-git clone https://github.com/NewNepal-org/NepalEntityService.git
+git clone https://github.com/Jawafdehi/NepalEntityService.git
 cd NepalEntityService
 
 # Clone the database (~1GB+)
-git clone https://github.com/NewNepal-org/NepalEntityService-database.git ./nes-db
+git clone https://github.com/Jawafdehi/NepalEntityService-database.git ./nes-db
 ```
 
 **Shallow Clone** (for development):
 ```bash
 # Clone with limited history
-git clone --depth 1 https://github.com/NewNepal-org/NepalEntityService-database.git ./nes-db
+git clone --depth 1 https://github.com/Jawafdehi/NepalEntityService-database.git ./nes-db
 ```
 
 ### Database Repository Optimization
@@ -543,7 +543,7 @@ git gc --aggressive
 **Manual Backup**:
 ```bash
 # Clone database repository
-git clone https://github.com/NewNepal-org/NepalEntityService-database.git backup-$(date +%Y%m%d)
+git clone https://github.com/Jawafdehi/NepalEntityService-database.git backup-$(date +%Y%m%d)
 
 # Or create archive
 cd nes-db

@@ -12,7 +12,7 @@ The migration:
 ## Data Sources
 
 - **existing-symbols.txt**: List of 137 available election symbol image files (PNG format)
-- **NES Assets Server**: https://assets.nes.newnepal.org/assets/images/2082-election-symbols/
+- **NES Assets Server**: https://assets.nes.jawafdehi.org/assets/images/2082-election-symbols/
 - **Nepal Election Commission**: Original source of election symbols for 2082 elections
 - **Political Party Database**: Existing political parties in the NES database (151 total parties)
 
@@ -22,7 +22,7 @@ This migration successfully updated 137 out of 151 political parties in the data
 
 **Updated Parties (137)**: Added EntityPicture objects with:
 - Type: `EntityPictureType.SYMBOL`
-- URL: `https://assets.nes.newnepal.org/assets/images/2082-election-symbols/{party-slug}.png`
+- URL: `https://assets.nes.jawafdehi.org/assets/images/2082-election-symbols/{party-slug}.png`
 - Description: "2082 Election Symbol"
 
 **Skipped Parties (14)**: No matching symbol files available for:

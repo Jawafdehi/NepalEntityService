@@ -148,7 +148,7 @@ async def fix_political_parties(context: MigrationContext) -> None:
         ]
 
         # Build picture (logo)
-        picture_url = f"https://assets.nes.newnepal.org/assets/images/2082-election-symbols/{party_data['slug']}.png"
+        picture_url = f"https://assets.nes.jawafdehi.org/assets/images/2082-election-symbols/{party_data['slug']}.png"
         picture = EntityPicture(
             type=EntityPictureType.THUMB,
             url=picture_url,
@@ -842,7 +842,7 @@ def _build_person_data(
         "pictures": [
             EntityPicture(
                 type=EntityPictureType.THUMB,
-                url=f"https://assets.nes.newnepal.org/assets/images/election-commission-2082-pictures/{candidate_id}.jpg",
+                url=f"https://assets.nes.jawafdehi.org/assets/images/election-commission-2082-pictures/{candidate_id}.jpg",
                 description="Source: Nepal Election Commission",
             )
         ],

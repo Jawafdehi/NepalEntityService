@@ -44,7 +44,7 @@ The system operates across two GitHub repositories to separate application code 
 
 ### Service API Repository
 
-**Repository**: https://github.com/NewNepal-org/NepalEntityService
+**Repository**: https://github.com/Jawafdehi/NepalEntityService
 
 **Contents**:
 - Application code (Python packages, API, CLI)
@@ -87,7 +87,7 @@ NepalEntityService/
 
 ### Database Repository
 
-**Repository**: https://github.com/NewNepal-org/NepalEntityService-database
+**Repository**: https://github.com/Jawafdehi/NepalEntityService-database
 
 **Contents**:
 - Entity JSON files (100k-1M files)

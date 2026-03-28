@@ -227,13 +227,13 @@ async def migrate(context):
 **Example**:
 ```bash
 # Search for entities
-curl https://nes.newnepal.org/api/entities?query=nepal&type=organization
+curl https://nes.jawafdehi.org/api/entities?query=nepal&type=organization
 
 # Get specific entity
-curl https://nes.newnepal.org/api/entities/entity:person/ram-chandra-poudel
+curl https://nes.jawafdehi.org/api/entities/entity:person/ram-chandra-poudel
 
 # Get version history
-curl https://nes.newnepal.org/api/entities/entity:person/ram-chandra-poudel/versions
+curl https://nes.jawafdehi.org/api/entities/entity:person/ram-chandra-poudel/versions
 ```
 
 **Documentation**: [API Guide](api-guide.md)
@@ -334,7 +334,7 @@ async def migrate(context):
 // Frontend application
 async function searchPoliticians(query) {
     const response = await fetch(
-        `https://nes.newnepal.org/api/entities?type=person&sub_type=politician&query=${query}`
+        `https://nes.jawafdehi.org/api/entities?type=person&sub_type=politician&query=${query}`
     );
     const data = await response.json();
     return data.entities;
@@ -342,14 +342,14 @@ async function searchPoliticians(query) {
 
 async function getPoliticianDetails(id) {
     const response = await fetch(
-        `https://nes.newnepal.org/api/entities/${id}`
+        `https://nes.jawafdehi.org/api/entities/${id}`
     );
     return await response.json();
 }
 
 async function getRelationships(id) {
     const response = await fetch(
-        `https://nes.newnepal.org/api/relationships?source_entity_id=${id}`
+        `https://nes.jawafdehi.org/api/relationships?source_entity_id=${id}`
     );
     return await response.json();
 }
@@ -395,7 +395,7 @@ import requests
 import networkx as nx
 
 # Fetch politicians
-response = requests.get("https://nes.newnepal.org/api/entities?type=person&sub_type=politician&limit=1000")
+response = requests.get("https://nes.jawafdehi.org/api/entities?type=person&sub_type=politician&limit=1000")
 politicians = response.json()["entities"]
 
 # Build network graph
@@ -403,7 +403,7 @@ G = nx.Graph()
 
 for politician in politicians:
     # Get relationships
-    rel_response = requests.get(f"https://nes.newnepal.org/api/relationships?source_entity_id={politician['id']}")
+    rel_response = requests.get(f"https://nes.jawafdehi.org/api/relationships?source_entity_id={politician['id']}")
     relationships = rel_response.json()["relationships"]
     
     for rel in relationships:

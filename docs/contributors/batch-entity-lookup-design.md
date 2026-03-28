@@ -698,9 +698,9 @@ Batch requests benefit from in-memory cache:
 
 ```bash
 # N separate requests
-curl "https://nes.newnepal.org/api/entities/entity%3Aperson%2Fram-chandra-poudel"
-curl "https://nes.newnepal.org/api/entities/entity%3Aperson%2Fkp-sharma-oli"
-curl "https://nes.newnepal.org/api/entities/entity%3Aperson%2Fpushpa-kamal-dahal"
+curl "https://nes.jawafdehi.org/api/entities/entity%3Aperson%2Fram-chandra-poudel"
+curl "https://nes.jawafdehi.org/api/entities/entity%3Aperson%2Fkp-sharma-oli"
+curl "https://nes.jawafdehi.org/api/entities/entity%3Aperson%2Fpushpa-kamal-dahal"
 # ... 20 requests total
 ```
 
@@ -708,7 +708,7 @@ curl "https://nes.newnepal.org/api/entities/entity%3Aperson%2Fpushpa-kamal-dahal
 
 ```bash
 # Single batch request (up to 25 entities)
-curl "https://nes.newnepal.org/api/entities?ids=entity%3Aperson%2Fram-chandra-poudel%2Centity%3Aperson%2Fkp-sharma-oli%2Centity%3Aperson%2Fpushpa-kamal-dahal"
+curl "https://nes.jawafdehi.org/api/entities?ids=entity%3Aperson%2Fram-chandra-poudel%2Centity%3Aperson%2Fkp-sharma-oli%2Centity%3Aperson%2Fpushpa-kamal-dahal"
 ```
 
 **Note**: Clients fetching more than 25 entities should split requests into multiple batches of 25 and fetch them in parallel.

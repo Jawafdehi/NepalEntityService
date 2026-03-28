@@ -3,7 +3,7 @@
 These tests verify that tag filtering works correctly with the production
 database configuration (file+memcached://) using the Config system.
 
-This mirrors the actual production setup used by nes.newnepal.org API.
+This mirrors the actual production setup used by nes.jawafdehi.org API.
 """
 
 import os

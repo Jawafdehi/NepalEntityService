@@ -8,9 +8,9 @@ This guide will help you get started with the Nepal Entity Service API. Whether 
 
 The easiest way to use Nepal Entity Service is through the public API. No installation required - just make HTTP requests to the API endpoints.
 
-**Base URL**: `https://nes.newnepal.org/api`
+**Base URL**: `https://nes.jawafdehi.org/api`
 
-> **Note:** If you're running your own instance locally, replace `https://nes.newnepal.org/api` with `http://localhost:8195/api` in all examples below.
+> **Note:** If you're running your own instance locally, replace `https://nes.jawafdehi.org/api` with `http://localhost:8195/api` in all examples below.
 
 ### Installing the Python Package
 
@@ -32,11 +32,11 @@ To run your own instance of the API:
 
 ```bash
 # Clone the repository
-git clone https://github.com/NewNepal-org/NepalEntityService.git
+git clone https://github.com/Jawafdehi/NepalEntityService.git
 cd NepalEntityService
 
 # Clone the database repository and set NES_DB_URL
-git clone --depth 1 https://github.com/NewNepal-org/NepalEntityService-database.git ./nes-db
+git clone --depth 1 https://github.com/Jawafdehi/NepalEntityService-database.git ./nes-db
 export NES_DB_URL=file://$(pwd)/nes-db/v2
 
 # Install dependencies with poetry
@@ -55,7 +55,7 @@ Let's make your first API call to search for entities:
 ### Using cURL
 
 ```bash
-curl "https://nes.newnepal.org/api/entities?query=poudel"
+curl "https://nes.jawafdehi.org/api/entities?query=poudel"
 ```
 
 ### Using Python
@@ -64,7 +64,7 @@ curl "https://nes.newnepal.org/api/entities?query=poudel"
 import requests
 
 response = requests.get(
-    "https://nes.newnepal.org/api/entities",
+    "https://nes.jawafdehi.org/api/entities",
     params={"query": "poudel"}
 )
 
@@ -78,7 +78,7 @@ for entity in data['entities']:
 ### Using JavaScript
 
 ```javascript
-fetch('https://nes.newnepal.org/api/entities?query=poudel')
+fetch('https://nes.jawafdehi.org/api/entities?query=poudel')
   .then(response => response.json())
   .then(data => {
     console.log(`Found ${data.total} entities`);
@@ -96,10 +96,10 @@ Search for entities by name (supports both English and Nepali):
 
 ```bash
 # Search by English name
-curl "https://nes.newnepal.org/api/entities?query=ram+chandra+poudel"
+curl "https://nes.jawafdehi.org/api/entities?query=ram+chandra+poudel"
 
 # Search by Nepali name
-curl "https://nes.newnepal.org/api/entities?query=राम+चन्द्र+पौडेल"
+curl "https://nes.jawafdehi.org/api/entities?query=राम+चन्द्र+पौडेल"
 ```
 
 ### Filter by Entity Type
@@ -108,10 +108,10 @@ Filter entities by type (person, organization, location):
 
 ```bash
 # Get all persons
-curl "https://nes.newnepal.org/api/entities?entity_type=person"
+curl "https://nes.jawafdehi.org/api/entities?entity_type=person"
 
 # Get all political parties
-curl "https://nes.newnepal.org/api/entities?entity_type=organization&sub_type=political_party"
+curl "https://nes.jawafdehi.org/api/entities?entity_type=organization&sub_type=political_party"
 ```
 
 ### Get a Specific Entity
@@ -119,7 +119,7 @@ curl "https://nes.newnepal.org/api/entities?entity_type=organization&sub_type=po
 Retrieve a specific entity by its ID:
 
 ```bash
-curl "https://nes.newnepal.org/api/entities/entity:person/ram-chandra-poudel"
+curl "https://nes.jawafdehi.org/api/entities/entity:person/ram-chandra-poudel"
 ```
 
 ### Query Relationships
@@ -128,10 +128,10 @@ Find relationships for an entity:
 
 ```bash
 # Get all relationships for an entity
-curl "https://nes.newnepal.org/api/entities/entity:person/ram-chandra-poudel/relationships"
+curl "https://nes.jawafdehi.org/api/entities/entity:person/ram-chandra-poudel/relationships"
 
 # Filter by relationship type
-curl "https://nes.newnepal.org/api/entities/entity:person/ram-chandra-poudel/relationships?relationship_type=MEMBER_OF"
+curl "https://nes.jawafdehi.org/api/entities/entity:person/ram-chandra-poudel/relationships?relationship_type=MEMBER_OF"
 ```
 
 ### Get Version History
@@ -139,7 +139,7 @@ curl "https://nes.newnepal.org/api/entities/entity:person/ram-chandra-poudel/rel
 Retrieve the version history for an entity:
 
 ```bash
-curl "https://nes.newnepal.org/api/entities/entity:person/ram-chandra-poudel/versions"
+curl "https://nes.jawafdehi.org/api/entities/entity:person/ram-chandra-poudel/versions"
 ```
 
 ## Pagination
@@ -148,10 +148,10 @@ All list endpoints support pagination using `limit` and `offset` parameters:
 
 ```bash
 # Get first 10 results
-curl "https://nes.newnepal.org/api/entities?limit=10&offset=0"
+curl "https://nes.jawafdehi.org/api/entities?limit=10&offset=0"
 
 # Get next 10 results
-curl "https://nes.newnepal.org/api/entities?limit=10&offset=10"
+curl "https://nes.jawafdehi.org/api/entities?limit=10&offset=10"
 ```
 
 ## Response Format
@@ -193,7 +193,7 @@ The API supports CORS (Cross-Origin Resource Sharing), allowing you to make requ
 
 ```javascript
 // Works from any origin
-fetch('https://nes.newnepal.org/api/entities')
+fetch('https://nes.jawafdehi.org/api/entities')
   .then(response => response.json())
   .then(data => console.log(data));
 ```

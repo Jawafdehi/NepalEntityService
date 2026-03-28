@@ -6,7 +6,7 @@ This guide is for developers who want to consume the Nepal Entity Service public
 
 The Nepal Entity Service provides a public, read-only RESTful API for accessing structured data about Nepali public entities including politicians, political parties, government organizations, and administrative locations.
 
-**Public API Base URL**: `https://nes.newnepal.org/api`
+**Public API Base URL**: `https://nes.jawafdehi.org/api`
 
 ## Key Concepts
 
@@ -49,7 +49,7 @@ The API follows a layered architecture:
 ```
 Client Application
        ↓
-  FastAPI Service (https://nes.newnepal.org/api)
+  FastAPI Service (https://nes.jawafdehi.org/api)
        ↓
   Search Service (Read-Optimized)
        ↓
@@ -74,7 +74,7 @@ For detailed architecture, see the [Service Design](/specs/nepal-entity-service/
 
 ### Interactive Documentation
 
-Visit the [OpenAPI documentation](https://nes.newnepal.org/docs) for:
+Visit the [OpenAPI documentation](https://nes.jawafdehi.org/docs) for:
 - Complete endpoint reference
 - Request/response schemas
 - Interactive API testing
@@ -85,7 +85,7 @@ Visit the [OpenAPI documentation](https://nes.newnepal.org/docs) for:
 ### Using cURL
 
 ```bash
-curl "https://nes.newnepal.org/api/entities?query=poudel"
+curl "https://nes.jawafdehi.org/api/entities?query=poudel"
 ```
 
 ### Using Python
@@ -94,7 +94,7 @@ curl "https://nes.newnepal.org/api/entities?query=poudel"
 import requests
 
 response = requests.get(
-    "https://nes.newnepal.org/api/entities",
+    "https://nes.jawafdehi.org/api/entities",
     params={"query": "poudel"}
 )
 
@@ -108,7 +108,7 @@ for entity in data['entities']:
 ### Using JavaScript
 
 ```javascript
-fetch('https://nes.newnepal.org/api/entities?query=poudel')
+fetch('https://nes.jawafdehi.org/api/entities?query=poudel')
   .then(response => response.json())
   .then(data => {
     console.log(`Found ${data.total} entities`);
@@ -126,20 +126,20 @@ Search supports both English and Nepali:
 
 ```bash
 # Search by English name
-curl "https://nes.newnepal.org/api/entities?query=ram+chandra+poudel"
+curl "https://nes.jawafdehi.org/api/entities?query=ram+chandra+poudel"
 
 # Search by Nepali name
-curl "https://nes.newnepal.org/api/entities?query=राम+चन्द्र+पौडेल"
+curl "https://nes.jawafdehi.org/api/entities?query=राम+चन्द्र+पौडेल"
 ```
 
 ### Filter by Entity Type
 
 ```bash
 # Get all persons
-curl "https://nes.newnepal.org/api/entities?entity_type=person"
+curl "https://nes.jawafdehi.org/api/entities?entity_type=person"
 
 # Get all political parties
-curl "https://nes.newnepal.org/api/entities?entity_type=organization&sub_type=political_party"
+curl "https://nes.jawafdehi.org/api/entities?entity_type=organization&sub_type=political_party"
 ```
 
 ### Filter by Tags
@@ -148,13 +148,13 @@ Tags allow you to categorize and filter entities by specific groups or categorie
 
 ```bash
 # Get all 2079 Federal election elected representatives
-curl "https://nes.newnepal.org/api/entities?tags=federal-election-2079-elected"
+curl "https://nes.jawafdehi.org/api/entities?tags=federal-election-2079-elected"
 
 # Get all 2079 Federal election candidates (both elected and non-elected)
-curl "https://nes.newnepal.org/api/entities?tags=federal-election-2079-candidate"
+curl "https://nes.jawafdehi.org/api/entities?tags=federal-election-2079-candidate"
 
 # Combine tags with entity type (get only person entities who were elected in 2079 Federal election)
-curl "https://nes.newnepal.org/api/entities?entity_type=person&tags=federal-election-2079-elected"
+curl "https://nes.jawafdehi.org/api/entities?entity_type=person&tags=federal-election-2079-elected"
 ```
 
 **Tag Filtering Rules:**
@@ -166,7 +166,7 @@ curl "https://nes.newnepal.org/api/entities?entity_type=person&tags=federal-elec
 
 ```bash
 # Get entities with BOTH tags (candidates who ran for both federal and provincial seats)
-curl "https://nes.newnepal.org/api/entities?tags=federal-election-2079-candidate,provincial-election-2079-candidate"
+curl "https://nes.jawafdehi.org/api/entities?tags=federal-election-2079-candidate,provincial-election-2079-candidate"
 ```
 
 **Python Example:**
@@ -176,7 +176,7 @@ import requests
 
 # Get all 2079 Federal election elected representatives
 response = requests.get(
-    "https://nes.newnepal.org/api/entities",
+    "https://nes.jawafdehi.org/api/entities",
     params={
         "entity_type": "person",
         "tags": "federal-election-2079-elected"
@@ -198,7 +198,7 @@ for person in elected['entities']:
 
 ```javascript
 // Fetch all 2082 Federal election candidates
-fetch('https://nes.newnepal.org/api/entities?tags=federal-election-2082-candidate')
+fetch('https://nes.jawafdehi.org/api/entities?tags=federal-election-2082-candidate')
   .then(response => response.json())
   .then(data => {
     console.log(`Found ${data.total} candidates for 2082 Federal election`);
@@ -224,23 +224,23 @@ fetch('https://nes.newnepal.org/api/entities?tags=federal-election-2082-candidat
 ### Get a Specific Entity
 
 ```bash
-curl "https://nes.newnepal.org/api/entities/entity:person/ram-chandra-poudel"
+curl "https://nes.jawafdehi.org/api/entities/entity:person/ram-chandra-poudel"
 ```
 
 ### Query Relationships
 
 ```bash
 # Get all relationships for an entity
-curl "https://nes.newnepal.org/api/entities/entity:person/ram-chandra-poudel/relationships"
+curl "https://nes.jawafdehi.org/api/entities/entity:person/ram-chandra-poudel/relationships"
 
 # Filter by relationship type
-curl "https://nes.newnepal.org/api/entities/entity:person/ram-chandra-poudel/relationships?relationship_type=MEMBER_OF"
+curl "https://nes.jawafdehi.org/api/entities/entity:person/ram-chandra-poudel/relationships?relationship_type=MEMBER_OF"
 ```
 
 ### Get Version History
 
 ```bash
-curl "https://nes.newnepal.org/api/entities/entity:person/ram-chandra-poudel/versions"
+curl "https://nes.jawafdehi.org/api/entities/entity:person/ram-chandra-poudel/versions"
 ```
 
 ## Pagination
@@ -249,10 +249,10 @@ All list endpoints support pagination:
 
 ```bash
 # Get first 10 results
-curl "https://nes.newnepal.org/api/entities?limit=10&offset=0"
+curl "https://nes.jawafdehi.org/api/entities?limit=10&offset=0"
 
 # Get next 10 results
-curl "https://nes.newnepal.org/api/entities?limit=10&offset=10"
+curl "https://nes.jawafdehi.org/api/entities?limit=10&offset=10"
 ```
 
 ## Response Format
@@ -294,7 +294,7 @@ The API supports CORS (Cross-Origin Resource Sharing), allowing you to make requ
 
 ```javascript
 // Works from any origin
-fetch('https://nes.newnepal.org/api/entities')
+fetch('https://nes.jawafdehi.org/api/entities')
   .then(response => response.json())
   .then(data => console.log(data));
 ```
@@ -315,7 +315,7 @@ The Nepal Entity Service API is designed for:
 
 ## Next Steps
 
-- Explore the [Interactive OpenAPI Documentation](https://nes.newnepal.org/docs)
+- Explore the [Interactive OpenAPI Documentation](https://nes.jawafdehi.org/docs)
 - Review [Data Models](/consumers/data-models) to understand entity schemas
 - Check out [Examples](/consumers/examples) for common usage patterns
 - Learn about the [Service Design](/specs/nepal-entity-service/design)
@@ -323,5 +323,5 @@ The Nepal Entity Service API is designed for:
 ## Need Help?
 
 - Check the [Examples](/consumers/examples) page for common patterns
-- Review the [OpenAPI documentation](https://nes.newnepal.org/docs) for detailed endpoint reference
-- Visit our [GitHub repository](https://github.com/NewNepal-org/NepalEntityService) for issues and discussions
+- Review the [OpenAPI documentation](https://nes.jawafdehi.org/docs) for detailed endpoint reference
+- Visit our [GitHub repository](https://github.com/Jawafdehi/NepalEntityService) for issues and discussions

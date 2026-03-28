@@ -22,7 +22,7 @@ jobs:
       - name: Checkout nes-db
         uses: actions/checkout@v4
         with:
-          repository: NewNepal-org/NepalEntityService-database
+          repository: Jawafdehi/NepalEntityService-database
           path: nes-db
       
       - name: Setup Python
