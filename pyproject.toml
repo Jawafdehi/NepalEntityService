@@ -72,7 +72,7 @@ exclude = '''
 
 [tool.isort]
 profile = "black"
-skip = ["entity-db", ".venv"]
+skip = ["entity-db", ".venv", "nes-db"]
 line_length = 88
 multi_line_output = 3
 include_trailing_comma = true

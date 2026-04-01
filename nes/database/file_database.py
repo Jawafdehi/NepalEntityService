@@ -356,21 +356,39 @@ class FileDatabase(EntityDatabase):
 
         entities = []
 
-        # Recursively find all JSON files
+        # Find paths first
+        file_paths = []
         for file_path in search_path.rglob("*.json"):
-            # Skip if we already have enough entities
-            if len(entities) >= limit + offset:
+            file_paths.append(file_path)
+            # If no filters, we can short circuit path collection
+            if not attr_filters and len(file_paths) >= limit + offset:
                 break
 
-            try:
-                entity = self._load_and_filter_entity(file_path, attr_filters)
+        # Process in chunks concurrently using thread pool
+        chunk_size = 200
+        for i in range(0, len(file_paths), chunk_size):
+            chunk = file_paths[i : i + chunk_size]
+
+            # Create thread tasks for each file
+            async def safe_load(fp):
+                try:
+                    return await asyncio.to_thread(
+                        self._load_and_filter_entity, fp, attr_filters
+                    )
+                except (json.JSONDecodeError, ValueError, KeyError) as e:
+                    logger.warning(f"Skipping invalid entity file {fp}: {e}")
+                    return None
+
+            tasks = [safe_load(fp) for fp in chunk]
+            results = await asyncio.gather(*tasks)
+
+            for entity in results:
                 if entity:
                     entities.append(entity)
 
-            except (json.JSONDecodeError, ValueError, KeyError) as e:
-                # Skip invalid files but log the error
-                logger.warning(f"Skipping invalid entity file {file_path}: {e}")
-                continue
+            # Skip if we already have enough entities
+            if len(entities) >= limit + offset:
+                break
 
         # Apply pagination
         return entities[offset : offset + limit]
@@ -864,20 +882,36 @@ class FileDatabase(EntityDatabase):
 
         relationships = []
 
-        # Recursively find all JSON files
+        # Find paths first
+        file_paths = []
         for file_path in search_path.rglob("*.json"):
-            if len(relationships) >= limit + offset:
+            file_paths.append(file_path)
+            if len(file_paths) >= limit + offset:
                 break
 
-            try:
-                relationship = self._load_relationship_from_file(file_path)
+        # Process in chunks concurrently using thread pool
+        chunk_size = 200
+        for i in range(0, len(file_paths), chunk_size):
+            chunk = file_paths[i : i + chunk_size]
+
+            async def safe_load(fp):
+                try:
+                    return await asyncio.to_thread(
+                        self._load_relationship_from_file, fp
+                    )
+                except (json.JSONDecodeError, ValueError, KeyError) as e:
+                    logger.warning(f"Skipping invalid relationship file {fp}: {e}")
+                    return None
+
+            tasks = [safe_load(fp) for fp in chunk]
+            results = await asyncio.gather(*tasks)
+
+            for relationship in results:
                 if relationship:
                     relationships.append(relationship)
 
-            except (json.JSONDecodeError, ValueError, KeyError) as e:
-                # Skip invalid files but log the error
-                logger.warning(f"Skipping invalid relationship file {file_path}: {e}")
-                continue
+            if len(relationships) >= limit + offset:
+                break
 
         # Apply pagination
         return relationships[offset : offset + limit]

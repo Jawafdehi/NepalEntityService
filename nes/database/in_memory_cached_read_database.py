@@ -5,6 +5,7 @@ in-memory cache of entities and relationships. The cache is automatically
 warmed at instantiation and does not support write operations.
 """
 
+import asyncio
 from typing import Dict, List, Optional, Tuple, Union
 
 from beaker.cache import CacheManager
@@ -75,24 +76,32 @@ class InMemoryCachedReadDatabase(EntityDatabase):
     async def _ensure_cache_warmed(self):
         """Ensure cache is warmed before any operation."""
         if not self._cache_warmed:
-            # Load all entities
-            entities = await self.underlying_db.list_entities(limit=999999)
+            # Load all entities and relationships concurrently
+            entities_task = asyncio.create_task(
+                self.underlying_db.list_entities(limit=999999)
+            )
+            relationships_task = asyncio.create_task(
+                self.underlying_db.list_relationships(limit=999999)
+            )
+
+            entities, relationships = await asyncio.gather(
+                entities_task, relationships_task
+            )
+
+            # Compute available tags during cache population
+            tags: set[str] = set()
             for entity in entities:
                 self._entity_cache[entity.id] = entity
-
-            # Load all relationships
-            relationships = await self.underlying_db.list_relationships(limit=999999)
-            for relationship in relationships:
-                self._relationship_cache[relationship.id] = relationship
-
-            # Compute available tags once during warming
-            tags: set[str] = set()
-            for entity in self._entity_cache.values():
                 if entity.tags:
                     for tag in entity.tags:
                         if isinstance(tag, str):
                             tags.add(tag)
+
             self._tags_cache = sorted(tags)
+
+            # Populate relationship cache
+            for relationship in relationships:
+                self._relationship_cache[relationship.id] = relationship
 
             self._cache_warmed = True
 
@@ -277,8 +286,14 @@ class InMemoryCachedReadDatabase(EntityDatabase):
                 ]
 
         # Apply tag filters (AND logic - entity must have ALL specified tags)
-        if tags_tuple:
-            entities = [e for e in entities if self._entity_matches_tags(e, tags_tuple)]
+        if tags_tuple is not None:
+            if len(tags_tuple) == 0:
+                # If tags is an empty list, return only entities with no tags
+                entities = [e for e in entities if not e.tags]
+            else:
+                entities = [
+                    e for e in entities if self._entity_matches_tags(e, tags_tuple)
+                ]
 
         # Apply entity_prefix filter (startswith logic)
         if entity_prefix:
