@@ -68,4 +68,4 @@ We welcome contributions! Please see our [Contributor Guide](docs/contributors/c
 
 This project is licensed under the **Hippocratic License 3.0** - an ethical source license that permits use, modification, and distribution for any purpose that does not violate human rights principles as defined by the United Nations Universal Declaration of Human Rights.
 
-See the [LICENSE](LICENSE) file for the complete license text, or visit [firstdonoharm.dev](https://firstdonoharm.dev/) to learn more about the Hippocratic License.
+See the [LICENSE](LICENSE) file for the complete license text, or visit [firstdonoharm.dev](https://firstdonoharm.dev/) to learn more about the Hippocratic License. 
