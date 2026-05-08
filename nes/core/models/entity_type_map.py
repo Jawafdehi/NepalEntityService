@@ -27,10 +27,13 @@ def _get_entity_prefix_map() -> Dict[str, Type["Entity"]]:
     """Get the entity prefix map with lazy imports."""
     from nes.core.models.location import Location
     from nes.core.models.organization import (
+        Contractor,
         GovernmentBody,
         Hospital,
+        JudicialBody,
         Organization,
         PoliticalParty,
+        PrivateCompany,
     )
     from nes.core.models.person import Person
     from nes.core.models.project import Project
@@ -52,6 +55,9 @@ def _get_entity_prefix_map() -> Dict[str, Type["Entity"]]:
         "organization/hospital": Hospital,
         "organization/ngo": Organization,
         "organization/international_org": Organization,
+        "organization/private_company": PrivateCompany,
+        "organization/judicial_body": JudicialBody,
+        "organization/contractor": Contractor,
         # Location entities
         "location": Location,
         "location/province": Location,

@@ -88,3 +88,37 @@ class Hospital(Organization):
     ownership: Optional[OwnershipType] = Field(
         None, description="Ownership type (Public/Private/Government)"
     )
+
+
+class PrivateCompany(Organization):
+    """Private company organization."""
+
+    sub_type: Literal[EntitySubType.PRIVATE_COMPANY] = Field(
+        default=EntitySubType.PRIVATE_COMPANY,
+        description="Organization subtype, always private_company",
+    )
+    registration_number: Optional[str] = Field(
+        None, description="OCR registration number"
+    )
+    industry: Optional[str] = Field(None, description="Industry sector")
+
+
+class JudicialBody(Organization):
+    """Judicial body (courts)."""
+
+    sub_type: Literal[EntitySubType.JUDICIAL_BODY] = Field(
+        default=EntitySubType.JUDICIAL_BODY,
+        description="Organization subtype, always judicial_body",
+    )
+    jurisdiction: Optional[str] = Field(None, description="Legal jurisdiction")
+
+
+class Contractor(Organization):
+    """Contractor/Construction firm."""
+
+    sub_type: Literal[EntitySubType.CONTRACTOR] = Field(
+        default=EntitySubType.CONTRACTOR,
+        description="Organization subtype, always contractor",
+    )
+    license_number: Optional[str] = Field(None, description="Contractor license number")
+    grade: Optional[str] = Field(None, description="Contractor grade (A, B, C, etc.)")
