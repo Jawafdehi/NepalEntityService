@@ -1,0 +1,68 @@
+name: 'Setup Poetry + Python'
+description: 'Composite action to set up Python, Poetry, and cached dependencies for Jawafdehi Python repos'
+
+inputs:
+  python-version:
+    description: 'Python version to set up'
+    required: false
+    default: '3.12'
+  poetry-version:
+    description: 'Poetry version to install (empty = latest)'
+    required: false
+    default: 'latest'
+  extras:
+    description: 'Comma-separated extras to install'
+    required: false
+    default: ''
+  install-root:
+    description: 'Whether to install the project root package'
+    required: false
+    default: 'true'
+
+outputs:
+  python-version:
+    description: 'The Python version that was set up'
+    value: ${{ steps.setup-python.outputs.python-version }}
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Python
+      id: setup-python
+      uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - name: Install Poetry
+      uses: snok/install-poetry@76e04a911780d5b312d89783f7b1cd627778900a # v1.4.1
+      with:
+        version: ${{ inputs.poetry-version }}
+        virtualenvs-create: true
+        virtualenvs-in-project: true
+
+    - name: Load cached venv
+      id: cached-poetry-dependencies
+      uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
+      with:
+        path: .venv
+        key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ inputs.poetry-version }}-${{ inputs.extras }}-${{ hashFiles('**/poetry.lock') }}
+
+    - name: Install dependencies
+      if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        if [ -n "${{ inputs.extras }}" ]; then
+          poetry install --no-interaction --no-root --extras "${{ inputs.extras }}"
+        else
+          poetry install --no-interaction --no-root
+        fi
+
+    - name: Install project
+      if: inputs.install-root == 'true'
+      shell: bash
+      run: |
+        if [ -n "${{ inputs.extras }}" ]; then
+          poetry install --no-interaction --extras "${{ inputs.extras }}"
+        else
+          poetry install --no-interaction
+        fi
