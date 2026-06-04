@@ -50,3 +50,11 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+      - name: Trigger Dokploy redeploy
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        run: |
+          curl -s -X POST \
+            -H "x-api-key: ${{ secrets.DOKPLOY_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            "https://infra.jawafdehi.org/api/compose.deploy" \
+            -d '{"composeId":"7ERsqgWqUv8U4xyI37g94","title":"Auto-deploy: ${{ github.sha }}"}'
