@@ -13,31 +13,7 @@ This directory contains example scripts demonstrating how to use the Nepal Entit
 
 ## Examples
 
-### 1. Wikipedia Scraper (`wikipedia_scraper_demo.py`)
-
-Demonstrates how to scrape raw data from Wikipedia for politicians.
-
-**What it shows:**
-- Using WikipediaScraper to extract data from Wikipedia
-- Fetching both English and Nepali Wikipedia pages
-- Viewing scraped data structure (content, summary, categories, links, etc.)
-- Saving raw data for later normalization
-
-**Prerequisites:**
-```bash
-poetry install --extras scraping
-```
-
-**Run:**
-```bash
-poetry run python examples/wikipedia_scraper_demo.py
-```
-
-**Example output:** Raw Wikipedia data for Ram Chandra Poudel
-
----
-
-### 2. Update Entity (`update_entity.py`)
+### 1. Update Entity (`update_entity.py`)
 
 Demonstrates how to update an existing entity with automatic versioning.
 
@@ -56,7 +32,7 @@ python examples/update_entity.py
 
 ---
 
-### 3. Create Relationship (`create_relationship.py`)
+### 2. Create Relationship (`create_relationship.py`)
 
 Demonstrates how to create relationships between entities.
 
@@ -75,7 +51,7 @@ python examples/create_relationship.py
 
 ---
 
-### 4. Batch Import (`batch_import.py`)
+### 3. Batch Import (`batch_import.py`)
 
 Demonstrates how to import multiple entities in a batch operation.
 
@@ -94,7 +70,7 @@ python examples/batch_import.py
 
 ---
 
-### 5. Version History (`version_history.py`)
+### 4. Version History (`version_history.py`)
 
 Demonstrates how to explore version history and audit trails.
 

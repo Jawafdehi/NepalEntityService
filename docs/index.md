@@ -71,8 +71,6 @@ Detailed guides for using the core services:
 
 - **[Publication Service Guide](/contributors/publication-service-guide)** - Creating and updating entities and relationships
 - **[Search Service Guide](/contributors/search-service-guide)** - Querying entities and relationships
-- **[Scraping Service Guide](/contributors/scraping-service-guide)** - Extracting and normalizing data from external sources
-- **[Translation Guide](/contributors/translation-guide)** - Translate between English and Nepali using the CLI
 
 #### Specifications
 Technical specifications and design documents:
@@ -100,8 +98,6 @@ Technical specifications and design documents:
 - [migration-maintainer-guide](/contributors/migration-maintainer-guide) - Executing migrations
 - [publication-service-guide](/contributors/publication-service-guide) - Publication Service API and usage
 - [search-service-guide](/contributors/search-service-guide) - Search Service API and usage
-- [scraping-service-guide](/contributors/scraping-service-guide) - Scraping Service API and usage
-- [translation-guide](/contributors/translation-guide) - Translation CLI guide
 
 ## What is Nepal Entity Service?
 

@@ -26,7 +26,6 @@ from nes.services.migration.context import MigrationContext
 from nes.services.migration.manager import MigrationManager
 from nes.services.migration.models import Migration, MigrationResult, MigrationStatus
 from nes.services.publication.service import PublicationService
-from nes.services.scraping.service import ScrapingService
 from nes.services.search.service import SearchService
 
 logger = logging.getLogger(__name__)
@@ -50,7 +49,6 @@ class MigrationRunner:
         self,
         publication_service: PublicationService,
         search_service: SearchService,
-        scraping_service: ScrapingService,
         db: EntityDatabase,
         migration_manager: MigrationManager,
     ):
@@ -60,13 +58,11 @@ class MigrationRunner:
         Args:
             publication_service: Service for creating/updating entities and relationships
             search_service: Service for searching and querying entities
-            scraping_service: Service for data extraction and normalization
             db: Database for direct read access to entities
             migration_manager: Manager for discovering and tracking migrations
         """
         self.publication = publication_service
         self.search = search_service
-        self.scraping = scraping_service
         self.db = db
         self.manager = migration_manager
 
@@ -87,7 +83,7 @@ class MigrationRunner:
         Create execution context for migration script.
 
         The context provides the migration script with:
-        - Access to publication, search, and scraping services
+        - Access to publication and search services
         - Access to the database for read operations
         - File reading helpers (CSV, JSON, Excel)
         - Logging mechanism
@@ -111,7 +107,6 @@ class MigrationRunner:
         context = MigrationContext(
             publication_service=self.publication,
             search_service=self.search,
-            scraping_service=self.scraping,
             db=self.db,
             migration_dir=migration.folder_path,
         )

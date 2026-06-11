@@ -92,7 +92,6 @@ async def test_migration_log_storage(temp_db_repo):
     runner = MigrationRunner(
         publication_service=PublicationService(database=db),
         search_service=SearchService(database=db),
-        scraping_service=None,
         db=db,
         migration_manager=manager,
     )
@@ -145,7 +144,6 @@ async def test_git_diff_capture(temp_db_repo):
     runner = MigrationRunner(
         publication_service=PublicationService(database=db),
         search_service=SearchService(database=db),
-        scraping_service=None,
         db=db,
         migration_manager=manager,
     )
@@ -177,7 +175,6 @@ async def test_clean_state_check_passes(temp_db_repo):
     runner = MigrationRunner(
         publication_service=PublicationService(database=db),
         search_service=SearchService(database=db),
-        scraping_service=None,
         db=db,
         migration_manager=manager,
     )
@@ -200,7 +197,6 @@ async def test_clean_state_check_fails(temp_db_repo):
     runner = MigrationRunner(
         publication_service=PublicationService(database=db),
         search_service=SearchService(database=db),
-        scraping_service=None,
         db=db,
         migration_manager=manager,
     )
@@ -228,7 +224,6 @@ async def test_version_file_counting(temp_db_repo):
     runner = MigrationRunner(
         publication_service=PublicationService(database=db),
         search_service=SearchService(database=db),
-        scraping_service=None,
         db=db,
         migration_manager=manager,
     )
@@ -287,7 +282,6 @@ async def migrate(context):
     runner = MigrationRunner(
         publication_service=PublicationService(database=db),
         search_service=SearchService(database=db),
-        scraping_service=None,
         db=db,
         migration_manager=manager,
     )

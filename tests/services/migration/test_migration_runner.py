@@ -19,7 +19,6 @@ from nes.services.migration import (
     MigrationStatus,
 )
 from nes.services.publication.service import PublicationService
-from nes.services.scraping.service import ScrapingService
 from nes.services.search.service import SearchService
 
 
@@ -37,14 +36,10 @@ def services(temp_db):
     """Create service instances for testing."""
     publication = PublicationService(temp_db)
     search = SearchService(temp_db)
-    # ScrapingService is optional for migration runner tests
-    # We'll pass None and migrations won't use it
-    scraping = None
 
     return {
         "publication": publication,
         "search": search,
-        "scraping": scraping,
         "db": temp_db,
     }
 
@@ -122,7 +117,6 @@ async def test_create_context(services, temp_migrations_dir, temp_db_repo):
     runner = MigrationRunner(
         publication_service=services["publication"],
         search_service=services["search"],
-        scraping_service=services["scraping"],
         db=services["db"],
         migration_manager=manager,
     )
@@ -135,7 +129,6 @@ async def test_create_context(services, temp_migrations_dir, temp_db_repo):
     assert context is not None
     assert context.publication == services["publication"]
     assert context.search == services["search"]
-    assert context.scraping == services["scraping"]
     assert context.db == services["db"]
     assert context.migration_dir == migration.folder_path
 
@@ -147,7 +140,6 @@ async def test_load_script_success(services, temp_migrations_dir, temp_db_repo):
     runner = MigrationRunner(
         publication_service=services["publication"],
         search_service=services["search"],
-        scraping_service=services["scraping"],
         db=services["db"],
         migration_manager=manager,
     )
@@ -183,7 +175,6 @@ async def migrate(context):
     runner = MigrationRunner(
         publication_service=services["publication"],
         search_service=services["search"],
-        scraping_service=services["scraping"],
         db=services["db"],
         migration_manager=manager,
     )
@@ -202,7 +193,6 @@ async def test_run_migration_success(services, temp_migrations_dir, temp_db_repo
     runner = MigrationRunner(
         publication_service=services["publication"],
         search_service=services["search"],
-        scraping_service=services["scraping"],
         db=services["db"],
         migration_manager=manager,
     )
@@ -253,7 +243,6 @@ async def test_run_migration_skipped(services, temp_migrations_dir, temp_db_repo
     runner = MigrationRunner(
         publication_service=services["publication"],
         search_service=services["search"],
-        scraping_service=services["scraping"],
         db=services["db"],
         migration_manager=manager,
     )

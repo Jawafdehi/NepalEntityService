@@ -13,7 +13,6 @@ from typing import Any, Dict, List, Optional
 
 from nes.database.entity_database import EntityDatabase
 from nes.services.publication.service import PublicationService
-from nes.services.scraping.service import ScrapingService
 from nes.services.search.service import SearchService
 
 logger = logging.getLogger(__name__)
@@ -24,7 +23,7 @@ class MigrationContext:
     Thin context object passed to migration scripts.
 
     Provides:
-    - Direct access to publication, search, scraping, and database services
+    - Direct access to publication, search, and database services
     - File reading helpers for CSV, JSON, and Excel files
     - Simple logging mechanism for migration progress
 
@@ -53,7 +52,6 @@ class MigrationContext:
         self,
         publication_service: PublicationService,
         search_service: SearchService,
-        scraping_service: ScrapingService,
         db: EntityDatabase,
         migration_dir: Path,
     ):
@@ -63,13 +61,11 @@ class MigrationContext:
         Args:
             publication_service: Service for creating/updating entities and relationships
             search_service: Service for searching and querying entities
-            scraping_service: Service for data extraction and normalization
             db: Database for direct read access to entities
             migration_dir: Path to the migration folder containing the script
         """
         self.publication = publication_service
         self.search = search_service
-        self.scraping = scraping_service
         self.db = db
         self._migration_dir = Path(migration_dir)
         self._logs: List[str] = []

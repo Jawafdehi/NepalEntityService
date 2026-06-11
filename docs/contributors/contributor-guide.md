@@ -32,7 +32,7 @@ poetry install
 # Install with API extras (for running the server)
 poetry install --extras api
 
-# Install with all extras (API + scraping)
+# Install with all extras
 poetry install --extras all
 ```
 
@@ -58,7 +58,6 @@ NepalEntityService/
 │   ├── services/                 # Business logic (Publication, Search)
 │   ├── api/                      # FastAPI application
 │   ├── cli/                      # Command-line interface
-│   ├── scraping/                 # Web scraping and data collection
 │   └── config.py                 # Configuration management
 ├── nes-db/                       # Database (Separate Git repository)
 │   └── v2/                       # Version 2 database files
@@ -194,34 +193,6 @@ updated = await pub_service.update_entity(
 
 For detailed data maintenance, see the [Data Maintainer Guide](/contributors/data-maintainer-guide).
 
-## Scraping Service
-
-The scraping service automates data collection using GenAI/LLM:
-
-### Prerequisites
-
-```bash
-# Install with scraping extras
-poetry install --extras scraping
-
-# Set up Google Cloud credentials (for Vertex AI)
-export GOOGLE_APPLICATION_CREDENTIALS=/path/to/credentials.json
-```
-
-### Using the Scraper
-
-```python
-from nes.services.scraping import WikipediaScraper, DataNormalizer
-
-# Scrape Wikipedia
-scraper = WikipediaScraper()
-raw_data = await scraper.scrape_politician("Ram Chandra Poudel")
-
-# Normalize to NES format
-normalizer = DataNormalizer()
-entity_data = await normalizer.normalize(raw_data)
-```
-
 ## Creating Migrations
 
 Migrations are the recommended way to contribute data changes:
@@ -304,9 +275,6 @@ The project uses Poetry extras for optional dependencies:
 # API only (FastAPI, Uvicorn)
 poetry install --extras api
 
-# Scraping only (Wikipedia, Google AI)
-poetry install --extras scraping
-
 # Everything
 poetry install --extras all
 ```
@@ -320,9 +288,6 @@ export NES_DB_URL=file:///absolute/path/to/nes-db/v2
 # API server configuration
 export NES_HOST=0.0.0.0
 export NES_PORT=8195
-
-# Google Cloud (for scraping)
-export GOOGLE_APPLICATION_CREDENTIALS=/path/to/credentials.json
 ```
 
 ## Docker Deployment

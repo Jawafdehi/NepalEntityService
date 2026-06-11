@@ -54,13 +54,11 @@ def mock_services():
     """Create mock services for testing."""
     publication_service = Mock()
     search_service = Mock()
-    scraping_service = Mock()
     db = Mock()
 
     return {
         "publication": publication_service,
         "search": search_service,
-        "scraping": scraping_service,
         "db": db,
     }
 
@@ -70,14 +68,12 @@ def test_migration_context_initialization(temp_migration_dir, mock_services):
     context = MigrationContext(
         publication_service=mock_services["publication"],
         search_service=mock_services["search"],
-        scraping_service=mock_services["scraping"],
         db=mock_services["db"],
         migration_dir=temp_migration_dir,
     )
 
     assert context.publication == mock_services["publication"]
     assert context.search == mock_services["search"]
-    assert context.scraping == mock_services["scraping"]
     assert context.db == mock_services["db"]
     assert context.migration_dir == temp_migration_dir
     assert context.logs == []
@@ -88,7 +84,6 @@ def test_migration_dir_property(temp_migration_dir, mock_services):
     context = MigrationContext(
         publication_service=mock_services["publication"],
         search_service=mock_services["search"],
-        scraping_service=mock_services["scraping"],
         db=mock_services["db"],
         migration_dir=temp_migration_dir,
     )
@@ -102,7 +97,6 @@ def test_log_message(temp_migration_dir, mock_services, capsys):
     context = MigrationContext(
         publication_service=mock_services["publication"],
         search_service=mock_services["search"],
-        scraping_service=mock_services["scraping"],
         db=mock_services["db"],
         migration_dir=temp_migration_dir,
     )
@@ -130,7 +124,6 @@ def test_logs_property_returns_copy(temp_migration_dir, mock_services):
     context = MigrationContext(
         publication_service=mock_services["publication"],
         search_service=mock_services["search"],
-        scraping_service=mock_services["scraping"],
         db=mock_services["db"],
         migration_dir=temp_migration_dir,
     )
@@ -157,7 +150,6 @@ def test_read_csv(temp_migration_dir, mock_services):
     context = MigrationContext(
         publication_service=mock_services["publication"],
         search_service=mock_services["search"],
-        scraping_service=mock_services["scraping"],
         db=mock_services["db"],
         migration_dir=temp_migration_dir,
     )
@@ -178,7 +170,6 @@ def test_read_csv_file_not_found(temp_migration_dir, mock_services):
     context = MigrationContext(
         publication_service=mock_services["publication"],
         search_service=mock_services["search"],
-        scraping_service=mock_services["scraping"],
         db=mock_services["db"],
         migration_dir=temp_migration_dir,
     )
@@ -194,7 +185,6 @@ def test_read_json(temp_migration_dir, mock_services):
     context = MigrationContext(
         publication_service=mock_services["publication"],
         search_service=mock_services["search"],
-        scraping_service=mock_services["scraping"],
         db=mock_services["db"],
         migration_dir=temp_migration_dir,
     )
@@ -214,7 +204,6 @@ def test_read_json_file_not_found(temp_migration_dir, mock_services):
     context = MigrationContext(
         publication_service=mock_services["publication"],
         search_service=mock_services["search"],
-        scraping_service=mock_services["scraping"],
         db=mock_services["db"],
         migration_dir=temp_migration_dir,
     )
@@ -234,7 +223,6 @@ def test_read_json_malformed(temp_migration_dir, mock_services):
     context = MigrationContext(
         publication_service=mock_services["publication"],
         search_service=mock_services["search"],
-        scraping_service=mock_services["scraping"],
         db=mock_services["db"],
         migration_dir=temp_migration_dir,
     )
@@ -264,7 +252,6 @@ def test_read_excel_without_openpyxl(temp_migration_dir, mock_services, monkeypa
     context = MigrationContext(
         publication_service=mock_services["publication"],
         search_service=mock_services["search"],
-        scraping_service=mock_services["scraping"],
         db=mock_services["db"],
         migration_dir=temp_migration_dir,
     )
@@ -280,7 +267,6 @@ def test_read_excel_file_not_found(temp_migration_dir, mock_services):
     context = MigrationContext(
         publication_service=mock_services["publication"],
         search_service=mock_services["search"],
-        scraping_service=mock_services["scraping"],
         db=mock_services["db"],
         migration_dir=temp_migration_dir,
     )
@@ -296,7 +282,6 @@ def test_service_access(temp_migration_dir, mock_services):
     context = MigrationContext(
         publication_service=mock_services["publication"],
         search_service=mock_services["search"],
-        scraping_service=mock_services["scraping"],
         db=mock_services["db"],
         migration_dir=temp_migration_dir,
     )
@@ -304,7 +289,6 @@ def test_service_access(temp_migration_dir, mock_services):
     # Verify services are accessible
     assert context.publication is mock_services["publication"]
     assert context.search is mock_services["search"]
-    assert context.scraping is mock_services["scraping"]
     assert context.db is mock_services["db"]
 
     # Verify we can call methods on services (they're mocks)

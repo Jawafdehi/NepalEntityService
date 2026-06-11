@@ -8,7 +8,6 @@ This module provides commands for:
 """
 
 import asyncio
-import logging
 from pathlib import Path
 from typing import Optional
 
@@ -16,8 +15,6 @@ import click
 
 from nes.config import Config
 from nes.services.migration import MigrationManager, MigrationRunner, MigrationStatus
-
-logger = logging.getLogger(__name__)
 
 
 @click.group()
@@ -253,26 +250,12 @@ def run(
         publication_service = Config.get_publication_service()
         search_service = Config.get_search_service()
 
-        # Initialize scraping service (optional - may not be configured)
-        try:
-            from nes.services.scraping.providers import MockLLMProvider
-            from nes.services.scraping.service import ScrapingService
-
-            # Use mock provider for migrations (scraping is optional)
-            mock_provider = MockLLMProvider()
-            scraping_service = ScrapingService(llm_provider=mock_provider)
-        except Exception as e:
-            logger.warning(f"Scraping service not available: {e}")
-            click.echo(f"Scraping service not available: {e}")
-            scraping_service = None
-
         # Initialize migration manager and runner
         manager = MigrationManager(migrations_dir=Path(migrations_dir), db_path=db_path)
 
         runner = MigrationRunner(
             publication_service=publication_service,
             search_service=search_service,
-            scraping_service=scraping_service,
             db=db,
             migration_manager=manager,
         )

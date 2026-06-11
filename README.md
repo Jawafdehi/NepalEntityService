@@ -1,6 +1,6 @@
 # Nepal Entity Service
 
-A comprehensive Python package for managing Nepali public entities with optional API and scraping capabilities.
+A comprehensive Python package for managing Nepali public entities with an optional API.
 
 ## About the Meta Repository
 
@@ -46,7 +46,6 @@ For detailed documentation including installation, database setup, and usage gui
 
 - **Core**: Entity and relationship management with version history
 - **API**: FastAPI web service with entity management endpoints
-- **Scraping**: ML-powered scraping tools for building entity databases
 - **Migrations**: Database migration system for schema evolution
 
 ## For AI Contexts

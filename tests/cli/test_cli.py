@@ -301,59 +301,6 @@ class TestSearchCommands:
         assert result.exit_code == 0
 
 
-@pytest.mark.skip(reason="Scraping commands not yet implemented")
-class TestScrapingCommands:
-    """Test scraping command group."""
-
-    def test_scrape_command_group_exists(self, runner):
-        """Test that 'scrape' command group exists."""
-        from nes.cli import cli
-
-        result = runner.invoke(cli, ["scrape", "--help"])
-        assert result.exit_code == 0
-
-    @patch("nes.cli.ScrapingService")
-    def test_scrape_wikipedia_command(self, mock_scraping_service_class, runner):
-        """Test 'scrape wikipedia' command."""
-        from nes.cli import cli
-
-        mock_service = Mock()
-        mock_service.extract_from_wikipedia = Mock(return_value={"title": "Test Page"})
-        mock_scraping_service_class.return_value = mock_service
-
-        result = runner.invoke(cli, ["scrape", "wikipedia", "Test_Page"])
-
-        assert result.exit_code == 0
-        mock_service.extract_from_wikipedia.assert_called_once()
-
-    @patch("nes.cli.ScrapingService")
-    def test_scrape_search_command(self, mock_scraping_service_class, runner):
-        """Test 'scrape search' command for external search."""
-        from nes.cli import cli
-
-        mock_service = Mock()
-        mock_service.search_external_sources = Mock(return_value=[])
-        mock_scraping_service_class.return_value = mock_service
-
-        result = runner.invoke(cli, ["scrape", "search", "test query"])
-
-        assert result.exit_code == 0
-        mock_service.search_external_sources.assert_called_once()
-
-    @patch("nes.cli.ScrapingService")
-    def test_scrape_info_command(self, mock_scraping_service_class, runner):
-        """Test 'scrape info' command for entity information."""
-        from nes.cli import cli
-
-        mock_service = Mock()
-        mock_service.search_external_sources = Mock(return_value=[])
-        mock_scraping_service_class.return_value = mock_service
-
-        result = runner.invoke(cli, ["scrape", "info", "test query"])
-
-        assert result.exit_code == 0
-
-
 @pytest.mark.skip(reason="Data management commands not yet implemented")
 class TestDataManagementCommands:
     """Test data management command group."""

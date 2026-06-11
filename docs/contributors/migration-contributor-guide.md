@@ -206,9 +206,6 @@ await context.publication.create_relationship(source_id, target_id, type, author
 entity = await context.search.find_entity_by_name("Ram Sharma", "person")
 results = await context.search.search_entities(query="Nepal", entity_type="organization")
 
-# Scraping Service - normalize and translate data
-normalized = await context.scraping.normalize_name("राम शर्मा", language="ne")
-
 # Database - direct read access
 entity = await context.db.get_entity("entity:person/ram-sharma")
 ```
