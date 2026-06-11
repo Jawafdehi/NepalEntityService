@@ -495,7 +495,6 @@ Migration logs in Database Repository:
 │  • Thin API for migration scripts                           │
 │  • Access to Publication Service                            │
 │  • Access to Search Service                                 │
-│  • Access to Scraping Service                               │
 │  • File reading helpers                                     │
 │  • Logging mechanism                                        │
 └─────────────────────────────────────────────────────────────┘
@@ -581,7 +580,7 @@ class MigrationRunner:
 **Responsibility**: Provide minimal API for migration scripts
 
 **Key Operations**:
-- Expose services (publication, search, scraping)
+- Expose services (publication, search)
 - Provide file reading helpers (CSV, JSON, Excel)
 - Provide logging mechanism
 - Provide migration folder path
@@ -594,7 +593,6 @@ class MigrationContext:
     # Services
     publication: PublicationService
     search: SearchService
-    scraping: ScrapingService
     db: EntityDatabase
     
     # Helpers

@@ -42,14 +42,7 @@ async def migrate(context: MigrationContext) -> None:
             await context.search.search_entities(query, **filters)
             await context.search.find_entity_by_name(name, entity_type=None)
             await context.search.get_entity(entity_id)
-    
-    context.scraping - ScrapingService
-        Extract and normalize data from various sources.
-        
-        Methods:
-            await context.scraping.normalize_name(raw_name, language="ne")
-            await context.scraping.extract_data(source, **options)
-    
+
     context.db - EntityDatabase
         Direct read access to the entity database.
         
@@ -196,19 +189,6 @@ async def migrate(context: MigrationContext) -> None:
             context.log(f"Updated {{entity.id}}")
         else:
             context.log("Entity not found")
-    
-    5. Normalize names:
-    
-        data = context.read_csv("entities.csv")
-        
-        for row in data:
-            # Normalize Nepali name
-            normalized = await context.scraping.normalize_name(
-                row["name_ne"],
-                language="ne"
-            )
-            
-            context.log(f"Normalized: {{row['name_ne']}} -> {{normalized}}")
     """
     
     # TODO: Implement your migration logic here

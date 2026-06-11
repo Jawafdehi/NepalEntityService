@@ -16,11 +16,6 @@ uvicorn = {version = "^0.24.0", optional = true}
 markdown = {version = "^3.5.0", optional = true}
 pymdown-extensions = {version = "^10.0", optional = true}
 
-# Scraping extras
-wikipedia = {version = "^1.4.0", optional = true}
-google-cloud-aiplatform = {version = "^1.38.0", optional = true}
-google-auth = {version = "^2.23.0", optional = true}
-
 # Core/Common
 python = "^3.12"
 pydantic = "^2.12.3"
@@ -31,8 +26,7 @@ beaker = "^1.13.0"
 
 [tool.poetry.extras]
 api = ["fastapi", "uvicorn", "markdown", "pymdown-extensions"]
-scraping = ["wikipedia", "google-cloud-aiplatform", "google-auth"]
-all = ["fastapi", "uvicorn", "markdown", "pymdown-extensions", "wikipedia", "google-cloud-aiplatform", "google-auth"]
+all = ["fastapi", "uvicorn", "markdown", "pymdown-extensions"]
 
 [tool.poetry.scripts]
 nes = "nes.cli:main"

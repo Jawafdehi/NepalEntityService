@@ -25,9 +25,6 @@ Detailed guides for using the core services:
 ### Publication Service
 - **[Publication Service Guide](publication-service-guide.md)** - Creating and updating entities and relationships
 
-### Scraping Service
-- **[Scraping Service Guide](scraping-service-guide.md)** - Extracting and normalizing data from external sources
-
 ### Search Service
 - **[Search Service Guide](search-service-guide.md)** - Querying entities and relationships
 

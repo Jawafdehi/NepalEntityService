@@ -86,8 +86,18 @@ The `context` object passed to your migration provides:
 ### Services
 - `context.publication` - Publication Service for creating/updating entities
 - `context.search` - Search Service for querying entities
-- `context.scraping` - Scraping Service for data normalization
 - `context.db` - Direct database access (read-only)
+
+> **Note on historical migrations:** Migrations
+> `003-source-2082-political-parties`, `005-seed-2079-election-candidates`,
+> `006-source-hospitals`, `007-source-projects`,
+> `008-complete-political-parties`, and `010-source-2082-direct-candidates`
+> import the now-removed scraping module (`nes.services.scraping` —
+> `NameExtractor`, `GoogleVertexAIProvider`, `RateLimiter`/`RetryHandler`, and
+> their `generate_translations.py` / scraper helpers). They have already been
+> applied and are retained for historical reference only; re-running them
+> requires a pre-removal version of NES. (`002-ward-name-fix` only mentions
+> `context.scraping` in docstrings, so it has no such dependency.)
 
 ### File Helpers
 - `context.read_csv(filename)` - Read CSV file from migration folder

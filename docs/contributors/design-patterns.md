@@ -53,13 +53,16 @@ def create_entity(name: str):
 
 **Example of acceptable local import:**
 ```python
-def scrape_data():
-    # Only import if scraping functionality is actually used
+def run_api_server():
+    # Only import if the API functionality is actually used
     try:
-        from nes.services.scraping import WikipediaScraper
-        return WikipediaScraper().scrape_politician("Name")
+        import uvicorn
+
+        from nes.api.app import app
     except ImportError:
-        raise RuntimeError("Scraping dependencies not installed. Install with: pip install nepal-entity-service[scraping]")
+        raise RuntimeError("API dependencies not installed. Install with: pip install nepal-entity-service[api]")
+
+    uvicorn.run(app)
 ```
 
 ## Code Organization
