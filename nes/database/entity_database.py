@@ -6,7 +6,7 @@ and author operations.
 """
 
 from abc import ABC, abstractmethod
-from typing import Dict, List, Optional, Union
+from typing import AsyncIterator, Dict, List, Optional, Union
 
 from nes.core.models.entity import Entity
 from nes.core.models.relationship import Relationship
@@ -124,6 +124,25 @@ class EntityDatabase(ABC):
                     if isinstance(tag, str):
                         tags.add(tag)
         return sorted(tags)
+
+    async def iter_entities(self, batch_size: int = 1000) -> AsyncIterator[Entity]:
+        """Yield every entity in the database, paging to bound memory use.
+
+        This default implementation pages via ``list_entities``. Backends with
+        a more efficient streaming path (e.g. file walking) should override it.
+        Intended for bulk operations such as building the search index over a
+        very large database without materializing all entities at once.
+        """
+        offset = 0
+        while True:
+            batch = await self.list_entities(limit=batch_size, offset=offset)
+            if not batch:
+                return
+            for entity in batch:
+                yield entity
+            if len(batch) < batch_size:
+                return
+            offset += batch_size
 
     @abstractmethod
     async def put_relationship(self, relationship: Relationship) -> Relationship:

@@ -17,6 +17,9 @@ class Config:
     _database: Optional[object] = None  # type: EntityDatabase
     _search_service: Optional[object] = None  # type: SearchService
     _publication_service: Optional[object] = None  # type: PublicationService
+    _search_backend: Optional[object] = None  # type: SearchBackend
+    _search_backend_resolved: bool = False
+    _entity_indexer: Optional[object] = None  # type: EntityIndexer
 
     @classmethod
     def get_db_path(cls, override_path: Optional[str] = None) -> Path:
@@ -167,6 +170,51 @@ class Config:
         return cls._database
 
     @classmethod
+    def get_search_backend(cls) -> Optional["SearchBackend"]:
+        """Get or create the global search backend.
+
+        Selected via SEARCH_BACKEND / OPENSEARCH_URL env vars. Returns ``None``
+        when no backend is configured (the default), in which case search is
+        served directly from the database. Resolution is memoized so an
+        unconfigured (``None``) result is not recomputed on every call.
+
+        Returns:
+            SearchBackend instance, or None when no backend is configured.
+        """
+        if not cls._search_backend_resolved:
+            from nes.search import get_search_backend
+
+            cls._search_backend = get_search_backend()
+            cls._search_backend_resolved = True
+            if cls._search_backend is None:
+                logger.info("No search backend configured; using database search")
+            else:
+                logger.info(
+                    "Search backend initialized: %s",
+                    type(cls._search_backend).__name__,
+                )
+
+        return cls._search_backend
+
+    @classmethod
+    def get_entity_indexer(cls) -> Optional["EntityIndexer"]:
+        """Get or create the global entity indexer, or None if no backend.
+
+        Returns None when no search backend is configured, so publication
+        operations skip indexing entirely (no behavior change).
+        """
+        if cls._entity_indexer is None:
+            backend = cls.get_search_backend()
+            if backend is None:
+                return None
+            from nes.search import EntityIndexer
+
+            cls._entity_indexer = EntityIndexer(backend=backend)
+            logger.info("Entity indexer initialized")
+
+        return cls._entity_indexer
+
+    @classmethod
     def get_search_service(cls) -> "SearchService":
         """Get or create the global search service instance.
 
@@ -177,7 +225,9 @@ class Config:
             from nes.services.search import SearchService
 
             db = cls.get_database()
-            cls._search_service = SearchService(database=db)
+            cls._search_service = SearchService(
+                database=db, backend=cls.get_search_backend()
+            )
             logger.info("Search service initialized")
 
         return cls._search_service
@@ -193,7 +243,9 @@ class Config:
             from nes.services.publication import PublicationService
 
             db = cls.get_database()
-            cls._publication_service = PublicationService(database=db)
+            cls._publication_service = PublicationService(
+                database=db, indexer=cls.get_entity_indexer()
+            )
             logger.info("Publication service initialized")
 
         return cls._publication_service
@@ -205,6 +257,9 @@ class Config:
         cls._database = None
         cls._search_service = None
         cls._publication_service = None
+        cls._search_backend = None
+        cls._search_backend_resolved = False
+        cls._entity_indexer = None
 
 
 # Global configuration instance

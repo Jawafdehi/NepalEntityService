@@ -54,10 +54,32 @@ async def lifespan(app: FastAPI):
                 f"Cache warming completed with note in {elapsed_time:.2f} seconds: {e}"
             )
 
+    # Initialize the search backend (if configured) and ensure its index exists.
+    # If the backend is unreachable, degrade gracefully: detach it from the
+    # search service so requests fall back to database search instead of failing.
+    backend = config.Config.get_search_backend()
+    if backend is not None:
+        try:
+            if await backend.health():
+                await backend.ensure_index()
+                logger.info("Search backend ready: %s", type(backend).__name__)
+            else:
+                raise RuntimeError("search backend health check failed")
+        except Exception as e:
+            logger.warning(
+                "Search backend unavailable (%s); degrading to database search", e
+            )
+            config.Config.get_search_service().backend = None
+
     yield
 
     # Shutdown
     logger.info("Shutting down Nepal Entity Service API v2")
+    if backend is not None:
+        try:
+            await backend.close()
+        except Exception:
+            logger.warning("Error closing search backend", exc_info=True)
     config.Config.cleanup()
 
 

@@ -21,6 +21,7 @@ from nes.api.responses import (
 )
 from nes.core.models.entity import EntityType
 from nes.core.models.entity_type_map import ALLOWED_ENTITY_PREFIXES
+from nes.search.models import SearchQuery
 from nes.services.search import SearchService
 
 logger = logging.getLogger(__name__)
@@ -58,6 +59,10 @@ async def list_entities(
         None,
         description="Comma-separated tags to filter by (AND logic - entity must have ALL tags)",
     ),
+    fuzzy: bool = Query(
+        True,
+        description="Allow typo-tolerant matching when a search backend is active",
+    ),
     limit: int = Query(100, ge=1, le=1000, description="Maximum number of results"),
     offset: int = Query(0, ge=0, description="Number of results to skip"),
     search_service: SearchService = Depends(get_search_service),
@@ -86,7 +91,9 @@ async def list_entities(
             sub_type,
         )
 
-    # Validate mutually exclusive parameters
+    # Validate mutually exclusive parameters. `fuzzy` is intentionally excluded:
+    # it only affects full-text search and is harmlessly ignored in batch (ids)
+    # mode, so it should not conflict with an ids lookup.
     other_params = [
         query,
         entity_type,
@@ -171,28 +178,37 @@ async def list_entities(
 
     # Search entities
     try:
-        entities = await search_service.search_entities(
+        search_query = SearchQuery.build(
             query=query,
             entity_type=entity_type,
             sub_type=sub_type,
             entity_prefix=entity_prefix,
             attributes=attr_filters,
             tags=tags_list,
+            fuzzy=fuzzy,
+            limit=limit,
+            offset=offset,
+        )
+        # Single hydration choke point in the service: avoids re-fetching the
+        # entities the database already returned in the no-backend path.
+        entities, total = await search_service.search_entities_page(search_query)
+        entity_dicts = [entity.model_dump(mode="json") for entity in entities]
+
+        # `total` is the accurate count of ALL matches when a backend is active;
+        # it degrades to the page size when no backend is configured.
+        return EntityListResponse(
+            entities=entity_dicts,
+            total=total,
             limit=limit,
             offset=offset,
         )
 
-        # Convert entities to dict format
-        entity_dicts = [entity.model_dump(mode="json") for entity in entities]
-
-        # For now, total is the count of returned entities
-        # In a real implementation, we'd query the total count separately
-        total = len(entity_dicts)
-
-        return EntityListResponse(
-            entities=entity_dicts, total=total, limit=limit, offset=offset
+    except ValueError as e:
+        # Caller/query errors (e.g. pagination window too large) -> 400.
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"error": {"code": "INVALID_REQUEST", "message": str(e)}},
         )
-
     except Exception as e:
         logger.error(f"Error searching entities: {e}", exc_info=True)
         raise HTTPException(

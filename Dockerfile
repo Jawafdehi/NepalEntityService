@@ -11,7 +11,7 @@ COPY pyproject.toml poetry.lock README.md ./
 COPY nes/ ./nes/
 RUN pip install poetry && \
     poetry config virtualenvs.create false && \
-    poetry install --extras api --only=main
+    poetry install --extras "api search" --only=main
 
 COPY docs/ ./docs/
 

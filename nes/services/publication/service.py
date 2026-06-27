@@ -19,6 +19,7 @@ from nes.core.models.relationship import Relationship, RelationshipType
 from nes.core.models.version import Author, Version, VersionSummary, VersionType
 from nes.core.utils.entity_utils import entity_from_dict
 from nes.database.entity_database import EntityDatabase
+from nes.search.indexer import EntityIndexer
 
 logger = logging.getLogger(__name__)
 
@@ -30,13 +31,23 @@ class PublicationService:
     management with automatic versioning, validation, and business rule enforcement.
     """
 
-    def __init__(self, database: EntityDatabase):
+    def __init__(
+        self,
+        database: EntityDatabase,
+        indexer: Optional[EntityIndexer] = None,
+    ):
         """Initialize the Publication Service.
 
         Args:
             database: Database instance for storage operations
+            indexer: Optional search indexer. When provided, entity
+                create/update/delete operations also update the search index on
+                a best-effort basis (failures are logged, never propagated, so
+                the database remains the source of truth). When ``None``,
+                publication behaves exactly as before with no indexing.
         """
         self.database = database
+        self.indexer = indexer
         logger.info("PublicationService initialized")
 
     async def create_entity(
@@ -134,6 +145,10 @@ class PublicationService:
         )
         await self.database.put_version(version)
 
+        # Best-effort live indexing (no-op when no indexer is configured).
+        if self.indexer is not None:
+            await self.indexer.upsert_entity(entity)
+
         logger.info(f"Created entity {entity_id} version 1")
         return entity
 
@@ -192,6 +207,10 @@ class PublicationService:
         )
         await self.database.put_version(version)
 
+        # Best-effort live indexing (no-op when no indexer is configured).
+        if self.indexer is not None:
+            await self.indexer.upsert_entity(entity)
+
         logger.info(f"Updated entity {entity.id} to version {new_version_number}")
         return entity
 
@@ -223,6 +242,9 @@ class PublicationService:
         result = await self.database.delete_entity(entity_id)
 
         if result:
+            # Best-effort removal from the search index.
+            if self.indexer is not None:
+                await self.indexer.remove_entity(entity_id)
             logger.info(f"Deleted entity {entity_id}")
 
         return result

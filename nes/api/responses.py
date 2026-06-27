@@ -101,4 +101,7 @@ class HealthResponse(BaseModel):
     version: str = Field(..., description="API version")
     api_version: str = Field(..., description="API version number")
     database: Dict[str, str] = Field(..., description="Database status")
+    search: Optional[Dict[str, str]] = Field(
+        default=None, description="Search backend status"
+    )
     timestamp: datetime = Field(..., description="Health check timestamp")

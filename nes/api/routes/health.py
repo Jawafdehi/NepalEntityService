@@ -9,9 +9,10 @@ from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends
 
-from nes.api.app import get_database
+from nes.api.app import get_database, get_search_service
 from nes.api.responses import HealthResponse
 from nes.database.entity_database import EntityDatabase
+from nes.services.search import SearchService
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +20,10 @@ router = APIRouter(prefix="/api", tags=["health"])
 
 
 @router.get("/health", response_model=HealthResponse)
-async def health_check(database: EntityDatabase = Depends(get_database)):
+async def health_check(
+    database: EntityDatabase = Depends(get_database),
+    search_service: SearchService = Depends(get_search_service),
+):
     """Health check endpoint.
 
     Returns the current health status of the API and its dependencies,
@@ -41,7 +45,22 @@ async def health_check(database: EntityDatabase = Depends(get_database)):
         logger.error(f"Database health check failed: {e}", exc_info=True)
         db_status = "disconnected"
 
-    # Determine overall status
+    # Report search backend status. A detached/absent backend means the API
+    # is serving search from the database (degraded but healthy).
+    backend = search_service.backend
+    if backend is None:
+        search_status = {"status": "database", "backend": "none"}
+    else:
+        try:
+            healthy = await backend.health()
+        except Exception:
+            healthy = False
+        search_status = {
+            "status": "connected" if healthy else "disconnected",
+            "backend": type(backend).__name__,
+        }
+
+    # Determine overall status (search degradation does not mark API unhealthy)
     overall_status = "healthy" if db_status == "connected" else "unhealthy"
 
     return HealthResponse(
@@ -49,5 +68,6 @@ async def health_check(database: EntityDatabase = Depends(get_database)):
         version="2.0.0",
         api_version="v2",
         database={"status": db_status, "type": "file_database"},
+        search=search_status,
         timestamp=datetime.now(UTC),
     )

@@ -225,6 +225,117 @@ def search_relationships(
         click.echo()
 
 
+def _require_search_backend():
+    """Resolve the configured search backend or abort with a clear message."""
+    from nes.search import get_search_backend
+
+    backend = get_search_backend()
+    if backend is None:
+        raise click.ClickException(
+            "No search backend configured. Set SEARCH_BACKEND=opensearch and "
+            "OPENSEARCH_URL=<url> (or SEARCH_BACKEND=inprocess)."
+        )
+    return backend
+
+
+@search.command(name="ensure-index")
+def search_ensure_index():
+    """Create the search index (with analyzers/mappings) if it does not exist.
+
+    Requires a configured OpenSearch backend (OPENSEARCH_URL / SEARCH_BACKEND).
+    """
+    import asyncio
+
+    backend = _require_search_backend()
+
+    async def _run():
+        if not await backend.health():
+            raise click.ClickException(
+                "Search backend is not reachable. Check OPENSEARCH_URL."
+            )
+        await backend.ensure_index()
+        await backend.close()
+
+    asyncio.run(_run())
+    click.echo("Search index ensured.")
+
+
+@search.command(name="reindex")
+@click.option("--batch-size", default=2000, type=int, help="Docs per bulk request")
+@click.option(
+    "--recreate",
+    is_flag=True,
+    help="Delete and recreate the index before indexing (full rebuild)",
+)
+def search_reindex(batch_size, recreate):
+    """(Re)index all entities into the search backend.
+
+    Streams entities from the database so a very large database is indexed
+    without loading everything into memory. Uses the entity ID as the document
+    key, so re-running upserts rather than duplicates.
+    """
+    import asyncio
+
+    from nes.config import Config
+    from nes.search import EntityDocumentBuilder
+
+    backend = _require_search_backend()
+    Config.initialize_database()
+    db = Config.get_database()
+    builder = EntityDocumentBuilder()
+
+    async def _run() -> int:
+        if not await backend.health():
+            raise click.ClickException(
+                "Search backend is not reachable. Check OPENSEARCH_URL."
+            )
+        if recreate and hasattr(backend, "delete_index"):
+            await backend.delete_index()
+        await backend.ensure_index()
+
+        total = 0
+        batch = []
+        async for entity in db.iter_entities(batch_size=batch_size):
+            batch.append(builder.build(entity))
+            if len(batch) >= batch_size:
+                total += await backend.index_bulk(batch)
+                click.echo(f"  indexed {total} entities...")
+                batch = []
+        if batch:
+            total += await backend.index_bulk(batch)
+
+        if hasattr(backend, "refresh"):
+            await backend.refresh()
+        await backend.close()
+        return total
+
+    total = asyncio.run(_run())
+    click.echo(f"Reindex complete: {total} entities indexed.")
+
+
+@search.command(name="status")
+def search_status():
+    """Report search backend type and reachability."""
+    import asyncio
+
+    from nes.search import get_search_backend
+
+    backend = get_search_backend()
+    if backend is None:
+        click.echo("Backend: none (database search)")
+        click.echo("Configure SEARCH_BACKEND / OPENSEARCH_URL to enable a backend.")
+        return
+
+    async def _run() -> bool:
+        healthy = await backend.health()
+        await backend.close()
+        return healthy
+
+    healthy = asyncio.run(_run())
+    click.echo(f"Backend: {type(backend).__name__}")
+    click.echo(f"Healthy: {healthy}")
+
+
 @cli.command()
 @click.argument("entity_id")
 @click.option("--json", "output_json", is_flag=True, help="Output in JSON format")

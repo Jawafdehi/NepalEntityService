@@ -18,7 +18,7 @@ import logging
 import time
 from datetime import date, datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, AsyncIterator, Dict, List, Optional, Union
 
 from nes.core.models.entity import Entity
 from nes.core.models.entity_type_map import ALLOWED_ENTITY_PREFIXES, ENTITY_PREFIX_MAP
@@ -392,6 +392,51 @@ class FileDatabase(EntityDatabase):
 
         # Apply pagination
         return entities[offset : offset + limit]
+
+    async def iter_entities(self, batch_size: int = 1000) -> AsyncIterator[Entity]:
+        """Stream every entity by lazily walking the entity directory tree.
+
+        Avoids materializing the full database in memory (critical at ~1M
+        entities). Files are parsed in bounded concurrent chunks; invalid files
+        are skipped with a warning rather than aborting the stream.
+        """
+        entity_root = self.base_path / "entity"
+        if not entity_root.exists():
+            return
+
+        chunk: List[Path] = []
+
+        # Bound concurrent file loads independently of batch_size so a large
+        # batch does not flood the default thread pool (which would starve other
+        # async work, e.g. API requests, during a reindex).
+        semaphore = asyncio.Semaphore(64)
+
+        async def _load_chunk(paths: List[Path]) -> List[Optional[Entity]]:
+            async def _safe(fp: Path) -> Optional[Entity]:
+                async with semaphore:
+                    try:
+                        return await asyncio.to_thread(
+                            self._load_and_filter_entity, fp, None
+                        )
+                    except (json.JSONDecodeError, ValueError, KeyError) as e:
+                        logger.warning(f"Skipping invalid entity file {fp}: {e}")
+                        return None
+
+            return await asyncio.gather(*[_safe(fp) for fp in paths])
+
+        for file_path in entity_root.rglob("*.json"):
+            chunk.append(file_path)
+            if len(chunk) >= batch_size:
+                for entity in await _load_chunk(chunk):
+                    if entity:
+                        yield entity
+                chunk = []
+
+        # Flush the final partial chunk.
+        if chunk:
+            for entity in await _load_chunk(chunk):
+                if entity:
+                    yield entity
 
     def _build_entity_search_path(
         self, entity_type: Optional[str] = None, sub_type: Optional[str] = None

@@ -1,0 +1,63 @@
+# Local / integration stack: OpenSearch + the NES API.
+#
+# Quick start:
+#   docker compose up -d --build
+#   docker compose exec nes-api nes search reindex   # build the index
+#
+# The opensearch service installs the analysis-icu plugin for proper
+# Devanagari tokenization. Security is disabled for local convenience only;
+# enable it (and set OPENSEARCH_USER/PASSWORD) for any non-local deployment.
+
+services:
+  opensearch:
+    image: opensearchproject/opensearch:2.13.0
+    container_name: nes-opensearch
+    environment:
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - "OPENSEARCH_JAVA_OPTS=-Xms1g -Xmx1g"
+      - DISABLE_SECURITY_PLUGIN=true
+      - DISABLE_INSTALL_DEMO_CONFIG=true
+    # Install the ICU analysis plugin on startup, then launch OpenSearch.
+    command: >
+      bash -c "
+      ./bin/opensearch-plugin list | grep -q analysis-icu ||
+      ./bin/opensearch-plugin install --batch analysis-icu;
+      ./opensearch-docker-entrypoint.sh
+      "
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - opensearch-data:/usr/share/opensearch/data
+    ports:
+      - "9200:9200"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:9200/_cluster/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  nes-api:
+    build:
+      context: .
+      args:
+        DB_REF: main
+    container_name: nes-api
+    environment:
+      - NES_DB_URL=file+memcached:///app/nes-db/v2
+      - SEARCH_BACKEND=opensearch
+      - OPENSEARCH_URL=http://opensearch:9200
+      - OPENSEARCH_INDEX=nes-entities
+    depends_on:
+      opensearch:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+
+volumes:
+  opensearch-data:

@@ -14,14 +14,19 @@ read operations only. It uses the database layer directly for efficient queries.
 """
 
 import asyncio
+import logging
 from dataclasses import dataclass
 from datetime import date
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 from nes.core.models.entity import Entity
 from nes.core.models.relationship import Relationship
 from nes.core.models.version import Version
 from nes.database.entity_database import EntityDatabase
+from nes.search.backend import SearchBackend
+from nes.search.models import SearchHit, SearchQuery, SearchResults
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -48,13 +53,21 @@ class SearchService:
         database: The database instance to query
     """
 
-    def __init__(self, database: EntityDatabase):
+    def __init__(
+        self, database: EntityDatabase, backend: Optional[SearchBackend] = None
+    ):
         """Initialize the Search Service.
 
         Args:
-            database: Database instance for querying
+            database: Database instance for querying and entity hydration.
+            backend: Optional search backend. When provided, full-text searches
+                are served by the backend (multi-field, fuzzy, transliteration,
+                accurate totals) and entities are re-hydrated from ``database``.
+                When ``None``, search falls back to the legacy database search,
+                preserving existing behavior.
         """
         self.database = database
+        self.backend = backend
 
     async def search_entities(
         self,
@@ -69,10 +82,9 @@ class SearchService:
     ) -> List[Entity]:
         """Search entities with text query and optional filtering.
 
-        Performs case-insensitive text search across entity name fields
-        (both English and Nepali). Supports filtering by type, subtype,
-        attributes, tags, and entity_prefix. Results are ranked by relevance
-        when a query is provided.
+        Backward-compatible entry point returning a list of entities. When a
+        search backend is configured it is used (with graceful fallback to the
+        database on backend errors); otherwise the database search is used.
 
         Args:
             query: Text query to search for in entity names (case-insensitive)
@@ -88,16 +100,114 @@ class SearchService:
         Returns:
             List of entities matching the search criteria, ranked by relevance
         """
-        return await self.database.search_entities(
+        query_obj = SearchQuery.build(
             query=query,
             entity_type=entity_type,
             sub_type=sub_type,
-            attr_filters=attributes,
-            tags=tags,
             entity_prefix=entity_prefix,
+            attributes=attributes,
+            tags=tags,
             limit=limit,
             offset=offset,
         )
+        entities, _total = await self.search_entities_page(query_obj)
+        return entities
+
+    async def search_entities_page(
+        self, query: SearchQuery
+    ) -> Tuple[List[Entity], int]:
+        """Search entities and return hydrated entities plus an accurate total.
+
+        This is the single hydration choke point shared by the list-returning
+        ``search_entities`` and the API route. It avoids re-fetching entities
+        that the database already returned:
+
+        - With a backend: the backend yields entity IDs + total; entities are
+          hydrated once from the database (the source of truth).
+        - Without a backend (or on backend error): the database search already
+          returns full entities, which are used directly (no second fetch).
+          ``total`` is the page size (legacy, page-bounded approximation).
+        """
+        if self.backend is not None:
+            results = await self._search_via_backend(query)
+            if results is not None:
+                entities = await self._hydrate(results)
+                return entities, results.total
+            # Backend failed; fall through to the database path below.
+
+        entities = await self.database.search_entities(
+            query=query.query,
+            entity_type=query.entity_type,
+            sub_type=query.sub_type,
+            attr_filters=query.attributes_dict,
+            tags=query.tags_list,
+            entity_prefix=query.entity_prefix,
+            limit=query.limit,
+            offset=query.offset,
+        )
+        return entities, len(entities)
+
+    async def search_entities_full(self, query: SearchQuery) -> SearchResults:
+        """Search entities and return ranked hits plus an accurate total.
+
+        Prefers the configured backend. If no backend is configured, or the
+        backend errors, this falls back to the database search and reports
+        ``total`` as the number of entities on the returned page (the legacy,
+        page-bounded approximation).
+        """
+        if self.backend is not None:
+            results = await self._search_via_backend(query)
+            if results is not None:
+                return results
+
+        # Degraded path: database search has no accurate total.
+        entities = await self.database.search_entities(
+            query=query.query,
+            entity_type=query.entity_type,
+            sub_type=query.sub_type,
+            attr_filters=query.attributes_dict,
+            tags=query.tags_list,
+            entity_prefix=query.entity_prefix,
+            limit=query.limit,
+            offset=query.offset,
+        )
+        hits = [SearchHit(entity_id=e.id, score=0.0, source={}) for e in entities]
+        return SearchResults(hits=hits, total=len(hits))
+
+    async def _search_via_backend(self, query: SearchQuery) -> Optional[SearchResults]:
+        """Run a backend search, returning None (degrade) on backend error.
+
+        ValueError is treated as a caller/query error (e.g. pagination window
+        too large) and re-raised so the API surfaces a 400 rather than silently
+        degrading; only operational failures trigger the database fallback.
+        """
+        try:
+            return await self.backend.search(query)
+        except ValueError:
+            raise
+        except Exception:
+            logger.exception("search backend failed; falling back to database")
+            return None
+
+    async def _hydrate(self, results: SearchResults) -> List[Entity]:
+        """Re-fetch canonical entities for hits, preserving hit order.
+
+        Hits whose entity is missing from the database (e.g. a stale index that
+        still references a deleted entity) are skipped and logged, so the
+        returned list never contains gaps and the drift is observable.
+        """
+        if not results.hits:
+            return []
+        batch = await self.get_entities_batch(results.entity_ids)
+        if batch.not_found:
+            logger.warning(
+                "search index references %d entities missing from the database "
+                "(stale index?); dropping from results: %s",
+                len(batch.not_found),
+                batch.not_found,
+            )
+        by_id = {e.id: e for e in batch.entities}
+        return [by_id[eid] for eid in results.entity_ids if eid in by_id]
 
     async def get_all_tags(self) -> List[str]:
         """Return all unique tag values across all entities."""
