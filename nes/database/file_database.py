@@ -401,10 +401,8 @@ class FileDatabase(EntityDatabase):
         are skipped with a warning rather than aborting the stream.
         """
         entity_root = self.base_path / "entity"
-        if not entity_root.exists():
+        if not await asyncio.to_thread(entity_root.exists):
             return
-
-        chunk: List[Path] = []
 
         # Bound concurrent file loads independently of batch_size so a large
         # batch does not flood the default thread pool (which would starve other
@@ -424,17 +422,26 @@ class FileDatabase(EntityDatabase):
 
             return await asyncio.gather(*[_safe(fp) for fp in paths])
 
-        for file_path in entity_root.rglob("*.json"):
-            chunk.append(file_path)
-            if len(chunk) >= batch_size:
-                for entity in await _load_chunk(chunk):
-                    if entity:
-                        yield entity
-                chunk = []
+        # rglob is a lazy generator: each step does directory-traversal I/O.
+        # Pull each batch of paths inside a worker thread so that traversal
+        # never blocks the event loop, while still streaming (we never
+        # materialize the full path list -- important at ~1M entities).
+        walker = entity_root.rglob("*.json")
 
-        # Flush the final partial chunk.
-        if chunk:
-            for entity in await _load_chunk(chunk):
+        def _next_path_batch() -> List[Path]:
+            batch: List[Path] = []
+            for _ in range(batch_size):
+                try:
+                    batch.append(next(walker))
+                except StopIteration:
+                    break
+            return batch
+
+        while True:
+            paths = await asyncio.to_thread(_next_path_batch)
+            if not paths:
+                break
+            for entity in await _load_chunk(paths):
                 if entity:
                     yield entity
 

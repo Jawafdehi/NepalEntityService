@@ -29,10 +29,20 @@ logger = logging.getLogger(__name__)
 class OpenSearchBackend(SearchBackend):
     """Search backend backed by an OpenSearch cluster."""
 
-    def __init__(self, client, index: str = DEFAULT_INDEX, use_icu: bool = True):
+    def __init__(
+        self,
+        client,
+        index: str = DEFAULT_INDEX,
+        use_icu: bool = True,
+        write_timeout: float = 2.0,
+    ):
         self.client = client
         self.index_name = index
         self.use_icu = use_icu
+        # Short per-request timeout for single-document writes so live indexing
+        # can never stall the entity write path (the EntityIndexer treats a
+        # timeout as a best-effort miss; the index is rebuildable).
+        self.write_timeout = write_timeout
 
     @classmethod
     def from_env(
@@ -46,12 +56,18 @@ class OpenSearchBackend(SearchBackend):
         index = index or os.getenv("OPENSEARCH_INDEX", DEFAULT_INDEX)
         if use_icu is None:
             use_icu = os.getenv("OPENSEARCH_USE_ICU", "true").lower() != "false"
+        write_timeout = float(os.getenv("OPENSEARCH_WRITE_TIMEOUT", "2.0"))
         client = build_async_client(
             url=url,
             user=os.getenv("OPENSEARCH_USER"),
             password=os.getenv("OPENSEARCH_PASSWORD"),
         )
-        return cls(client=client, index=index, use_icu=use_icu)
+        return cls(
+            client=client,
+            index=index,
+            use_icu=use_icu,
+            write_timeout=write_timeout,
+        )
 
     async def health(self) -> bool:
         try:
@@ -63,12 +79,8 @@ class OpenSearchBackend(SearchBackend):
     async def ensure_index(self) -> None:
         if await self.client.indices.exists(index=self.index_name):
             return
-        body = {
-            "settings": index_settings(use_icu=self.use_icu),
-            "mappings": index_mappings(),
-        }
         try:
-            await self.client.indices.create(index=self.index_name, body=body)
+            await self._create_index()
         except Exception as e:
             # Retry without ICU only when the failure is the missing ICU
             # tokenizer; any other error (bad shards, auth, network) propagates
@@ -80,10 +92,31 @@ class OpenSearchBackend(SearchBackend):
                     "plugin for better Devanagari tokenization)"
                 )
                 self.use_icu = False
-                body["settings"] = index_settings(use_icu=False)
-                await self.client.indices.create(index=self.index_name, body=body)
+                await self._create_index()
             else:
                 raise
+
+    async def _create_index(self) -> None:
+        """Create the index, tolerating a concurrent creator.
+
+        Multiple workers/instances may call ensure_index() at startup; the one
+        that loses the race gets a resource_already_exists_exception, which we
+        treat as success (the index now exists either way).
+        """
+        body = {
+            "settings": index_settings(use_icu=self.use_icu),
+            "mappings": index_mappings(),
+        }
+        try:
+            await self.client.indices.create(index=self.index_name, body=body)
+        except Exception as e:
+            if _is_already_exists_error(e):
+                logger.info(
+                    "Index %s already created concurrently; continuing",
+                    self.index_name,
+                )
+                return
+            raise
 
     async def delete_index(self) -> None:
         """Delete the index if present (used by tests and full rebuilds)."""
@@ -97,7 +130,12 @@ class OpenSearchBackend(SearchBackend):
         entity_id = doc.get("id")
         if not entity_id:
             raise ValueError("document is missing required 'id' field")
-        await self.client.index(index=self.index_name, id=entity_id, body=doc)
+        await self.client.index(
+            index=self.index_name,
+            id=entity_id,
+            body=doc,
+            request_timeout=self.write_timeout,
+        )
 
     async def index_bulk(self, docs: Iterable[Dict[str, Any]]) -> int:
         from opensearchpy.helpers import async_bulk  # lazy import
@@ -116,7 +154,10 @@ class OpenSearchBackend(SearchBackend):
 
     async def delete(self, entity_id: str) -> bool:
         result = await self.client.delete(
-            index=self.index_name, id=entity_id, ignore=[404]
+            index=self.index_name,
+            id=entity_id,
+            ignore=[404],
+            request_timeout=self.write_timeout,
         )
         return result.get("result") == "deleted"
 
@@ -166,6 +207,16 @@ def _is_missing_icu_error(exc: Exception) -> bool:
     """
     message = str(exc).lower()
     return "icu" in message
+
+
+def _is_already_exists_error(exc: Exception) -> bool:
+    """Return True if ``exc`` indicates the index already exists.
+
+    OpenSearch raises resource_already_exists_exception (HTTP 400) when an index
+    is created concurrently by another worker.
+    """
+    message = str(exc).lower()
+    return "resource_already_exists" in message or "already exists" in message
 
 
 __all__ = ["OpenSearchBackend"]
